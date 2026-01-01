@@ -29,7 +29,6 @@
         main { flex: 1; padding: 20px; overflow-y: auto; display: none; }
         main.active-section { display: block; }
 
-        /* --- CARTAS --- */
         .card { 
             width: 90px; height: 130px; position: relative; 
             clip-path: polygon(0% 0%, 100% 0%, 100% 88%, 50% 100%, 0% 88%); 
@@ -43,6 +42,23 @@
         .card.plata-raro { background: linear-gradient(135deg, #a8b2bd, #4e5a65); border: 1px solid #cbd5e0; color: white; }
         .card.plata-comun { background: #ced4da; border: 1px solid #adb5bd; color: #343a40; }
         .card.bronce { background: linear-gradient(135deg, #6e4a2c, #3d2616); border: 1px solid #8e6341; color: white; }
+
+        /* EFECTO ARCOIRIS PARA +87 */
+        .walkout-rainbow {
+            animation: rainbowGlow 2s linear infinite, walkoutShake 0.1s infinite !important;
+            box-shadow: 0 0 50px rgba(255,255,255,0.5);
+        }
+
+        @keyframes rainbowGlow {
+            0% { filter: hue-rotate(0deg) brightness(1.2); }
+            100% { filter: hue-rotate(360deg) brightness(1.2); }
+        }
+
+        @keyframes walkoutShake {
+            0% { transform: rotate(0deg) scale(1.1); }
+            50% { transform: rotate(1deg) scale(1.12); }
+            100% { transform: rotate(-1deg) scale(1.1); }
+        }
 
         .card-rating { font-size: 1.1rem; font-weight: 900; position: absolute; top: 10px; left: 10px; }
         .big-card .card-rating { font-size: 2.5rem; top: 20px; left: 20px; }
@@ -63,7 +79,6 @@
         .market-grid, .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 15px; }
         .item-container { background: #1a1f2e; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid #000; position: relative; }
         
-        /* Badge Oferta */
         .offer-badge { background: #ffd700; color: black; font-size: 0.6rem; font-weight: 900; padding: 2px 5px; border-radius: 3px; position: absolute; top: 5px; right: 5px; z-index: 5; }
 
         .btn-buy, .btn-discard, .btn-auto { background: var(--fifa-neon); color: black; border: none; width: 100%; padding: 6px; margin-top: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
@@ -83,7 +98,6 @@
         #packModal { position: fixed; inset: 0; background: radial-gradient(circle, #0d1117, #02060c); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
         
         .reveal-step { font-size: 5rem; font-weight: 900; color: var(--fifa-neon); text-shadow: 0 0 30px var(--fifa-neon); display: none; }
-        .walkout-active { animation: walkoutShake 0.1s infinite, rainbowGlow 2s linear infinite !important; }
         .card-reveal-active { animation: revealPop 0.8s ease-out forwards; }
         .flash-effect { position: fixed; inset: 0; background: white; opacity: 0; z-index: 2500; pointer-events: none; }
         
@@ -107,7 +121,7 @@
         .pack-oro { background: linear-gradient(180deg, #b7950b 0%, #f5e3a6 100%); border-color: #ffd700; }
         .pack-especial { background: linear-gradient(180deg, #00ff85 0%, #005f32 100%); border-color: var(--fifa-neon); }
 
-        #timer-box { transition: 0.3s; padding: 5px 10px; border-radius: 5px; }
+        #timer-box { transition: 0.3s; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
         .timer-urgent { color: #ff4444; text-shadow: 0 0 10px #ff4444; animation: pulse-red 1s infinite; }
         @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
@@ -119,7 +133,7 @@
     <header>
         <div class="brand">MPS UT 26</div>
         <div class="top-stats">
-            <div class="coins-box">🪙 <span id="userCoins">7500</span></div>
+            <div class="coins-box">🪙 <span id="userCoins">0</span></div>
             <div class="avg-box">GRL PROMEDIO: <span id="teamAvg">0</span></div>
             <button class="btn-reset" onclick="resetGame()">Resetear Datos</button>
         </div>
@@ -388,15 +402,21 @@
 
         let club = [];
         let squad = [null, null, null, null, null, null, null];
-        let coins = 7500;
+        let coins = 10000;
         let marketCards = [];
         let timeLeft = 180;
         let currentPacked = null; 
         let intervalRef = null;
-        const formationSlots = [{l:50,t:82,p:"GK"}, {l:30,t:60,p:"DF"}, {l:70,t:60,p:"DF"}, {l:30,t:35,p:"MC"}, {l:70,t:35,p:"MC"}, {l:30,t:12,p:"ST"}, {l:70,t:12,p:"ST"}];
+        let currentFormation = null;
+
+        const formations = [
+            { name: "1-2-2-2", slots: [{l:50,t:82,p:"GK"}, {l:30,t:60,p:"DF"}, {l:70,t:60,p:"DF"}, {l:30,t:35,p:"MC"}, {l:70,t:35,p:"MC"}, {l:30,t:12,p:"ST"}, {l:70,t:12,p:"ST"}] },
+            { name: "1-3-1-2", slots: [{l:50,t:85,p:"GK"}, {l:20,t:65,p:"DF"}, {l:50,t:65,p:"DF"}, {l:80,t:65,p:"DF"}, {l:50,t:40,p:"MC"}, {l:30,t:15,p:"ST"}, {l:70,t:15,p:"ST"}] },
+            { name: "1-2-1-3", slots: [{l:50,t:85,p:"GK"}, {l:30,t:65,p:"DF"}, {l:70,t:65,p:"DF"}, {l:50,t:45,p:"MC"}, {l:20,t:20,p:"ST"}, {l:50,t:15,p:"ST"}, {l:80,t:20,p:"ST"}] }
+        ];
 
         function saveGame() {
-            const gameState = { coins: coins, club: club, squad: squad, marketCards: marketCards, timeLeft: timeLeft };
+            const gameState = { coins, club, squad, marketCards, timeLeft, currentFormation };
             localStorage.setItem('mps_ut_save', JSON.stringify(gameState));
         }
 
@@ -407,16 +427,17 @@
                 coins = data.coins; club = data.club; squad = data.squad;
                 marketCards = data.marketCards || [];
                 timeLeft = data.timeLeft || 180;
+                currentFormation = data.currentFormation || formations[0];
                 return true;
             }
             return false;
         }
 
         function resetGame() {
-            if (confirm("¿Estás seguro de que quieres borrar todo tu progreso?")) {
+            if (confirm("¿Estás seguro? Se reiniciarán tus monedas a 10,000.")) {
                 if (intervalRef) clearInterval(intervalRef);
-                localStorage.removeItem('mps_ut_save');
-                window.location.href = window.location.href;
+                localStorage.clear();
+                window.location.reload();
             }
         }
 
@@ -435,11 +456,9 @@
             else if (grl < 88) baseValue = 6000 + Math.pow(grl - 83, 3.5) * 150;
             else if (grl < 92) baseValue = 25000 + Math.pow(grl - 87, 4) * 2000;
             else baseValue = 150000 + Math.pow(grl - 91, 4.5) * 15000;
-
             let multiplier = (rarity === "especial") ? 1.8 : (rarity.includes("raro") ? 1.2 : 1.0);
             let finalPrice = baseValue * multiplier;
             const luck = Math.random();
-
             let status = "normal";
             if (grl >= 88) {
                 if (luck < 0.15) { finalPrice *= 0.8; status = "cheap"; }
@@ -476,16 +495,6 @@
                 gain.gain.setValueAtTime(0.2, AudioCtx.currentTime);
                 gain.gain.linearRampToValueAtTime(0, AudioCtx.currentTime + 0.5);
                 osc.start(); osc.stop(AudioCtx.currentTime + 0.5);
-            } else if (type === 'majestic') {
-                [440, 554, 659].forEach(f => {
-                    const o = AudioCtx.createOscillator(); const g = AudioCtx.createGain();
-                    o.connect(g); g.connect(AudioCtx.destination);
-                    o.frequency.setValueAtTime(f, AudioCtx.currentTime);
-                    g.gain.setValueAtTime(0, AudioCtx.currentTime);
-                    g.gain.linearRampToValueAtTime(0.1, AudioCtx.currentTime + 0.5);
-                    g.gain.exponentialRampToValueAtTime(0.01, AudioCtx.currentTime + 2);
-                    o.start(); o.stop(AudioCtx.currentTime + 2);
-                });
             }
         }
 
@@ -509,7 +518,7 @@
 
         function updateCoins(amount) {
             coins += amount;
-            document.getElementById('userCoins').innerText = Math.round(coins).toLocaleString();
+            document.getElementById('userCoins').innerText = coins.toLocaleString();
             saveGame();
         }
 
@@ -517,7 +526,7 @@
             if(!p) return '';
             let imgTag = p.img ? `<img src="${p.img}" class="card-img">` : `<div style="height:50px;"></div>`;
             return `
-                <div class="card ${p.r} ${isBig ? 'big-card' : ''}">
+                <div class="card ${p.r} ${isBig ? 'big-card' : ''} ${isBig && p.g >= 87 ? 'walkout-rainbow' : ''}">
                     <div class="card-rating">${p.g}</div>
                     <div class="card-pos-container">
                         <div class="card-pos">${p.p[0]}</div>
@@ -529,63 +538,59 @@
         }
 
         function generateInitialSquad() {
-            const getRand = (pos, min, max) => {
-                let pool = database.filter(x => x.p.includes(pos) && x.g >= min && x.g <= max);
-                if(pool.length === 0) pool = database.filter(x => x.p.includes(pos));
+            currentFormation = formations[Math.floor(Math.random() * formations.length)];
+            const getRand = (pos) => {
+                let pool = database.filter(x => x.p.includes(pos));
                 return {...pool[Math.floor(Math.random()*pool.length)], uId: Math.random()};
             };
-            club.push(getRand("ST", 66, 70)); club.push(getRand("GK", 30, 64)); 
-            club.push(getRand("DF", 30, 64)); club.push(getRand("DF", 30, 64));
-            club.push(getRand("MC", 30, 64)); club.push(getRand("MC", 30, 64)); 
-            club.push(getRand("ST", 30, 64));
+            currentFormation.slots.forEach(slot => { club.push(getRand(slot.p)); });
             autoFillSquad(); renderClub();
         }
 
         function initPackOpening(type, price) {
-            if (coins < price) { alert("¡No tienes suficientes monedas!"); return; }
+            if(coins < price) return alert("No tienes suficientes monedas.");
             updateCoins(-price);
             if (currentPacked) club.push({ ...currentPacked, uId: Math.random() });
             const p = getPlayerByWeight(type); currentPacked = p;
-            const modal = document.getElementById('packModal'); const cardCont = document.getElementById('finalCardReveal'); const flash = document.getElementById('flash');
-            modal.style.display = 'flex'; cardCont.style.display = 'none'; cardCont.className = ''; 
+            const modal = document.getElementById('packModal'); const cardCont = document.getElementById('finalCardReveal');
+            modal.style.display = 'flex'; cardCont.style.display = 'none'; 
             document.getElementById('revealPos').style.display = 'none'; document.getElementById('revealGrl').style.display = 'none'; document.getElementById('packActions').style.display = 'none';
             document.getElementById('btnReopen').onclick = () => initPackOpening(type, price);
-            const isWalkout = p.g >= 87; const timeMult = isWalkout ? 1.6 : 1;
-            setTimeout(() => { playSound('beep'); const el = document.getElementById('revealPos'); el.innerText = p.p[0]; el.style.display = 'block'; }, 600 * timeMult);
-            setTimeout(() => { playSound('beep'); document.getElementById('revealPos').style.display = 'none'; const el = document.getElementById('revealGrl'); el.innerText = p.g; el.style.display = 'block'; }, 1600 * timeMult);
+            const isWalkout = p.g >= 87;
+            setTimeout(() => { playSound('beep'); const el = document.getElementById('revealPos'); el.innerText = p.p[0]; el.style.display = 'block'; }, 600);
+            setTimeout(() => { playSound('beep'); document.getElementById('revealPos').style.display = 'none'; const el = document.getElementById('revealGrl'); el.innerText = p.g; el.style.display = 'block'; }, 1600);
             setTimeout(() => {
                 document.getElementById('revealGrl').style.display = 'none';
-                if (isWalkout) { playSound('majestic'); cardCont.classList.add('walkout-active'); } else { playSound('impact'); }
-                flash.style.animation = 'flashAnim 0.5s ease-out'; setTimeout(() => flash.style.animation = '', 500);
-                cardCont.innerHTML = getCardHTML(p, true); cardCont.style.display = 'block'; cardCont.classList.add('card-reveal-active');
+                playSound('impact');
+                document.getElementById('flash').style.animation = 'flashAnim 0.5s ease-out';
+                cardCont.innerHTML = getCardHTML(p, true); cardCont.style.display = 'block';
                 document.getElementById('packActions').style.display = 'flex';
                 if (p.g >= 88) confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
-            }, 2800 * timeMult);
+            }, 2800);
         }
 
         function closePack() { 
             if (currentPacked) club.push({ ...currentPacked, uId: Math.random() }); 
-            currentPacked = null; 
-            document.getElementById('packModal').style.display = 'none'; 
+            currentPacked = null; document.getElementById('packModal').style.display = 'none'; 
             saveGame(); renderClub(); showSection('club'); 
         }
 
         function calculateAvg() { let total = 0, count = 0; squad.forEach(p => { if(p) { total += p.g; count++; } }); document.getElementById('teamAvg').innerText = count > 0 ? Math.round(total / 7) : 0; }
         
         function openSelector(idx) {
-            const slot = formationSlots[idx]; const menu = document.getElementById('selectorMenu'); const grid = document.getElementById('selectorGrid');
+            const slot = currentFormation.slots[idx]; const grid = document.getElementById('selectorGrid');
             document.getElementById('selectorTitle').innerText = `SELECCIONAR ${slot.p}`; grid.innerHTML = '';
-            club.filter(c => c.p.includes(slot.p) && !squad.some((s, i) => s && s.n === c.n && i !== idx)).sort((a, b) => b.g - a.g).forEach(p => {
+            club.filter(c => c.p.includes(slot.p) && !squad.some((s, i) => s && s.uId === c.uId && i !== idx)).sort((a, b) => b.g - a.g).forEach(p => {
                 let div = document.createElement('div'); div.className = 'selector-item'; div.innerHTML = getCardHTML(p);
                 div.onclick = () => { squad[idx] = p; renderPitch(); closeSelector(); saveGame(); }; grid.appendChild(div);
             });
-            menu.style.display = 'flex';
+            document.getElementById('selectorMenu').style.display = 'flex';
         }
         function closeSelector() { document.getElementById('selectorMenu').style.display = 'none'; }
         
         function renderPitch() {
             const pitch = document.getElementById('pitch'); pitch.innerHTML = '';
-            formationSlots.forEach((slot, i) => {
+            currentFormation.slots.forEach((slot, i) => {
                 let div = document.createElement('div'); div.className = 'player-slot'; div.style.left = slot.l + '%'; div.style.top = slot.t + '%';
                 let p = squad[i]; div.innerHTML = p ? getCardHTML(p) : `<div style="color:rgba(255,255,255,0.4); font-weight:bold;">${slot.p}</div>`;
                 div.onclick = () => openSelector(i); pitch.appendChild(div);
@@ -595,8 +600,8 @@
 
         function autoFillSquad() {
             squad = [null, null, null, null, null, null, null];
-            formationSlots.forEach((slot, i) => {
-                let best = club.filter(c => c.p.includes(slot.p) && !squad.some(s => s && s.n === c.n)).sort((a, b) => b.g - a.g)[0];
+            currentFormation.slots.forEach((slot, i) => {
+                let best = club.filter(c => c.p.includes(slot.p) && !squad.some(s => s && s.uId === c.uId)).sort((a, b) => b.g - a.g)[0];
                 if(best) squad[i] = best;
             });
             renderPitch(); saveGame();
@@ -606,16 +611,9 @@
             marketCards = [];
             database.forEach((player) => {
                 let valuation = calculatePlayerValue(player.g, player.r);
-                marketCards.push({ 
-                    ...player, 
-                    marketId: `m-${player.n.replace(/\s+/g, '')}-${Math.random()}`, 
-                    currentPrice: valuation.price,
-                    status: valuation.status,
-                    sold: false
-                });
+                marketCards.push({ ...player, marketId: `m-${player.n}-${Math.random()}`, currentPrice: valuation.price, status: valuation.status, sold: false });
             });
-            renderMarket();
-            saveGame();
+            renderMarket(); saveGame();
         }
 
         function renderMarket() {
@@ -623,33 +621,16 @@
             marketCards.forEach(p => {
                 let div = document.createElement('div'); div.className = `item-container`;
                 if (p.sold) { div.style.opacity = "0.5"; div.style.filter = "grayscale(1)"; }
-                
                 let offerTag = (p.status === "cheap" && !p.sold) ? `<div class="offer-badge">¡OFERTA!</div>` : '';
-                let cheapClass = p.status === "cheap" ? 'is-cheap' : '';
-                
-                let buttonHTML = p.sold 
-                    ? `<button class="btn-buy" style="background: #444; cursor: not-allowed;">ADQUIRIDO</button>`
-                    : `<button class="btn-buy ${cheapClass}" onclick="buy('${p.marketId}', ${p.currentPrice})">
-                        ${p.currentPrice.toLocaleString()} 🪙
-                       </button>`;
-
-                div.innerHTML = `
-                    ${offerTag}
-                    ${getCardHTML(p)}
-                    ${buttonHTML}`;
-                grid.appendChild(div);
+                let buttonHTML = p.sold ? `<button class="btn-buy" style="background:#444;">ADQUIRIDO</button>` : `<button class="btn-buy ${p.status === "cheap" ? 'is-cheap' : ''}" onclick="buy('${p.marketId}', ${p.currentPrice})">${p.currentPrice.toLocaleString()} 🪙</button>`;
+                div.innerHTML = `${offerTag}${getCardHTML(p)}${buttonHTML}`; grid.appendChild(div);
             });
         }
 
         function buy(mId, price) {
-            if (coins < price) { alert("¡No tienes suficientes monedas!"); return; }
+            if(coins < price) return alert("No tienes suficientes monedas.");
             let item = marketCards.find(c => c.marketId === mId);
-            if(item && !item.sold) { 
-                updateCoins(-price);
-                item.sold = true;
-                club.push({...item, uId: Math.random()}); 
-                renderMarket(); renderClub(); saveGame();
-            }
+            if(item && !item.sold) { updateCoins(-price); item.sold = true; club.push({...item, uId: Math.random()}); renderMarket(); renderClub(); }
         }
 
         function renderClub() {
@@ -657,41 +638,37 @@
             club.forEach(p => {
                 let discardVal = calculateDiscardValue(p.g, p.r);
                 let div = document.createElement('div'); div.className = 'item-container';
-                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DESCARTAR (+${discardVal.toLocaleString()})</button>`;
+                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DESCARTAR (+${discardVal})</button>`;
                 grid.appendChild(div);
             });
         }
 
         function discard(uid, val) { 
-            updateCoins(val);
-            club = club.filter(c => c.uId !== uid); 
+            updateCoins(val); club = club.filter(c => c.uId !== uid); 
             squad = squad.map(s => s && s.uId === uid ? null : s); 
-            renderClub(); renderPitch(); saveGame();
+            renderClub(); renderPitch();
         }
 
-        function showSection(id) { document.querySelectorAll('main').forEach(m => m.classList.remove('active-section')); document.querySelectorAll('nav button').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active-section'); document.getElementById('nav-' + id).classList.add('active'); if(id === 'club') renderClub(); }
+        function showSection(id) { 
+            document.querySelectorAll('main').forEach(m => m.classList.remove('active-section')); 
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active')); 
+            document.getElementById(id).classList.add('active-section'); 
+            document.getElementById('nav-' + id).classList.add('active'); 
+            if(id === 'club') renderClub(); 
+        }
 
         intervalRef = setInterval(() => {
             timeLeft--;
             const timerBox = document.getElementById('timer-box');
-            if (timeLeft <= 10) timerBox.classList.add('timer-urgent');
-            else timerBox.classList.remove('timer-urgent');
-
             if(timeLeft <= 0) { timeLeft = 180; refreshMarket(); }
-            
-            saveGame();
             let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
             timerBox.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+            saveGame();
         }, 1000);
 
         window.onload = () => { 
-            if (!loadGame()) { 
-                generateInitialSquad(); 
-                refreshMarket();
-            } else {
-                if (marketCards.length === 0) refreshMarket();
-            }
-            document.getElementById('userCoins').innerText = Math.round(coins).toLocaleString();
+            if (!loadGame()) { generateInitialSquad(); refreshMarket(); }
+            document.getElementById('userCoins').innerText = coins.toLocaleString();
             renderPitch(); renderClub(); renderMarket();
         };
     </script>
