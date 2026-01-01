@@ -43,7 +43,6 @@
         .card.plata-comun { background: #ced4da; border: 1px solid #adb5bd; color: #343a40; }
         .card.bronce { background: linear-gradient(135deg, #6e4a2c, #3d2616); border: 1px solid #8e6341; color: white; }
 
-        /* EFECTO ARCOIRIS PARA +87 */
         .walkout-rainbow {
             animation: rainbowGlow 2s linear infinite, walkoutShake 0.1s infinite !important;
             box-shadow: 0 0 50px rgba(255,255,255,0.5);
@@ -148,7 +147,10 @@
 
     <main id="squad" class="active-section">
         <div class="pitch-container">
-            <button class="btn-auto" onclick="autoFillSquad()" style="background: #4a90e2; color: white; margin-bottom: 10px;">AUTOCOMPLETAR MEJOR EQUIPO</button>
+            <div style="display:flex; gap:10px; width:100%; max-width:450px;">
+                <button class="btn-auto" onclick="autoFillSquad()" style="background: #4a90e2; color: white; margin-bottom: 10px;">AUTOCOMPLETAR</button>
+                <button class="btn-auto" onclick="changeFormation()" style="background: #9b59b6; color: white; margin-bottom: 10px;">CAMBIAR FORMACIÓN</button>
+            </div>
             <div class="pitch" id="pitch"></div>
         </div>
     </main>
@@ -407,7 +409,7 @@
         let timeLeft = 180;
         let currentPacked = null; 
         let intervalRef = null;
-        let currentFormation = null;
+        let currentFormationIndex = 0;
 
         const formations = [
             { name: "1-2-2-2", slots: [{l:50,t:82,p:"GK"}, {l:30,t:60,p:"DF"}, {l:70,t:60,p:"DF"}, {l:30,t:35,p:"MC"}, {l:70,t:35,p:"MC"}, {l:30,t:12,p:"ST"}, {l:70,t:12,p:"ST"}] },
@@ -416,7 +418,7 @@
         ];
 
         function saveGame() {
-            const gameState = { coins, club, squad, marketCards, timeLeft, currentFormation };
+            const gameState = { coins, club, squad, marketCards, timeLeft, currentFormationIndex };
             localStorage.setItem('mps_ut_save', JSON.stringify(gameState));
         }
 
@@ -427,7 +429,7 @@
                 coins = data.coins; club = data.club; squad = data.squad;
                 marketCards = data.marketCards || [];
                 timeLeft = data.timeLeft || 180;
-                currentFormation = data.currentFormation || formations[0];
+                currentFormationIndex = data.currentFormationIndex || 0;
                 return true;
             }
             return false;
@@ -538,12 +540,28 @@
         }
 
         function generateInitialSquad() {
-            currentFormation = formations[Math.floor(Math.random() * formations.length)];
-            const getRand = (pos) => {
-                let pool = database.filter(x => x.p.includes(pos));
-                return {...pool[Math.floor(Math.random()*pool.length)], uId: Math.random()};
+            // Cambio: Se implementa lógica para evitar nombres repetidos al iniciar
+            const selectedNames = new Set();
+            
+            const getRandBad = () => {
+                let pool = database.filter(x => x.g < 65 && !selectedNames.has(x.n));
+                if (pool.length === 0) pool = database.filter(x => x.g < 65); // Fallback
+                const player = pool[Math.floor(Math.random()*pool.length)];
+                selectedNames.add(player.n);
+                return {...player, uId: Math.random()};
             };
-            currentFormation.slots.forEach(slot => { club.push(getRand(slot.p)); });
+            
+            const getRandStar = () => {
+                let pool = database.filter(x => x.g >= 66 && x.g <= 70 && !selectedNames.has(x.n));
+                if (pool.length === 0) pool = database.filter(x => x.g >= 66 && x.g <= 70); // Fallback
+                const player = pool[Math.floor(Math.random()*pool.length)];
+                selectedNames.add(player.n);
+                return {...player, uId: Math.random()};
+            };
+            
+            for(let i=0; i<6; i++) { club.push(getRandBad()); }
+            club.push(getRandStar());
+            
             autoFillSquad(); renderClub();
         }
 
@@ -556,7 +574,6 @@
             modal.style.display = 'flex'; cardCont.style.display = 'none'; 
             document.getElementById('revealPos').style.display = 'none'; document.getElementById('revealGrl').style.display = 'none'; document.getElementById('packActions').style.display = 'none';
             document.getElementById('btnReopen').onclick = () => initPackOpening(type, price);
-            const isWalkout = p.g >= 87;
             setTimeout(() => { playSound('beep'); const el = document.getElementById('revealPos'); el.innerText = p.p[0]; el.style.display = 'block'; }, 600);
             setTimeout(() => { playSound('beep'); document.getElementById('revealPos').style.display = 'none'; const el = document.getElementById('revealGrl'); el.innerText = p.g; el.style.display = 'block'; }, 1600);
             setTimeout(() => {
@@ -578,7 +595,7 @@
         function calculateAvg() { let total = 0, count = 0; squad.forEach(p => { if(p) { total += p.g; count++; } }); document.getElementById('teamAvg').innerText = count > 0 ? Math.round(total / 7) : 0; }
         
         function openSelector(idx) {
-            const slot = currentFormation.slots[idx]; const grid = document.getElementById('selectorGrid');
+            const slot = formations[currentFormationIndex].slots[idx]; const grid = document.getElementById('selectorGrid');
             document.getElementById('selectorTitle').innerText = `SELECCIONAR ${slot.p}`; grid.innerHTML = '';
             club.filter(c => c.p.includes(slot.p) && !squad.some((s, i) => s && s.uId === c.uId && i !== idx)).sort((a, b) => b.g - a.g).forEach(p => {
                 let div = document.createElement('div'); div.className = 'selector-item'; div.innerHTML = getCardHTML(p);
@@ -588,9 +605,18 @@
         }
         function closeSelector() { document.getElementById('selectorMenu').style.display = 'none'; }
         
+        function changeFormation() {
+            currentFormationIndex = (currentFormationIndex + 1) % formations.length;
+            squad = [null, null, null, null, null, null, null];
+            autoFillSquad();
+            renderPitch();
+            alert("Formación cambiada a: " + formations[currentFormationIndex].name);
+            saveGame();
+        }
+
         function renderPitch() {
             const pitch = document.getElementById('pitch'); pitch.innerHTML = '';
-            currentFormation.slots.forEach((slot, i) => {
+            formations[currentFormationIndex].slots.forEach((slot, i) => {
                 let div = document.createElement('div'); div.className = 'player-slot'; div.style.left = slot.l + '%'; div.style.top = slot.t + '%';
                 let p = squad[i]; div.innerHTML = p ? getCardHTML(p) : `<div style="color:rgba(255,255,255,0.4); font-weight:bold;">${slot.p}</div>`;
                 div.onclick = () => openSelector(i); pitch.appendChild(div);
@@ -600,7 +626,7 @@
 
         function autoFillSquad() {
             squad = [null, null, null, null, null, null, null];
-            currentFormation.slots.forEach((slot, i) => {
+            formations[currentFormationIndex].slots.forEach((slot, i) => {
                 let best = club.filter(c => c.p.includes(slot.p) && !squad.some(s => s && s.uId === c.uId)).sort((a, b) => b.g - a.g)[0];
                 if(best) squad[i] = best;
             });
