@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPS ULTIMATE TEAM 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { 
+            --fifa-dark: #02060c; --fifa-navy: #0d1117; --fifa-neon: #00ff85; 
+            --fifa-gold: #d4af37; --fifa-card-gold: linear-gradient(135deg, #f5e3a6 0%, #b7950b 50%, #8a6d3b 100%);
+            --text: #ffffff; 
+        }
+        body { font-family: 'DIN Alternate', sans-serif; background: var(--fifa-dark); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        header { background: var(--fifa-navy); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--fifa-neon); z-index: 100; }
+        .brand { font-weight: 900; color: var(--fifa-neon); text-transform: uppercase; }
+        nav { display: flex; gap: 10px; }
+        nav button { background: transparent; border: none; color: #888; padding: 10px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        nav button.active { color: var(--fifa-neon); background: rgba(0, 255, 133, 0.1); }
+
+        .top-stats { display: flex; gap: 15px; align-items: center; }
+        .avg-box, .coins-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 5px; border-left: 3px solid var(--fifa-neon); font-size: 0.9rem; }
+        .coins-box { border-left-color: #ffd700; color: #ffd700; font-weight: bold; }
+
+        .btn-reset { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; margin-left: 10px; }
+        .btn-reset:hover { background: #cc0000; }
+
+        main { flex: 1; padding: 20px; overflow-y: auto; display: none; }
+        main.active-section { display: block; }
+
+        /* --- CARTAS --- */
+        .card { 
+            width: 90px; height: 130px; position: relative; 
+            clip-path: polygon(0% 0%, 100% 0%, 100% 88%, 50% 100%, 0% 88%); 
+            overflow: hidden; margin: 0 auto; transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .card.big-card { width: 220px; height: 310px; }
+        .card.especial { background: linear-gradient(135deg, #2c3e50, #000000); border: 2px solid var(--fifa-neon); color: #fff; }
+        .card.oro-raro { background: var(--fifa-card-gold); border: 1px solid #fff3a3; color: #322600; }
+        .card.oro-comun { background: #e9c46a; border: 1px solid #f4a261; color: #264653; }
+        .card.plata-raro { background: linear-gradient(135deg, #a8b2bd, #4e5a65); border: 1px solid #cbd5e0; color: white; }
+        .card.plata-comun { background: #ced4da; border: 1px solid #adb5bd; color: #343a40; }
+        .card.bronce { background: linear-gradient(135deg, #6e4a2c, #3d2616); border: 1px solid #8e6341; color: white; }
+
+        .card-rating { font-size: 1.1rem; font-weight: 900; position: absolute; top: 10px; left: 10px; }
+        .big-card .card-rating { font-size: 2.5rem; top: 20px; left: 20px; }
+        
+        .card-pos-container { position: absolute; top: 28px; left: 10px; display: flex; flex-direction: column; align-items: center; line-height: 0.9; }
+        .card-pos { font-size: 0.6rem; font-weight: bold; text-transform: uppercase; }
+        .card-pos-sec { font-size: 0.45rem; font-weight: bold; text-transform: lowercase; opacity: 0.8; }
+        
+        .big-card .card-pos-container { top: 60px; left: 20px; }
+        .big-card .card-pos { font-size: 1.2rem; }
+        .big-card .card-pos-sec { font-size: 0.9rem; }
+
+        .card-img { width: 85%; height: auto; object-fit: contain; margin-top: 10px; }
+        .big-card .card-img { width: 80%; margin-top: 25px; }
+        .card-name { font-size: 0.65rem; font-weight: 900; text-align: center; width: 100%; position: absolute; bottom: 16%; text-transform: uppercase; }
+        .big-card .card-name { font-size: 1.2rem; bottom: 15%; }
+
+        .market-grid, .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 15px; }
+        .item-container { background: #1a1f2e; padding: 10px; border-radius: 8px; text-align: center; border-bottom: 3px solid #000; position: relative; }
+        
+        /* Badge Oferta */
+        .offer-badge { background: #ffd700; color: black; font-size: 0.6rem; font-weight: 900; padding: 2px 5px; border-radius: 3px; position: absolute; top: 5px; right: 5px; z-index: 5; }
+
+        .btn-buy, .btn-discard, .btn-auto { background: var(--fifa-neon); color: black; border: none; width: 100%; padding: 6px; margin-top: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
+        .btn-buy.is-cheap { background: #ffd700; }
+        .btn-discard { background: #ff4444; color: white; }
+
+        .pitch-container { display: flex; flex-direction: column; align-items: center; padding: 10px; }
+        .pitch { background: #2d5a27; height: 500px; position: relative; width: 100%; max-width: 450px; border: 3px solid rgba(255,255,255,0.2); border-radius: 10px; background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
+        .player-slot { width: 90px; height: 130px; position: absolute; transform: translateX(-50%); cursor: pointer; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-radius: 5px; }
+
+        #selectorMenu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; flex-direction: column; padding: 20px; }
+        .selector-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .selector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; }
+        .selector-item { cursor: pointer; transition: transform 0.2s; }
+        .selector-item:hover { transform: scale(1.05); }
+
+        #packModal { position: fixed; inset: 0; background: radial-gradient(circle, #0d1117, #02060c); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
+        
+        .reveal-step { font-size: 5rem; font-weight: 900; color: var(--fifa-neon); text-shadow: 0 0 30px var(--fifa-neon); display: none; }
+        .walkout-active { animation: walkoutShake 0.1s infinite, rainbowGlow 2s linear infinite !important; }
+        .card-reveal-active { animation: revealPop 0.8s ease-out forwards; }
+        .flash-effect { position: fixed; inset: 0; background: white; opacity: 0; z-index: 2500; pointer-events: none; }
+        
+        @keyframes revealPop {
+            0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
+            100% { transform: scale(1.1); opacity: 1; filter: blur(0); }
+        }
+        @keyframes flashAnim { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
+        .pack-card { 
+            width: 180px; height: 260px; border-radius: 10px; cursor: pointer; transition: 0.3s; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            text-align: center; position: relative; border: 2px solid rgba(255,255,255,0.1);
+        }
+        .pack-card:hover { transform: scale(1.05) translateY(-10px); border-color: var(--fifa-neon); }
+        .pack-label { font-weight: 900; font-size: 1.2rem; margin-top: 15px; text-shadow: 2px 2px 0 #000; text-transform: uppercase; }
+        .pack-price { font-size: 0.9rem; color: #ffd700; font-weight: bold; margin-top: 5px; }
+        
+        .pack-bronce { background: linear-gradient(180deg, #3d2616 0%, #6e4a2c 100%); }
+        .pack-plata { background: linear-gradient(180deg, #2c3e50 0%, #4e5a65 100%); }
+        .pack-oro { background: linear-gradient(180deg, #b7950b 0%, #f5e3a6 100%); border-color: #ffd700; }
+        .pack-especial { background: linear-gradient(180deg, #00ff85 0%, #005f32 100%); border-color: var(--fifa-neon); }
+
+        #timer-box { transition: 0.3s; padding: 5px 10px; border-radius: 5px; }
+        .timer-urgent { color: #ff4444; text-shadow: 0 0 10px #ff4444; animation: pulse-red 1s infinite; }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="flash" class="flash-effect"></div>
+
+    <header>
+        <div class="brand">MPS UT 26</div>
+        <div class="top-stats">
+            <div class="coins-box">🪙 <span id="userCoins">7500</span></div>
+            <div class="avg-box">GRL PROMEDIO: <span id="teamAvg">0</span></div>
+            <button class="btn-reset" onclick="resetGame()">Resetear Datos</button>
+        </div>
+        <nav>
+            <button onclick="showSection('squad')" id="nav-squad" class="active">Plantilla</button>
+            <button onclick="showSection('market')" id="nav-market">Mercado</button>
+            <button onclick="showSection('store')" id="nav-store">Tienda</button>
+            <button onclick="showSection('club')" id="nav-club">Club</button>
+        </nav>
+        <div id="timer-box">03:00</div>
+    </header>
+
+    <main id="squad" class="active-section">
+        <div class="pitch-container">
+            <button class="btn-auto" onclick="autoFillSquad()" style="background: #4a90e2; color: white; margin-bottom: 10px;">AUTOCOMPLETAR MEJOR EQUIPO</button>
+            <div class="pitch" id="pitch"></div>
+        </div>
+    </main>
+
+    <main id="market"><div class="market-grid" id="marketGrid"></div></main>
+    
+    <main id="store">
+        <div id="store-container" style="display:flex; flex-wrap: wrap; gap: 30px; justify-content:center; align-items:center; padding-top: 40px;">
+            <div class="pack-card pack-bronce" onclick="initPackOpening('plus55', 0)">
+                <div style="font-size: 3.5rem;">🎒</div><div class="pack-label">SOBRE BRONCE</div><div class="pack-price">GRATIS</div>
+            </div>
+            <div class="pack-card pack-plata" onclick="initPackOpening('plus65', 500)">
+                <div style="font-size: 3.5rem;">📦</div><div class="pack-label">SOBRE PLATA</div><div class="pack-price">500 🪙</div>
+            </div>
+            <div class="pack-card pack-oro" onclick="initPackOpening('plus75', 1000)">
+                <div style="font-size: 3.5rem;">🔥</div><div class="pack-label">SOBRE ORO</div><div class="pack-price">1,000 🪙</div>
+            </div>
+            <div class="pack-card pack-especial" onclick="initPackOpening('plus85', 20000)">
+                <div style="font-size: 3.5rem;">💎</div><div class="pack-label">SOBRE ESPECIAL</div><div class="pack-price">20,000 🪙</div>
+            </div>
+        </div>
+    </main>
+    
+    <main id="club"><div class="club-grid" id="clubGrid"></div></main>
+
+    <div id="selectorMenu">
+        <div class="selector-header">
+            <h2 id="selectorTitle" style="color: var(--fifa-neon); margin: 0;">CAMBIAR JUGADOR</h2>
+            <button onclick="closeSelector()" style="background: #ff4444; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">CERRAR</button>
+        </div>
+        <div class="selector-grid" id="selectorGrid"></div>
+    </div>
+
+    <div id="packModal">
+        <div id="revealPos" class="reveal-step"></div>
+        <div id="revealGrl" class="reveal-step"></div>
+        <div id="finalCardReveal"></div>
+        <div id="packActions" style="display:none; margin-top:30px; gap:15px;">
+            <button id="btnReopen" class="btn-buy" style="width:150px; background: white;">ABRIR OTRO</button>
+            <button class="btn-buy" style="width:150px;" onclick="closePack()">CONTINUAR</button>
+        </div>
+    </div>
+
+    <script>
+        const database = [
+    // --- CLASS X ---
+    { n: "Guanactolay", g: 99, p: ["DF"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9C8983D80DEEDB042CB08AD1ACCB0123-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Jessnaldo", g: 93, p: ["ST"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F79097C46D75C4274224832944D564BA-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Overr_rated", g: 91, p: ["ST", "MC"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B08E3F6F8D096C54201CF4B4573B6085-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "vnpthu", g: 90, p: ["ST"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-C7B4DA54BB61728C94992477181E87C3-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+
+    // --- CLASS S ---
+    { n: "dvnny1", g: 89, p: ["ST"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-54A72199C84B8D3F78C73F20E6AF0E26-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "yangnicoo", g: 88, p: ["ST"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-456E46023FF6645ED92004D18A715CC0-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "destzard", g: 87, p: ["MC"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-CCCD034625679B75B7AC19E5A005B7E0-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "VayIon", g: 87, p: ["ST"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-1CCD4C62CC47EC70E161E95AE19489BB-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Calvadini", g: 86, p: ["DF"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-6C4ED9C9C14DEEEA2C6ABFEA9B15AE96-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Hermanitosandox777", g: 86, p: ["MC"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3B7682AF27649B15F4E6BD23BDB0434C-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "XIBenXI", g: 86, p: ["MC"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-556A58703C514D444B9F2CD09184D60B-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "JDPF10", g: 86, p: ["GK"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-42627CC1F69CA9DC921E90821F0BE25E-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Cakelover58", g: 86, p: ["GK"], r: "oro-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-EEFAB57FE55543C529BEC189B40B1C28-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+
+    // --- CLASS A ---
+    { n: "ELCHILENO_56789", g: 85, p: ["DF"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B458180C356625151F48F51FF834DA79-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "relajao", g: 85, p: ["DF"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E66FDAD4F8449D84250AAE6D508A8ACF-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "danieIfly", g: 85, p: ["GK"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-5466F282B228D62532BD37AC9E7E1752-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "trackpa_d", g: 84, p: ["GK"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A639D56DC7A4E45ECA186B959B4D918E-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "iLozanoo", g: 84, p: ["ST"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-258D30586DB7F110424C5EA06EC77F90-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "pembele", g: 84, p: ["DF"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-96E599435DB4118A9BB4A2B9412F6028-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "rodriskits", g: 83, p: ["DF", "MC"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-5B306C7E588F89DB2B82B5778CA45C72-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "yinvaI", g: 83, p: ["ST"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-12DD4C0EECC155384029299C110E50BC-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "m6tteeo", g: 83, p: ["MC"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-DA2A09874BA882BA9DE01B19C9B5D2E8-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "49SL_Party", g: 82, p: ["GK"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A8BFD56E4D294666F6243FB7E3C5DD54-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Swaeku", g: 82, p: ["DF"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4765089BA8B526F115821F0D32466AF9-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "tthhiagv", g: 82, p: ["MC"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-FDCBFEB1AB6BB26AE2BF43F65CD6A84F-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "esteIaar", g: 82, p: ["MC", "DF"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E0E4C8A5F8B2516956B19BE4160F4D52-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "lukoyz", g: 82, p: ["ST"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-D2E1B39FE17A7D54689C93CF683906AF-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "NeymarXXI", g: 82, p: ["ST"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9C362CE541F3379C27CA2FC91696A26D-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "MasterOfShaker", g: 81, p: ["ST"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-FFA1001B858CB6C41DE12CD584FFF68B-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "54XBN", g: 81, p: ["MC"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-DE8C0BEDF867B00AEB442C74C72F7AA7-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "n4vazz", g: 81, p: ["GK"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-139335AF49335C1A8DCA3FEFAFBCB2F7-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "422benji", g: 81, p: ["GK"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-1C29FF23EBE925EC8F40A236964BCD15-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Acraex", g: 81, p: ["DF"], r: "oro-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-5D8439D24F64179BC62706D822763949-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+
+    // --- CLASS B ---
+    { n: "rvvp8", g: 80, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-C4CBAAB2F7DFE523D80B3713EE2B8A87-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "jekoved", g: 80, p: ["MC", "DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4755D99020A4E3E4418DA0333616DCA9-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Pepxovic", g: 80, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-1D341DCEC93B5F5677A074C52DF72950-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "wodifulbro", g: 80, p: ["GK"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4BA7106F5AE3B722221AD1E6509E5220-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "xxjupiterxx3", g: 80, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-95D7E944B22C4C282320EED4108354CF-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "fabretzko", g: 79, p: ["GK"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-5A73B80F51B3F67EF8D474243F3338B5-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "koreeaaan", g: 79, p: ["GK"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A6C0A773CA799015C377B452340241E8-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "fvzaro", g: 79, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-378677F7CB988130C5BC5DFC1C4B32E5-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "LaZanahoriaRoja", g: 79, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-6D852671940356E83A8762A1F14176DD-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "ameeriican", g: 79, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-BA7FE3C1CEB960926173429A9DE264D2-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "MushyRabobo", g: 79, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-44B251DD5F5D077F2B3BFA6CC2F785D3-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "larry_maguire", g: 78, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0C5EE9CDEE1D15F5FCA45DFFAA5E5FE3-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "matderossi", g: 78, p: ["ST", "DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-699E137ECE293E64D701B57DC22558FD-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "peIuche0920", g: 77, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0153244B2CBC90EA50CCED5081BA200F-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "xtsyuriel", g: 77, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-30BEDC4E12AEE9282169A80D0C327EAE-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "messiTPS14", g: 77, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-167B4DB71E4ECE7CD465A7DF7F7BDE05-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "nnanoqe", g: 77, p: ["GK"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-DD6B749E9FA19549AB16B763C47D18A1-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "DanielDeEgg", g: 77, p: ["GK"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-DDCE43FAC452B7CB313005A3B3D2104A-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "ecuinthehouse", g: 76, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-1847E01A505645D2AFDA0DD6C2396440-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "kaorumt", g: 76, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-51A9D0BEB5DCCB8EA4538A7E56B76133-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "VepaIand", g: 76, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-1B79A35FCC95A1E2A78C5DFC096EEBAD-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "5xo", g: 76, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3B959D29982FA495C277AA903780D4B3-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "gvuapo", g: 76, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9878D59D1BD463BD9423389A58179F29-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Moogley", g: 76, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-BE1B93981C38AE31F1F9A6D54899727D-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "maximocoooo2", g: 76, p: ["GK"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-7D35E5435E0235F4D7661BA8A2C3CC6A-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "The_real0ms", g: 76, p: ["GK"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B48D58D618EB8445F1DF4E7703820526-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "PiuraBacon", g: 76, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-2645B8E3C3F9D0C4741D0FFD8DBAC336-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "WxlfKL", g: 76, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-5B7277B7912D2B50815BB2951B32C023-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "ElSmurfiano", g: 76, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-86D111FEE6AFC1BFABF0A2914B341D2A-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "dimebeIe", g: 76, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-13A3A0483F86373F19545C796B9C3985-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Xyphorsix", g: 76, p: ["ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-D08B493A76A35FE880F6978B248A4FF3-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "shawon123Xx", g: 76, p: ["DF"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4C1D20C9D27E6E550F8B9F3680469F08-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "n8e", g: 76, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-7735E93C47D84F2F99A79000AE1AD62C-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "phocial", g: 76, p: ["MC", "ST"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-8FB046DCB5680C56B30E031D00F3D099-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "iRonaldinhoXII", g: 76, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0F00BF555C21139529FE544F0F827BEF-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Ronomic", g: 76, p: ["MC"], r: "plata-raro", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A9A82D5F53A72AC0AB70033C63808D39-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+
+    // --- CLASS C ---
+    { n: "Rottzzu", g: 75, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-5A4837625E5A8B21863371067E1FD992-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "ciro_nazario", g: 75, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-EE3ACF97FDBE37C1CF167FBAB66E4D3D-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "nojuggle", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B041452B6A6BF0CCDE4B25FCAE457804-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "cabzea", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-D2738E5A738C24B556CA4EE525FD65CE-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Wetzeil", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F531B0908350E3EFFFF5B6566524F090-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "kenchisio", g: 75, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-15D96C6EBD6EAA49CCEBDACE80960BDB-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "gr3ntel", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-36521A2DBC1F2E34545C638CA8A81BB0-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "xonork", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3D4B232441668F82B02511AB3BE0F31E-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "deleteduserdre", g: 75, p: ["GK"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A77EF6E12A100574CB2C00AC1047B9EC-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "kenma_igna", g: 75, p: ["ST"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-11CB69B2AFFE4917C8D4D100C5DCADAC-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Xhaldini", g: 75, p: ["ST"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-CED13A02DA0742E505AEFCF5E89D8138-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Salamenzs", g: 75, p: ["MC"], r: "plata-comun", img: "" },
+    { n: "Legendofzelda", g: 75, p: ["GK"], r: "plata-comun", img: "" },
+    { n: "unrossi", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-D9B8D5FC6EE6E448208627209F71D661-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "mastqrrr", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3B2815180E46767CFC7AD05B455ACA34-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "mystticaIl", g: 75, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-D7AF1C8ACC75CB69AF29E66597A54B84-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Fenixers1234", g: 75, p: ["ST"], r: "plata-comun", img: "" },
+    { n: "jaime_exee", g: 74, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-DF0DDC83E4C95CE520534D9D8C3BFA4F-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "iDareToBear", g: 74, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-2DB380C16C4221A1A5B9394DCCE7A1E0-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Arionko1", g: 73, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B6F0CE0409EA2F29F0F0A156C9E0A881-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "ROMMAANNNNNNNNNNNNNN", g: 73, p: ["ST"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3E05EB2448B334A70525A2A4F2DB73EA-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Keynnerbarreton", g: 72, p: ["ST"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0B998F986B5E9671A6231A79550C5D56-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Bioxinhoo", g: 72, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3538BBA8AB879FB60BE008376C89414F-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "aphexzi", g: 72, p: ["ST"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-DFAA9B3823742830F01E25688737C23A-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "rip_02niko", g: 72, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-0CF6B88DF593008CC37015F16E7C8ADF-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Elsinbrazos849", g: 72, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-3E951F6488987CA3D785C4D61AEF16C6-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "TheBiteLOL707", g: 72, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-4E0F0716362CA7956A0F984809A51B01-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "sebastianquiroga123", g: 71, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E02C7161F56B69BAB88E1FBC92FC010A-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "RenCbMaster", g: 71, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-1092C3A19D2E7E0F63E57A265BBE5853-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "dragonaittrr1", g: 71, p: ["GK"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-C9C0AB5C0178FE8B161D9057ACC3ED09-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "zxre6677", g: 71, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A966265607EFF7D1EB0FCBFC039A6EDD-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Falahprogamer54", g: 71, p: ["ST"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-D227D11F2C171887FB6E4DD1BD65B912-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Murietzny", g: 71, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-CA8F81A7E323B321F7071E3DE1ADFAA2-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "yoyoa87", g: 71, p: ["ST"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-C1253B8BC4EE1254D1471E5658EFBF14-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "ZT0RMM", g: 71, p: ["MC"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A95BF989E5A8926B9B8BF10A8D7BF59C-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "bysixx46", g: 71, p: ["DF"], r: "plata-comun", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-D8796F588B29D6C1F78D311141B823A1-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+
+    // --- CLASS D ---
+    { n: "gh102111", g: 70, p: ["GK"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-60139C1ABABCC4606A740F85746C0A05-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "celetsuu", g: 70, p: ["GK"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-6E6D908187EA64A3F82E6E2C4977DBCA-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Xuralll", g: 70, p: ["MC"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-5E75BC32D58FCD3FA5E8942664BEDEF7-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Zkoovis", g: 70, p: ["MC"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F4D9BE1EBAA6CEB73A91EF73B962C199-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Zersak", g: 70, p: ["MC"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-16A63D1A174971FA664D28DDE4FABD43-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Xefalzo", g: 70, p: ["ST"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-723FA9C8113632B955B44F384715F8A9-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Saikcxs", g: 70, p: ["DF"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-C5FD76FAE7F6008A505BB34B3D789E39-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "unshielding", g: 70, p: ["MC"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-989CCEF83746BE32BA0F878453F3DC78-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "kxrviin", g: 70, p: ["ST"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-77F2E9EA814C7D1ED1C895E447F17869-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "goku356proo", g: 69, p: ["MC"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-41EE543123B0DBCC441D1F018A54300B-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "HaxBallOwner", g: 69, p: ["MC"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-A0ACD26CE480B8EE5BAD1A1A594A8615-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "001_Azael", g: 69, p: ["GK"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-67EF342BC5C58585A63A24085171F71-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "Lostphantom", g: 69, p: ["ST"], r: "bronce", img: "" },
+    { n: "matyas23415", g: 68, p: ["DF"], r: "bronce", img: "" },
+    { n: "ismaeljajajak", g: 68, p: ["GK"], r: "bronce", img: "" },
+    { n: "santielpro9443", g: 68, p: ["DF"], r: "bronce", img: "" },
+    { n: "cclu2", g: 68, p: ["DF"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-215CD3FD7B135053B0D7F16684A220F5-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "MagicGoal10", g: 67, p: ["DF"], r: "bronce", img: "" },
+    { n: "ALANJARA9", g: 67, p: ["MC"], r: "bronce", img: "" },
+    { n: "rulitoo13", g: 67, p: ["GK"], r: "bronce", img: "" },
+    { n: "THOMYABY", g: 67, p: ["ST"], r: "bronce", img: "" },
+    { n: "futbolyatos3", g: 66, p: ["ST"], r: "bronce", img: "" },
+    { n: "chocomaniuwuxd", g: 66, p: ["DF"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-B57AB5CB3CAC7A4EA51EA097513AA678-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+    { n: "PACIFIST", g: 66, p: ["ST"], r: "bronce", img: "" },
+    { n: "axelgabrielvv5", g: 66, p: ["DF"], r: "bronce", img: "" },
+    { n: "magogosin", g: 66, p: ["GK"], r: "bronce", img: "" },
+    { n: "Stinger1010", g: 70, p: ["ST"], r: "bronce", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-942E3F59B55C55DAF99A17B2F005B5B0-Png/150/150/AvatarHeadshot/Webp/noFilter" },
+
+    // --- CLASS E ---
+    { n: "dvbinha", g: 65, p: ["MC"], r: "bronce", img: "" },
+    { n: "el_montis", g: 65, p: ["MC"], r: "bronce", img: "" },
+    { n: "fecbac648", g: 65, p: ["ST"], r: "bronce", img: "" },
+    { n: "ghost_wnz", g: 65, p: ["DF"], r: "bronce", img: "" },
+    { n: "ianxd192000", g: 65, p: ["ST"], r: "bronce", img: "" },
+    { n: "Diegotoro122", g: 65, p: ["DF"], r: "bronce", img: "" },
+    { n: "fabianelfuerte", g: 65, p: ["ST"], r: "bronce", img: "" },
+    { n: "janceoo", g: 65, p: ["GK"], r: "bronce", img: "" },
+    { n: "basti07374w", g: 65, p: ["DF"], r: "bronce", img: "" },
+    { n: "poch0505", g: 65, p: ["ST"], r: "bronce", img: "" },
+    { n: "Carbeore", g: 63, p: ["ST"], r: "bronce", img: "" },
+    { n: "THOMAS207VERA", g: 62, p: ["DF"], r: "bronce", img: "" },
+    { n: "JR9_TCM", g: 61, p: ["GK"], r: "bronce", img: "" },
+    { n: "ninja421351", g: 61, p: ["DF"], r: "bronce", img: "" },
+    { n: "INickeado", g: 61, p: ["DF"], r: "bronce", img: "" },
+    { n: "alexcrackver", g: 61, p: ["ST"], r: "bronce", img: "" },
+
+    // --- CLASS F ---
+    { n: "Miauzan1401", g: 60, p: ["DF"], r: "bronce", img: "" },
+    { n: "PAPBANEDXD", g: 60, p: ["DF"], r: "bronce", img: "" },
+    { n: "fabianmessi5", g: 60, p: ["MC"], r: "bronce", img: "" },
+    { n: "juari21", g: 60, p: ["MC"], r: "bronce", img: "" },
+    { n: "mrfish1381391", g: 60, p: ["MC"], r: "bronce", img: "" },
+    { n: "caremilio0314", g: 60, p: ["DF"], r: "bronce", img: "" },
+    { n: "Deigoelpro1", g: 60, p: ["DF"], r: "bronce", img: "" },
+    { n: "rapr_20202021", g: 59, p: ["DF"], r: "bronce", img: "" },
+    { n: "hormiga25", g: 58, p: ["MC"], r: "bronce", img: "" },
+    { n: "ceballos9", g: 57, p: ["ST"], r: "bronce", img: "" },
+    { n: "joacofloo2", g: 57, p: ["ST"], r: "bronce", img: "" },
+    { n: "draco22240", g: 56, p: ["ST"], r: "bronce", img: "" },
+    { n: "gonzabenja07742", g: 56, p: ["DF"], r: "bronce", img: "" },
+    { n: "llamita46748", g: 56, p: ["DF"], r: "bronce", img: "" },
+    { n: "SANFERB", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "sawada37", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "Tpsfubtol07", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "Fernandoyt47", g: 55, p: ["ST"], r: "bronce", img: "" },
+    { n: "hola016783", g: 55, p: ["MC"], r: "bronce", img: "" },
+    { n: "andriy01212", g: 55, p: ["GK"], r: "bronce", img: "" },
+    { n: "Matesebastian1", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "elias1700", g: 55, p: ["GK"], r: "bronce", img: "" },
+    { n: "xlauti15", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "yolorenzo02", g: 55, p: ["ST"], r: "bronce", img: "" },
+    { n: "lgamers8", g: 55, p: ["MC"], r: "bronce", img: "" },
+    { n: "mxelmemu", g: 55, p: ["ST"], r: "bronce", img: "" },
+    { n: "nickoo0420", g: 55, p: ["ST"], r: "bronce", img: "" },
+    { n: "DANEX442", g: 55, p: ["GK"], r: "bronce", img: "" },
+    { n: "juliocesar0848591", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "itsdrake21", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "mateus201599m", g: 55, p: ["MC"], r: "bronce", img: "" },
+    { n: "Benjitatik", g: 55, p: ["MC"], r: "bronce", img: "" },
+    { n: "agustps_pro", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "moamagio", g: 55, p: ["ST"], r: "bronce", img: "" },
+    { n: "tobi0658", g: 55, p: ["ST"], r: "bronce", img: "" },
+    { n: "thiaguitoo0861", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "titooo_t_43308", g: 55, p: ["DF"], r: "bronce", img: "" },
+    { n: "thewaosx", g: 55, p: ["ST"], r: "bronce", img: "" },
+    { n: "teitokar1994", g: 55, p: ["MC"], r: "bronce", img: "" },
+    { n: "calientaviejos9", g: 55, p: ["GK"], r: "bronce", img: "" },
+    { n: "Santiago45246", g: 30, p: ["ST"], r: "bronce", img: "" }
+];
+
+        let club = [];
+        let squad = [null, null, null, null, null, null, null];
+        let coins = 7500;
+        let marketCards = [];
+        let timeLeft = 180;
+        let currentPacked = null; 
+        let intervalRef = null;
+        const formationSlots = [{l:50,t:82,p:"GK"}, {l:30,t:60,p:"DF"}, {l:70,t:60,p:"DF"}, {l:30,t:35,p:"MC"}, {l:70,t:35,p:"MC"}, {l:30,t:12,p:"ST"}, {l:70,t:12,p:"ST"}];
+
+        function saveGame() {
+            const gameState = { coins: coins, club: club, squad: squad, marketCards: marketCards, timeLeft: timeLeft };
+            localStorage.setItem('mps_ut_save', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const savedData = localStorage.getItem('mps_ut_save');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                coins = data.coins; club = data.club; squad = data.squad;
+                marketCards = data.marketCards || [];
+                timeLeft = data.timeLeft || 180;
+                return true;
+            }
+            return false;
+        }
+
+        function resetGame() {
+            if (confirm("¿Estás seguro de que quieres borrar todo tu progreso?")) {
+                if (intervalRef) clearInterval(intervalRef);
+                localStorage.removeItem('mps_ut_save');
+                window.location.href = window.location.href;
+            }
+        }
+
+        function smartRound(value) {
+            if (value > 100000) return Math.round(value / 5000) * 5000;
+            if (value > 10000) return Math.round(value / 1000) * 1000;
+            if (value > 1000) return Math.round(value / 100) * 100;
+            return Math.round(value / 10) * 10;
+        }
+
+        function calculatePlayerValue(grl, rarity) {
+            let baseValue = 0;
+            if (grl < 65) baseValue = 150 + (grl - 30) * 5;
+            else if (grl < 75) baseValue = 350 + (grl - 65) * 30;
+            else if (grl < 84) baseValue = 800 + Math.pow(grl - 74, 2.2) * 20;
+            else if (grl < 88) baseValue = 6000 + Math.pow(grl - 83, 3.5) * 150;
+            else if (grl < 92) baseValue = 25000 + Math.pow(grl - 87, 4) * 2000;
+            else baseValue = 150000 + Math.pow(grl - 91, 4.5) * 15000;
+
+            let multiplier = (rarity === "especial") ? 1.8 : (rarity.includes("raro") ? 1.2 : 1.0);
+            let finalPrice = baseValue * multiplier;
+            const luck = Math.random();
+
+            let status = "normal";
+            if (grl >= 88) {
+                if (luck < 0.15) { finalPrice *= 0.8; status = "cheap"; }
+                else if (luck < 0.40) finalPrice *= 1.2;
+                else finalPrice *= (1.5 + Math.random() * 0.5);
+            } else {
+                if (luck < 0.30) { finalPrice *= 0.7; status = "cheap"; }
+                else if (luck > 0.90) finalPrice *= 1.3;
+            }
+            return { price: smartRound(finalPrice), status: status };
+        }
+
+        function calculateDiscardValue(grl, rarity) {
+            if (grl < 65) return 15;
+            if (grl < 75) return 32;
+            if (grl < 82) return 300;
+            if (grl < 84) return 500;
+            if (grl < 86) return 650;
+            if (rarity === "especial") return 10000 + (grl - 85) * 500;
+            return 750 + (grl - 84) * 50;
+        }
+
+        const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            const osc = AudioCtx.createOscillator(); const gain = AudioCtx.createGain();
+            osc.connect(gain); gain.connect(AudioCtx.destination);
+            if (type === 'beep') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, AudioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, AudioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, AudioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(AudioCtx.currentTime + 0.1);
+            } else if (type === 'impact') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(150, AudioCtx.currentTime);
+                gain.gain.setValueAtTime(0.2, AudioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, AudioCtx.currentTime + 0.5);
+                osc.start(); osc.stop(AudioCtx.currentTime + 0.5);
+            } else if (type === 'majestic') {
+                [440, 554, 659].forEach(f => {
+                    const o = AudioCtx.createOscillator(); const g = AudioCtx.createGain();
+                    o.connect(g); g.connect(AudioCtx.destination);
+                    o.frequency.setValueAtTime(f, AudioCtx.currentTime);
+                    g.gain.setValueAtTime(0, AudioCtx.currentTime);
+                    g.gain.linearRampToValueAtTime(0.1, AudioCtx.currentTime + 0.5);
+                    g.gain.exponentialRampToValueAtTime(0.01, AudioCtx.currentTime + 2);
+                    o.start(); o.stop(AudioCtx.currentTime + 2);
+                });
+            }
+        }
+
+        const packConfigs = {
+            plus55: [{min:80,max:99,w:2}, {min:70,max:79,w:15}, {min:55,max:69,w:1000}],
+            plus65: [{min:84,max:99,w:5}, {min:75,max:83,w:60}, {min:65,max:74,w:1000}],
+            plus75: [{min:90,max:99,w:10}, {min:84,max:89,w:100}, {min:75,max:83,w:1000}],
+            plus85: [{min:94,max:99,w:30}, {min:88,max:93,w:200}, {min:85,max:87,w:1000}]
+        };
+
+        function getPlayerByWeight(type) {
+            const config = packConfigs[type];
+            const totalW = config.reduce((s, r) => s + r.w, 0);
+            let rand = Math.random() * totalW;
+            let selectedRange = config[config.length-1];
+            for (const r of config) { if (rand < r.w) { selectedRange = r; break; } rand -= r.w; }
+            let pool = database.filter(p => p.g >= selectedRange.min && p.g <= selectedRange.max);
+            if(pool.length === 0) pool = database.filter(p => p.g >= selectedRange.min - 10);
+            return {...pool[Math.floor(Math.random()*pool.length)], uId: Math.random()};
+        }
+
+        function updateCoins(amount) {
+            coins += amount;
+            document.getElementById('userCoins').innerText = Math.round(coins).toLocaleString();
+            saveGame();
+        }
+
+        function getCardHTML(p, isBig = false) {
+            if(!p) return '';
+            let imgTag = p.img ? `<img src="${p.img}" class="card-img">` : `<div style="height:50px;"></div>`;
+            return `
+                <div class="card ${p.r} ${isBig ? 'big-card' : ''}">
+                    <div class="card-rating">${p.g}</div>
+                    <div class="card-pos-container">
+                        <div class="card-pos">${p.p[0]}</div>
+                        ${p.p[1] ? `<div class="card-pos-sec">${p.p[1]}</div>` : ''}
+                    </div>
+                    ${imgTag}
+                    <div class="card-name">${p.n}</div>
+                </div>`;
+        }
+
+        function generateInitialSquad() {
+            const getRand = (pos, min, max) => {
+                let pool = database.filter(x => x.p.includes(pos) && x.g >= min && x.g <= max);
+                if(pool.length === 0) pool = database.filter(x => x.p.includes(pos));
+                return {...pool[Math.floor(Math.random()*pool.length)], uId: Math.random()};
+            };
+            club.push(getRand("ST", 66, 70)); club.push(getRand("GK", 30, 64)); 
+            club.push(getRand("DF", 30, 64)); club.push(getRand("DF", 30, 64));
+            club.push(getRand("MC", 30, 64)); club.push(getRand("MC", 30, 64)); 
+            club.push(getRand("ST", 30, 64));
+            autoFillSquad(); renderClub();
+        }
+
+        function initPackOpening(type, price) {
+            if (coins < price) { alert("¡No tienes suficientes monedas!"); return; }
+            updateCoins(-price);
+            if (currentPacked) club.push({ ...currentPacked, uId: Math.random() });
+            const p = getPlayerByWeight(type); currentPacked = p;
+            const modal = document.getElementById('packModal'); const cardCont = document.getElementById('finalCardReveal'); const flash = document.getElementById('flash');
+            modal.style.display = 'flex'; cardCont.style.display = 'none'; cardCont.className = ''; 
+            document.getElementById('revealPos').style.display = 'none'; document.getElementById('revealGrl').style.display = 'none'; document.getElementById('packActions').style.display = 'none';
+            document.getElementById('btnReopen').onclick = () => initPackOpening(type, price);
+            const isWalkout = p.g >= 87; const timeMult = isWalkout ? 1.6 : 1;
+            setTimeout(() => { playSound('beep'); const el = document.getElementById('revealPos'); el.innerText = p.p[0]; el.style.display = 'block'; }, 600 * timeMult);
+            setTimeout(() => { playSound('beep'); document.getElementById('revealPos').style.display = 'none'; const el = document.getElementById('revealGrl'); el.innerText = p.g; el.style.display = 'block'; }, 1600 * timeMult);
+            setTimeout(() => {
+                document.getElementById('revealGrl').style.display = 'none';
+                if (isWalkout) { playSound('majestic'); cardCont.classList.add('walkout-active'); } else { playSound('impact'); }
+                flash.style.animation = 'flashAnim 0.5s ease-out'; setTimeout(() => flash.style.animation = '', 500);
+                cardCont.innerHTML = getCardHTML(p, true); cardCont.style.display = 'block'; cardCont.classList.add('card-reveal-active');
+                document.getElementById('packActions').style.display = 'flex';
+                if (p.g >= 88) confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
+            }, 2800 * timeMult);
+        }
+
+        function closePack() { 
+            if (currentPacked) club.push({ ...currentPacked, uId: Math.random() }); 
+            currentPacked = null; 
+            document.getElementById('packModal').style.display = 'none'; 
+            saveGame(); renderClub(); showSection('club'); 
+        }
+
+        function calculateAvg() { let total = 0, count = 0; squad.forEach(p => { if(p) { total += p.g; count++; } }); document.getElementById('teamAvg').innerText = count > 0 ? Math.round(total / 7) : 0; }
+        
+        function openSelector(idx) {
+            const slot = formationSlots[idx]; const menu = document.getElementById('selectorMenu'); const grid = document.getElementById('selectorGrid');
+            document.getElementById('selectorTitle').innerText = `SELECCIONAR ${slot.p}`; grid.innerHTML = '';
+            club.filter(c => c.p.includes(slot.p) && !squad.some((s, i) => s && s.n === c.n && i !== idx)).sort((a, b) => b.g - a.g).forEach(p => {
+                let div = document.createElement('div'); div.className = 'selector-item'; div.innerHTML = getCardHTML(p);
+                div.onclick = () => { squad[idx] = p; renderPitch(); closeSelector(); saveGame(); }; grid.appendChild(div);
+            });
+            menu.style.display = 'flex';
+        }
+        function closeSelector() { document.getElementById('selectorMenu').style.display = 'none'; }
+        
+        function renderPitch() {
+            const pitch = document.getElementById('pitch'); pitch.innerHTML = '';
+            formationSlots.forEach((slot, i) => {
+                let div = document.createElement('div'); div.className = 'player-slot'; div.style.left = slot.l + '%'; div.style.top = slot.t + '%';
+                let p = squad[i]; div.innerHTML = p ? getCardHTML(p) : `<div style="color:rgba(255,255,255,0.4); font-weight:bold;">${slot.p}</div>`;
+                div.onclick = () => openSelector(i); pitch.appendChild(div);
+            });
+            calculateAvg();
+        }
+
+        function autoFillSquad() {
+            squad = [null, null, null, null, null, null, null];
+            formationSlots.forEach((slot, i) => {
+                let best = club.filter(c => c.p.includes(slot.p) && !squad.some(s => s && s.n === c.n)).sort((a, b) => b.g - a.g)[0];
+                if(best) squad[i] = best;
+            });
+            renderPitch(); saveGame();
+        }
+
+        function refreshMarket() {
+            marketCards = [];
+            database.forEach((player) => {
+                let valuation = calculatePlayerValue(player.g, player.r);
+                marketCards.push({ 
+                    ...player, 
+                    marketId: `m-${player.n.replace(/\s+/g, '')}-${Math.random()}`, 
+                    currentPrice: valuation.price,
+                    status: valuation.status,
+                    sold: false
+                });
+            });
+            renderMarket();
+            saveGame();
+        }
+
+        function renderMarket() {
+            const grid = document.getElementById('marketGrid'); grid.innerHTML = '';
+            marketCards.forEach(p => {
+                let div = document.createElement('div'); div.className = `item-container`;
+                if (p.sold) { div.style.opacity = "0.5"; div.style.filter = "grayscale(1)"; }
+                
+                let offerTag = (p.status === "cheap" && !p.sold) ? `<div class="offer-badge">¡OFERTA!</div>` : '';
+                let cheapClass = p.status === "cheap" ? 'is-cheap' : '';
+                
+                let buttonHTML = p.sold 
+                    ? `<button class="btn-buy" style="background: #444; cursor: not-allowed;">ADQUIRIDO</button>`
+                    : `<button class="btn-buy ${cheapClass}" onclick="buy('${p.marketId}', ${p.currentPrice})">
+                        ${p.currentPrice.toLocaleString()} 🪙
+                       </button>`;
+
+                div.innerHTML = `
+                    ${offerTag}
+                    ${getCardHTML(p)}
+                    ${buttonHTML}`;
+                grid.appendChild(div);
+            });
+        }
+
+        function buy(mId, price) {
+            if (coins < price) { alert("¡No tienes suficientes monedas!"); return; }
+            let item = marketCards.find(c => c.marketId === mId);
+            if(item && !item.sold) { 
+                updateCoins(-price);
+                item.sold = true;
+                club.push({...item, uId: Math.random()}); 
+                renderMarket(); renderClub(); saveGame();
+            }
+        }
+
+        function renderClub() {
+            const grid = document.getElementById('clubGrid'); grid.innerHTML = '';
+            club.forEach(p => {
+                let discardVal = calculateDiscardValue(p.g, p.r);
+                let div = document.createElement('div'); div.className = 'item-container';
+                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DESCARTAR (+${discardVal.toLocaleString()})</button>`;
+                grid.appendChild(div);
+            });
+        }
+
+        function discard(uid, val) { 
+            updateCoins(val);
+            club = club.filter(c => c.uId !== uid); 
+            squad = squad.map(s => s && s.uId === uid ? null : s); 
+            renderClub(); renderPitch(); saveGame();
+        }
+
+        function showSection(id) { document.querySelectorAll('main').forEach(m => m.classList.remove('active-section')); document.querySelectorAll('nav button').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active-section'); document.getElementById('nav-' + id).classList.add('active'); if(id === 'club') renderClub(); }
+
+        intervalRef = setInterval(() => {
+            timeLeft--;
+            const timerBox = document.getElementById('timer-box');
+            if (timeLeft <= 10) timerBox.classList.add('timer-urgent');
+            else timerBox.classList.remove('timer-urgent');
+
+            if(timeLeft <= 0) { timeLeft = 180; refreshMarket(); }
+            
+            saveGame();
+            let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+            timerBox.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        }, 1000);
+
+        window.onload = () => { 
+            if (!loadGame()) { 
+                generateInitialSquad(); 
+                refreshMarket();
+            } else {
+                if (marketCards.length === 0) refreshMarket();
+            }
+            document.getElementById('userCoins').innerText = Math.round(coins).toLocaleString();
+            renderPitch(); renderClub(); renderMarket();
+        };
+    </script>
+</body>
+</html>
