@@ -21,8 +21,8 @@
 
         .top-stats { display: flex; gap: 15px; align-items: center; }
         
-        /* Contenedores con ID para controlar visibilidad */
-        #avg-container, #coins-container, #timer-box { display: none; }
+        /* Contenedores para control de visibilidad */
+        #avg-container, #coins-container { display: none; }
 
         .avg-box, .coins-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 5px; border-left: 3px solid var(--fifa-neon); font-size: 0.9rem; }
         .coins-box { border-left-color: #ffd700; color: #ffd700; font-weight: bold; }
@@ -157,7 +157,7 @@
         .pack-oro { background: linear-gradient(180deg, #b7950b 0%, #f5e3a6 100%); border-color: #ffd700; }
         .pack-especial { background: linear-gradient(180deg, #00ff85 0%, #005f32 100%); border-color: var(--fifa-neon); }
 
-        #timer-box-display { background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 5px; font-weight: bold; border: 1px solid var(--fifa-neon); color: var(--fifa-neon); font-size: 0.8rem; }
+        #timer-box { font-weight: bold; color: var(--fifa-neon); background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -171,14 +171,14 @@
             <div id="avg-container" class="avg-box">AVG RATING: <span id="teamAvg">0</span></div>
             <button class="btn-reset" onclick="resetGame()">Reset Data</button>
         </div>
-        <nav>
+        <nav id="nav-container">
             <button onclick="showSection('home')" id="nav-home">Home</button>
             <button onclick="showSection('squad')" id="nav-squad">Squad</button>
             <button onclick="showSection('market')" id="nav-market">Market</button>
             <button onclick="showSection('store')" id="nav-store">Store</button>
             <button onclick="showSection('club')" id="nav-club">Club</button>
         </nav>
-        <div id="timer-box"><span id="timer-box-display">03:00</span></div>
+        <div id="timer-box">03:00</div>
     </header>
 
     <main id="home" class="active-section">
@@ -758,37 +758,40 @@
             updateCoins(totalProfit); renderClub(); alert(`¡Has vendido ${toDiscard.length} duplicados por ${totalProfit.toLocaleString()} monedas!`);
         }
 
-        // LÓGICA DE VISIBILIDAD DE TOP STATS SEGÚN LA SECCIÓN
         function showSection(id) { 
             document.querySelectorAll('main').forEach(m => m.classList.remove('active-section')); 
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active')); 
             
-            const activeMain = document.getElementById(id);
-            activeMain.classList.add('active-section'); 
+            const targetSection = document.getElementById(id);
+            if(targetSection) targetSection.classList.add('active-section'); 
             
-            const navBtn = document.getElementById('nav-' + id);
-            if(navBtn) navBtn.classList.add('active'); 
+            const targetBtn = document.getElementById('nav-' + id);
+            if(targetBtn) targetBtn.classList.add('active'); 
 
-            // Control de visibilidad del Header
+            // Control de visibilidad del Header según la sección
+            const navContainer = document.getElementById('nav-container');
             const avgCont = document.getElementById('avg-container');
             const coinsCont = document.getElementById('coins-container');
             const timerBox = document.getElementById('timer-box');
 
-            // 1. AVG Rating: Solo en Squad
+            // 1. No mostrar botones de navegación en "home"
+            navContainer.style.display = (id === 'home') ? 'none' : 'flex';
+
+            // 2. AVG Rating: Solo en Squad
             avgCont.style.display = (id === 'squad') ? 'block' : 'none';
 
-            // 2. Dinero: Solo en Market, Store y Club
+            // 3. Dinero: Solo en Market, Store y Club
             coinsCont.style.display = (['market', 'store', 'club'].includes(id)) ? 'block' : 'none';
 
-            // 3. Cronómetro: No sale en Home
-            timerBox.style.display = (id !== 'home') ? 'block' : 'none';
+            // 4. Cronómetro: Oculto en Home
+            timerBox.style.display = (id === 'home') ? 'none' : 'block';
 
             if(id === 'club') renderClub(); 
         }
 
         intervalRef = setInterval(() => {
             timeLeft--;
-            const timerBox = document.getElementById('timer-box-display');
+            const timerBox = document.getElementById('timer-box');
             if(timeLeft <= 0) { timeLeft = 180; refreshMarket(); }
             let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
             timerBox.innerText = `${m}:${s < 10 ? '0'+s : s}`;
@@ -799,7 +802,7 @@
             if (!loadGame()) { generateInitialSquad(); refreshMarket(); }
             document.getElementById('userCoins').innerText = coins.toLocaleString();
             renderPitch(); renderClub(); renderMarket();
-            showSection('home'); // Iniciar siempre en Home para aplicar filtros de visibilidad
+            showSection('home'); // Asegurar que inicie en Home con los filtros aplicados
         };
     </script>
 </body>
