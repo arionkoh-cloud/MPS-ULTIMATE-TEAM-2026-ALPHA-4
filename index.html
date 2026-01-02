@@ -113,10 +113,12 @@
         
         .offer-badge { background: #ffd700; color: black; font-size: 0.6rem; font-weight: 900; padding: 2px 5px; border-radius: 3px; position: absolute; top: 5px; right: 5px; z-index: 5; }
 
-        .btn-buy, .btn-discard, .btn-auto, .btn-sell-dupes { background: var(--fifa-neon); color: black; border: none; width: 100%; padding: 6px; margin-top: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
+        .btn-buy, .btn-discard, .btn-auto, .btn-sell-dupes, .btn-list { background: var(--fifa-neon); color: black; border: none; width: 100%; padding: 6px; margin-top: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
         .btn-buy.is-cheap { background: #ffd700; }
         .btn-discard { background: #ff4444; color: white; }
         .btn-sell-dupes { background: #f39c12; color: white; margin-bottom: 20px; max-width: 200px; }
+        .btn-list { background: #9b59b6; color: white; }
+        .btn-list.ganga { background: #e67e22; }
 
         .pitch-container { display: flex; flex-direction: column; align-items: center; padding: 10px; }
         .pitch { background: #2d5a27; height: 500px; position: relative; width: 100%; max-width: 450px; border: 3px solid rgba(255,255,255,0.2); border-radius: 10px; background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
@@ -157,7 +159,16 @@
         .pack-oro { background: linear-gradient(180deg, #b7950b 0%, #f5e3a6 100%); border-color: #ffd700; }
         .pack-especial { background: linear-gradient(180deg, #00ff85 0%, #005f32 100%); border-color: var(--fifa-neon); }
 
-        #timer-box { font-weight: bold; color: var(--fifa-neon); background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; }
+        #timer-box { transition: 0.3s; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+
+        /* Estilos específicos Colección y Transfer List */
+        .collection-counter { background: var(--fifa-navy); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--fifa-neon); font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .transfer-section { background: #0d1117; padding: 15px; border-radius: 10px; margin-bottom: 30px; border: 2px dashed #333; }
+        .transfer-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 10px; }
+        .transfer-slot { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; min-height: 180px; display: flex; flex-direction: column; align-items: center; border: 1px solid #222; }
+        .status-badge { font-size: 0.6rem; padding: 3px; border-radius: 3px; margin-top: 5px; font-weight: 900; text-transform: uppercase; }
+        .status-waiting { background: #555; color: white; }
+        .status-sold { background: var(--fifa-neon); color: black; }
     </style>
 </head>
 <body>
@@ -232,6 +243,16 @@
     </main>
     
     <main id="club">
+        <div class="collection-counter">
+            <span>COLECCIÓN DE CARTAS</span>
+            <span id="collectionStats" style="color: var(--fifa-neon);">0 / 0</span>
+        </div>
+
+        <div class="transfer-section">
+            <div style="font-weight: 900; font-size: 0.8rem; color: #888;">LISTA DE TRANSFERENCIAS (<span id="tListCount">0</span>/5)</div>
+            <div class="transfer-grid" id="transferGrid"></div>
+        </div>
+
         <button class="btn-sell-dupes" onclick="sellDuplicates()">Sell Duplicates</button>
         <div class="club-grid" id="clubGrid"></div>
     </main>
@@ -474,6 +495,7 @@
         let squad = [null, null, null, null, null, null, null];
         let coins = 10000;
         let marketCards = [];
+        let transferList = [];
         let timeLeft = 180;
         let currentPacked = null; 
         let intervalRef = null;
@@ -486,7 +508,7 @@
         ];
 
         function saveGame() {
-            const gameState = { coins, club, squad, marketCards, timeLeft, currentFormationIndex };
+            const gameState = { coins, club, squad, marketCards, transferList, timeLeft, currentFormationIndex };
             localStorage.setItem('mps_ut_save', JSON.stringify(gameState));
         }
 
@@ -496,6 +518,7 @@
                 const data = JSON.parse(savedData);
                 coins = data.coins; club = data.club; squad = data.squad;
                 marketCards = data.marketCards || [];
+                transferList = data.transferList || []; // Cargar lista de transferencias
                 timeLeft = data.timeLeft || 180;
                 currentFormationIndex = data.currentFormationIndex || 0;
                 return true;
@@ -516,6 +539,7 @@
             let visualClass = "bronce";
             if (p.g >= 80) visualClass = "oro";
             else if (p.g >= 70) visualClass = "plata";
+            
             let imgTag = p.img ? `<img src="${p.img}" class="card-img">` : `<div style="height:50px;"></div>`;
             return `
                 <div class="card ${visualClass} ${isBig ? 'big-card' : ''} ${isBig && p.g >= 87 ? 'walkout-rainbow' : ''}">
@@ -544,16 +568,22 @@
             else if (grl < 88) baseValue = 6000 + Math.pow(grl - 83, 3.5) * 150;
             else if (grl < 92) baseValue = 25000 + Math.pow(grl - 87, 4) * 2000;
             else baseValue = 150000 + Math.pow(grl - 91, 4.5) * 15000;
+            
             let finalPrice = baseValue;
             const luck = Math.random();
             let status = "normal";
-            if (grl >= 88) {
-                if (luck < 0.15) { finalPrice *= 0.8; status = "cheap"; }
-                else if (luck < 0.40) finalPrice *= 1.2;
-                else finalPrice *= (1.5 + Math.random() * 0.5);
-            } else {
-                if (luck < 0.30) { finalPrice *= 0.7; status = "cheap"; }
-                else if (luck > 0.90) finalPrice *= 1.3;
+
+            // LOGICA DE BALANCEO DE GANGAS
+            let chanceGanga = 0.30; // Base para bajos GRL
+            if (grl >= 77) chanceGanga = 0.10;
+            if (grl >= 85) chanceGanga = 0.05;
+            if (grl >= 90) chanceGanga = 0.01; // Casi imposible para 90+
+
+            if (luck < chanceGanga) { 
+                finalPrice *= 0.7; 
+                status = "cheap"; 
+            } else if (luck > 0.90) {
+                finalPrice *= 1.3;
             }
             return { price: smartRound(finalPrice), status: status };
         }
@@ -628,6 +658,118 @@
                 else { club.push(getUniquePlayer(pos, 30, 65)); }
             });
             autoFillSquad(); renderClub();
+        }
+
+        // --- FUNCIONES DE LISTA DE TRANSFERENCIAS ---
+        function listPlayer(uId, type) {
+            if (transferList.length >= 5) return alert("Lista de transferencias llena (Máx 5)");
+            
+            const playerIndex = club.findIndex(p => p.uId === uId);
+            const player = club[playerIndex];
+            
+            // Calculo de precio
+            const valuation = calculatePlayerValue(player.g);
+            let listPrice = valuation.price;
+            
+            // Si es ganga, bajamos el precio (probabilidad de venta sube)
+            if (type === 'ganga') {
+                listPrice = Math.round(listPrice * 0.8);
+            }
+
+            transferList.push({
+                ...player,
+                listPrice: listPrice,
+                listType: type, // 'ganga' o 'normal'
+                sold: false
+            });
+
+            club.splice(playerIndex, 1);
+            squad = squad.map(s => s && s.uId === uId ? null : s); // Quitar del squad si estaba
+            
+            renderClub();
+            renderTransferList();
+            renderPitch();
+            saveGame();
+        }
+
+        function processTransferSales() {
+            // Se ejecuta cada vez que el mercado se refresca
+            transferList.forEach(item => {
+                if (item.sold) return; // Si ya se vendió, ignorar
+
+                let saleProbability = 0.15; // Probabilidad base (Normal)
+
+                if (item.listType === 'ganga') {
+                    saleProbability = 0.60; // Probabilidad alta (Ganga)
+                }
+
+                // Si vale más de 10k, es difícil vender
+                if (item.listPrice > 10000) {
+                    saleProbability = saleProbability / 3;
+                }
+
+                // Tirar dados
+                if (Math.random() < saleProbability) {
+                    item.sold = true;
+                }
+            });
+            renderTransferList();
+        }
+
+        function claimSale(uId) {
+            const idx = transferList.findIndex(i => i.uId === uId);
+            const item = transferList[idx];
+            updateCoins(item.listPrice);
+            transferList.splice(idx, 1); // Quitar de lista
+            renderTransferList();
+            saveGame();
+        }
+
+        function cancelTransfer(uId) {
+            const idx = transferList.findIndex(i => i.uId === uId);
+            const item = transferList[idx];
+            club.push(item); // Devolver al club
+            transferList.splice(idx, 1);
+            renderTransferList();
+            renderClub();
+            saveGame();
+        }
+
+        function renderTransferList() {
+            const grid = document.getElementById('transferGrid');
+            const countDisplay = document.getElementById('tListCount');
+            grid.innerHTML = '';
+            countDisplay.innerText = transferList.length;
+
+            transferList.forEach(item => {
+                let div = document.createElement('div');
+                div.className = 'transfer-slot';
+                
+                let statusHTML = '';
+                if (item.sold) {
+                    statusHTML = `<div class="status-badge status-sold">¡VENDIDO!</div>
+                                  <div style="font-size:0.8rem; font-weight:bold; color:#ffd700;">+${item.listPrice}</div>
+                                  <button class="btn-buy" onclick="claimSale(${item.uId})">RECLAMAR</button>`;
+                } else {
+                    statusHTML = `<div class="status-badge status-waiting">EN VENTA</div>
+                                  <div style="font-size:0.7rem;">${item.listPrice}</div>
+                                  <button class="btn-discard" style="font-size:0.6rem; padding:2px;" onclick="cancelTransfer(${item.uId})">CANCELAR</button>`;
+                }
+
+                div.innerHTML = getCardHTML(item) + statusHTML;
+                grid.appendChild(div);
+            });
+        }
+
+        // --- FUNCION CONTADOR COLECCION ---
+        function updateCollectionCounter() {
+            const uniqueOwned = new Set();
+            // Contamos los del club, los del squad y los de la transfer list
+            club.forEach(p => uniqueOwned.add(p.n));
+            squad.forEach(p => { if(p) uniqueOwned.add(p.n); });
+            transferList.forEach(p => uniqueOwned.add(p.n));
+
+            document.getElementById('collectionStats').innerText = `${uniqueOwned.size} / ${database.length}`;
         }
 
         function initPackOpening(type, price) {
@@ -714,6 +856,10 @@
                 let valuation = calculatePlayerValue(player.g);
                 marketCards.push({ ...player, marketId: `m-${player.n}-${Math.random()}`, currentPrice: valuation.price, status: valuation.status, sold: false });
             });
+            
+            // PROCESAR VENTAS DE LA LISTA DE TRANSFERENCIAS AL MISMO TIEMPO
+            processTransferSales();
+            
             renderMarket(); saveGame();
         }
 
@@ -739,9 +885,18 @@
             club.forEach(p => {
                 let discardVal = calculateDiscardValue(p.g);
                 let div = document.createElement('div'); div.className = 'item-container';
-                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DESCARTAR (+${discardVal})</button>`;
+                div.innerHTML = getCardHTML(p);
+                
+                // Botones de Listar
+                div.innerHTML += `<div style="display:flex; gap:5px; margin-top:5px;">
+                                    <button class="btn-list ganga" onclick="listPlayer(${p.uId}, 'ganga')">GANGA</button>
+                                    <button class="btn-list" onclick="listPlayer(${p.uId}, 'normal')">NORMAL</button>
+                                  </div>`;
+                
+                div.innerHTML += `<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DESCARTAR (+${discardVal})</button>`;
                 grid.appendChild(div);
             });
+            updateCollectionCounter(); // Actualizar contador al renderizar
         }
 
         function discard(uid, val) { 
@@ -786,7 +941,7 @@
             // 4. Cronómetro: Oculto en Home
             timerBox.style.display = (id === 'home') ? 'none' : 'block';
 
-            if(id === 'club') renderClub(); 
+            if(id === 'club') { renderClub(); renderTransferList(); }
         }
 
         intervalRef = setInterval(() => {
@@ -798,7 +953,13 @@
             saveGame();
         }, 1000);
 
-        window.onload = () => { 
+        window.onload = () => {
+            // LÓGICA DE RESET FORZOSO POR CAMBIO DE VERSIÓN
+            if (!localStorage.getItem('mps_v4_reset')) {
+                localStorage.clear();
+                localStorage.setItem('mps_v4_reset', 'true');
+            }
+
             if (!loadGame()) { generateInitialSquad(); refreshMarket(); }
             document.getElementById('userCoins').innerText = coins.toLocaleString();
             renderPitch(); renderClub(); renderMarket();
