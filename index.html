@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -80,19 +80,23 @@
         
         .offer-badge { background: #ffd700; color: black; font-size: 0.6rem; font-weight: 900; padding: 2px 5px; border-radius: 3px; position: absolute; top: 5px; right: 5px; z-index: 5; }
 
-        .btn-buy, .btn-discard, .btn-auto { background: var(--fifa-neon); color: black; border: none; width: 100%; padding: 6px; margin-top: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
+        .btn-buy, .btn-discard, .btn-auto, .btn-sell-dupes { background: var(--fifa-neon); color: black; border: none; width: 100%; padding: 6px; margin-top: 8px; font-weight: bold; cursor: pointer; font-size: 0.7rem; text-transform: uppercase; }
         .btn-buy.is-cheap { background: #ffd700; }
         .btn-discard { background: #ff4444; color: white; }
+        .btn-sell-dupes { background: #f39c12; color: white; margin-bottom: 20px; max-width: 200px; }
 
         .pitch-container { display: flex; flex-direction: column; align-items: center; padding: 10px; }
         .pitch { background: #2d5a27; height: 500px; position: relative; width: 100%; max-width: 450px; border: 3px solid rgba(255,255,255,0.2); border-radius: 10px; background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px; }
         .player-slot { width: 90px; height: 130px; position: absolute; transform: translateX(-50%); cursor: pointer; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.2); border-radius: 5px; }
 
-        #selectorMenu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; flex-direction: column; padding: 20px; }
+        #selectorMenu, #formationMenu { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; flex-direction: column; padding: 20px; }
         .selector-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .selector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; }
         .selector-item { cursor: pointer; transition: transform 0.2s; }
         .selector-item:hover { transform: scale(1.05); }
+
+        .formation-option { background: #1a1f2e; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #333; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .formation-option:hover { border-color: var(--fifa-neon); background: #252b3d; }
 
         #packModal { position: fixed; inset: 0; background: radial-gradient(circle, #0d1117, #02060c); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
         
@@ -133,13 +137,13 @@
         <div class="brand">MPS UT 26</div>
         <div class="top-stats">
             <div class="coins-box">🪙 <span id="userCoins">0</span></div>
-            <div class="avg-box">GRL PROMEDIO: <span id="teamAvg">0</span></div>
-            <button class="btn-reset" onclick="resetGame()">Resetear Datos</button>
+            <div class="avg-box">AVG RATING: <span id="teamAvg">0</span></div>
+            <button class="btn-reset" onclick="resetGame()">Reset Data</button>
         </div>
         <nav>
-            <button onclick="showSection('squad')" id="nav-squad" class="active">Plantilla</button>
-            <button onclick="showSection('market')" id="nav-market">Mercado</button>
-            <button onclick="showSection('store')" id="nav-store">Tienda</button>
+            <button onclick="showSection('squad')" id="nav-squad" class="active">Squad</button>
+            <button onclick="showSection('market')" id="nav-market">Market</button>
+            <button onclick="showSection('store')" id="nav-store">Store</button>
             <button onclick="showSection('club')" id="nav-club">Club</button>
         </nav>
         <div id="timer-box">03:00</div>
@@ -148,8 +152,8 @@
     <main id="squad" class="active-section">
         <div class="pitch-container">
             <div style="display:flex; gap:10px; width:100%; max-width:450px;">
-                <button class="btn-auto" onclick="autoFillSquad()" style="background: #4a90e2; color: white; margin-bottom: 10px;">AUTOCOMPLETAR</button>
-                <button class="btn-auto" onclick="changeFormation()" style="background: #9b59b6; color: white; margin-bottom: 10px;">CAMBIAR FORMACIÓN</button>
+                <button class="btn-auto" onclick="autoFillSquad()" style="background: #4a90e2; color: white; margin-bottom: 10px;">AUTO FILL</button>
+                <button class="btn-auto" onclick="openFormationMenu()" style="background: #9b59b6; color: white; margin-bottom: 10px;">CHANGE FORMATION</button>
             </div>
             <div class="pitch" id="pitch"></div>
         </div>
@@ -160,28 +164,39 @@
     <main id="store">
         <div id="store-container" style="display:flex; flex-wrap: wrap; gap: 30px; justify-content:center; align-items:center; padding-top: 40px;">
             <div class="pack-card pack-bronce" onclick="initPackOpening('plus55', 0)">
-                <div style="font-size: 3.5rem;">🎒</div><div class="pack-label">SOBRE BRONCE</div><div class="pack-price">GRATIS</div>
+                <div style="font-size: 3.5rem;">🎒</div><div class="pack-label">BRONZE PACK</div><div class="pack-price">FREE</div>
             </div>
             <div class="pack-card pack-plata" onclick="initPackOpening('plus65', 500)">
-                <div style="font-size: 3.5rem;">📦</div><div class="pack-label">SOBRE PLATA</div><div class="pack-price">500 🪙</div>
+                <div style="font-size: 3.5rem;">📦</div><div class="pack-label">SILVER PACK</div><div class="pack-price">500 🪙</div>
             </div>
             <div class="pack-card pack-oro" onclick="initPackOpening('plus75', 1000)">
-                <div style="font-size: 3.5rem;">🔥</div><div class="pack-label">SOBRE ORO</div><div class="pack-price">1,000 🪙</div>
+                <div style="font-size: 3.5rem;">🔥</div><div class="pack-label">GOLD PACK</div><div class="pack-price">1,000 🪙</div>
             </div>
             <div class="pack-card pack-especial" onclick="initPackOpening('plus85', 20000)">
-                <div style="font-size: 3.5rem;">💎</div><div class="pack-label">SOBRE ESPECIAL</div><div class="pack-price">20,000 🪙</div>
+                <div style="font-size: 3.5rem;">💎</div><div class="pack-label">SPECIAL PACK</div><div class="pack-price">20,000 🪙</div>
             </div>
         </div>
     </main>
     
-    <main id="club"><div class="club-grid" id="clubGrid"></div></main>
+    <main id="club">
+        <button class="btn-sell-dupes" onclick="sellDuplicates()">Sell Duplicates</button>
+        <div class="club-grid" id="clubGrid"></div>
+    </main>
 
     <div id="selectorMenu">
         <div class="selector-header">
-            <h2 id="selectorTitle" style="color: var(--fifa-neon); margin: 0;">CAMBIAR JUGADOR</h2>
-            <button onclick="closeSelector()" style="background: #ff4444; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">CERRAR</button>
+            <h2 id="selectorTitle" style="color: var(--fifa-neon); margin: 0;">SELECT PLAYER</h2>
+            <button onclick="closeSelector()" style="background: #ff4444; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">CLOSE</button>
         </div>
         <div class="selector-grid" id="selectorGrid"></div>
+    </div>
+
+    <div id="formationMenu">
+        <div class="selector-header">
+            <h2 style="color: var(--fifa-neon); margin: 0;">CHOOSE FORMATION</h2>
+            <button onclick="closeFormationMenu()" style="background: #ff4444; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">CLOSE</button>
+        </div>
+        <div class="selector-grid" id="formationGrid"></div>
     </div>
 
     <div id="packModal">
@@ -189,13 +204,13 @@
         <div id="revealGrl" class="reveal-step"></div>
         <div id="finalCardReveal"></div>
         <div id="packActions" style="display:none; margin-top:30px; gap:15px;">
-            <button id="btnReopen" class="btn-buy" style="width:150px; background: white;">ABRIR OTRO</button>
-            <button class="btn-buy" style="width:150px;" onclick="closePack()">CONTINUAR</button>
+            <button id="btnReopen" class="btn-buy" style="width:150px; background: white;">OPEN AGAIN</button>
+            <button class="btn-buy" style="width:150px;" onclick="closePack()">CONTINUE</button>
         </div>
     </div>
 
     <script>
-        const database = [
+       const database = [
     // --- CLASS X ---
     { n: "Guanactolay", g: 99, p: ["DF"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9C8983D80DEEDB042CB08AD1ACCB0123-Png/150/150/AvatarHeadshot/Webp/noFilter" },
     { n: "Jessnaldo", g: 93, p: ["ST"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F79097C46D75C4274224832944D564BA-Png/150/150/AvatarHeadshot/Webp/noFilter" },
@@ -436,7 +451,7 @@
         }
 
         function resetGame() {
-            if (confirm("¿Estás seguro? Se reiniciarán tus monedas a 10,000.")) {
+            if (confirm("Are you sure? Your coins will be reset to 10,000.")) {
                 if (intervalRef) clearInterval(intervalRef);
                 localStorage.clear();
                 window.location.reload();
@@ -540,33 +555,35 @@
         }
 
         function generateInitialSquad() {
-            // Cambio: Se implementa lógica para evitar nombres repetidos al iniciar
             const selectedNames = new Set();
-            
-            const getRandBad = () => {
-                let pool = database.filter(x => x.g < 65 && !selectedNames.has(x.n));
-                if (pool.length === 0) pool = database.filter(x => x.g < 65); // Fallback
-                const player = pool[Math.floor(Math.random()*pool.length)];
+            club = [];
+            currentFormationIndex = 0; 
+
+            const getUniquePlayer = (position, minG, maxG) => {
+                let pool = database.filter(x => x.p.includes(position) && x.g >= minG && x.g <= maxG && !selectedNames.has(x.n));
+                if (pool.length === 0) pool = database.filter(x => x.p.includes(position) && x.g >= minG && x.g <= maxG);
+                if (pool.length === 0) pool = database.filter(x => x.p.includes(position)); 
+                const player = pool[Math.floor(Math.random() * pool.length)];
                 selectedNames.add(player.n);
-                return {...player, uId: Math.random()};
+                return { ...player, uId: Math.random() };
             };
-            
-            const getRandStar = () => {
-                let pool = database.filter(x => x.g >= 66 && x.g <= 70 && !selectedNames.has(x.n));
-                if (pool.length === 0) pool = database.filter(x => x.g >= 66 && x.g <= 70); // Fallback
-                const player = pool[Math.floor(Math.random()*pool.length)];
-                selectedNames.add(player.n);
-                return {...player, uId: Math.random()};
-            };
-            
-            for(let i=0; i<6; i++) { club.push(getRandBad()); }
-            club.push(getRandStar());
+
+            const positions = ["GK", "DF", "DF", "MC", "MC", "ST", "ST"];
+            const starIndex = Math.floor(Math.random() * positions.length);
+
+            positions.forEach((pos, idx) => {
+                if(idx === starIndex) {
+                    club.push(getUniquePlayer(pos, 66, 70));
+                } else {
+                    club.push(getUniquePlayer(pos, 0, 65));
+                }
+            });
             
             autoFillSquad(); renderClub();
         }
 
         function initPackOpening(type, price) {
-            if(coins < price) return alert("No tienes suficientes monedas.");
+            if(coins < price) return alert("Not enough coins.");
             updateCoins(-price);
             if (currentPacked) club.push({ ...currentPacked, uId: Math.random() });
             const p = getPlayerByWeight(type); currentPacked = p;
@@ -596,7 +613,7 @@
         
         function openSelector(idx) {
             const slot = formations[currentFormationIndex].slots[idx]; const grid = document.getElementById('selectorGrid');
-            document.getElementById('selectorTitle').innerText = `SELECCIONAR ${slot.p}`; grid.innerHTML = '';
+            document.getElementById('selectorTitle').innerText = `SELECT ${slot.p}`; grid.innerHTML = '';
             club.filter(c => c.p.includes(slot.p) && !squad.some((s, i) => s && s.uId === c.uId && i !== idx)).sort((a, b) => b.g - a.g).forEach(p => {
                 let div = document.createElement('div'); div.className = 'selector-item'; div.innerHTML = getCardHTML(p);
                 div.onclick = () => { squad[idx] = p; renderPitch(); closeSelector(); saveGame(); }; grid.appendChild(div);
@@ -605,12 +622,29 @@
         }
         function closeSelector() { document.getElementById('selectorMenu').style.display = 'none'; }
         
-        function changeFormation() {
-            currentFormationIndex = (currentFormationIndex + 1) % formations.length;
+        function openFormationMenu() {
+            const grid = document.getElementById('formationGrid');
+            grid.innerHTML = '';
+            formations.forEach((f, idx) => {
+                let div = document.createElement('div');
+                div.className = 'formation-option';
+                div.innerText = f.name;
+                div.onclick = () => selectFormation(idx);
+                grid.appendChild(div);
+            });
+            document.getElementById('formationMenu').style.display = 'flex';
+        }
+
+        function closeFormationMenu() {
+            document.getElementById('formationMenu').style.display = 'none';
+        }
+
+        function selectFormation(idx) {
+            currentFormationIndex = idx;
             squad = [null, null, null, null, null, null, null];
             autoFillSquad();
             renderPitch();
-            alert("Formación cambiada a: " + formations[currentFormationIndex].name);
+            closeFormationMenu();
             saveGame();
         }
 
@@ -647,14 +681,14 @@
             marketCards.forEach(p => {
                 let div = document.createElement('div'); div.className = `item-container`;
                 if (p.sold) { div.style.opacity = "0.5"; div.style.filter = "grayscale(1)"; }
-                let offerTag = (p.status === "cheap" && !p.sold) ? `<div class="offer-badge">¡OFERTA!</div>` : '';
-                let buttonHTML = p.sold ? `<button class="btn-buy" style="background:#444;">ADQUIRIDO</button>` : `<button class="btn-buy ${p.status === "cheap" ? 'is-cheap' : ''}" onclick="buy('${p.marketId}', ${p.currentPrice})">${p.currentPrice.toLocaleString()} 🪙</button>`;
+                let offerTag = (p.status === "cheap" && !p.sold) ? `<div class="offer-badge">OFFER!</div>` : '';
+                let buttonHTML = p.sold ? `<button class="btn-buy" style="background:#444;">ACQUIRED</button>` : `<button class="btn-buy ${p.status === "cheap" ? 'is-cheap' : ''}" onclick="buy('${p.marketId}', ${p.currentPrice})">${p.currentPrice.toLocaleString()} 🪙</button>`;
                 div.innerHTML = `${offerTag}${getCardHTML(p)}${buttonHTML}`; grid.appendChild(div);
             });
         }
 
         function buy(mId, price) {
-            if(coins < price) return alert("No tienes suficientes monedas.");
+            if(coins < price) return alert("Not enough coins.");
             let item = marketCards.find(c => c.marketId === mId);
             if(item && !item.sold) { updateCoins(-price); item.sold = true; club.push({...item, uId: Math.random()}); renderMarket(); renderClub(); }
         }
@@ -664,7 +698,7 @@
             club.forEach(p => {
                 let discardVal = calculateDiscardValue(p.g, p.r);
                 let div = document.createElement('div'); div.className = 'item-container';
-                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DESCARTAR (+${discardVal})</button>`;
+                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DISCARD (+${discardVal})</button>`;
                 grid.appendChild(div);
             });
         }
@@ -673,6 +707,39 @@
             updateCoins(val); club = club.filter(c => c.uId !== uid); 
             squad = squad.map(s => s && s.uId === uid ? null : s); 
             renderClub(); renderPitch();
+        }
+
+        function sellDuplicates() {
+            const counts = {};
+            const toDiscard = [];
+            let totalProfit = 0;
+
+            club.forEach(p => {
+                if (!counts[p.n]) {
+                    counts[p.n] = 1;
+                } else {
+                    // Check if player is NOT in current squad before selling
+                    const inSquad = squad.some(s => s && s.uId === p.uId);
+                    if (!inSquad) {
+                        toDiscard.push(p);
+                    }
+                }
+            });
+
+            if (toDiscard.length === 0) {
+                alert("No non-squad duplicates found!");
+                return;
+            }
+
+            toDiscard.forEach(p => {
+                const val = calculateDiscardValue(p.g, p.r);
+                totalProfit += val;
+                club = club.filter(c => c.uId !== p.uId);
+            });
+
+            updateCoins(totalProfit);
+            renderClub();
+            alert(`Sold ${toDiscard.length} duplicates for ${totalProfit.toLocaleString()} coins!`);
         }
 
         function showSection(id) { 
