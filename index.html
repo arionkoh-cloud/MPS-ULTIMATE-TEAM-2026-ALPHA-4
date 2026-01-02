@@ -14,12 +14,16 @@
         body { font-family: 'DIN Alternate', sans-serif; background: var(--fifa-dark); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         header { background: var(--fifa-navy); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--fifa-neon); z-index: 100; }
-        .brand { font-weight: 900; color: var(--fifa-neon); text-transform: uppercase; }
+        .brand { font-weight: 900; color: var(--fifa-neon); text-transform: uppercase; cursor: pointer; }
         nav { display: flex; gap: 10px; }
         nav button { background: transparent; border: none; color: #888; padding: 10px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
         nav button.active { color: var(--fifa-neon); background: rgba(0, 255, 133, 0.1); }
 
         .top-stats { display: flex; gap: 15px; align-items: center; }
+        
+        /* Contenedores con ID para controlar visibilidad */
+        #avg-container, #coins-container, #timer-box { display: none; }
+
         .avg-box, .coins-box { background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 5px; border-left: 3px solid var(--fifa-neon); font-size: 0.9rem; }
         .coins-box { border-left-color: #ffd700; color: #ffd700; font-weight: bold; }
 
@@ -29,6 +33,36 @@
         main { flex: 1; padding: 20px; overflow-y: auto; display: none; }
         main.active-section { display: block; }
 
+        /* --- ESTILO MENÚ PRINCIPAL (HUB) --- */
+        .menu-hub {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            grid-template-rows: 220px 220px;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 40px auto;
+            width: 95%;
+        }
+        .tile {
+            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+            border: 2px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 25px;
+        }
+        .tile:hover { transform: scale(1.02); border-color: var(--fifa-neon); background: #1c2128; }
+        .tile-title { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; font-style: italic; z-index: 2; line-height: 0.9; }
+        .tile-icon { position: absolute; right: -20px; top: -20px; font-size: 10rem; opacity: 0.05; transform: rotate(-15deg); transition: 0.3s; }
+        .tile:hover .tile-icon { opacity: 0.2; transform: rotate(-10deg) scale(1.1); }
+        .tile-main { grid-row: span 2; background: linear-gradient(135deg, #00ff85 0%, #005f32 100%); color: #000; }
+        .tile-main .tile-title { color: #000; }
+        .tile-main .tile-icon { color: #000; opacity: 0.1; }
+
+        /* DISEÑOS DE CARTAS */
         .card { 
             width: 90px; height: 130px; position: relative; 
             clip-path: polygon(0% 0%, 100% 0%, 100% 88%, 50% 100%, 0% 88%); 
@@ -36,12 +70,11 @@
             display: flex; flex-direction: column; align-items: center;
         }
         .card.big-card { width: 220px; height: 310px; }
-        .card.especial { background: linear-gradient(135deg, #2c3e50, #000000); border: 2px solid var(--fifa-neon); color: #fff; }
-        .card.oro-raro { background: var(--fifa-card-gold); border: 1px solid #fff3a3; color: #322600; }
-        .card.oro-comun { background: #e9c46a; border: 1px solid #f4a261; color: #264653; }
-        .card.plata-raro { background: linear-gradient(135deg, #a8b2bd, #4e5a65); border: 1px solid #cbd5e0; color: white; }
-        .card.plata-comun { background: #ced4da; border: 1px solid #adb5bd; color: #343a40; }
+        
+        .card.oro { background: var(--fifa-card-gold); border: 1px solid #fff3a3; color: #322600; }
+        .card.plata { background: linear-gradient(135deg, #a8b2bd, #4e5a65); border: 1px solid #cbd5e0; color: white; }
         .card.bronce { background: linear-gradient(135deg, #6e4a2c, #3d2616); border: 1px solid #8e6341; color: white; }
+        .card.especial { background: linear-gradient(135deg, #2c3e50, #000000); border: 2px solid var(--fifa-neon); color: #fff; }
 
         .walkout-rainbow {
             animation: rainbowGlow 2s linear infinite, walkoutShake 0.1s infinite !important;
@@ -124,9 +157,7 @@
         .pack-oro { background: linear-gradient(180deg, #b7950b 0%, #f5e3a6 100%); border-color: #ffd700; }
         .pack-especial { background: linear-gradient(180deg, #00ff85 0%, #005f32 100%); border-color: var(--fifa-neon); }
 
-        #timer-box { transition: 0.3s; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-        .timer-urgent { color: #ff4444; text-shadow: 0 0 10px #ff4444; animation: pulse-red 1s infinite; }
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        #timer-box-display { background: rgba(0,0,0,0.4); padding: 5px 10px; border-radius: 5px; font-weight: bold; border: 1px solid var(--fifa-neon); color: var(--fifa-neon); font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -134,22 +165,44 @@
     <div id="flash" class="flash-effect"></div>
 
     <header>
-        <div class="brand">MPS UT 26</div>
+        <div class="brand" onclick="showSection('home')">MPS UT 26</div>
         <div class="top-stats">
-            <div class="coins-box">🪙 <span id="userCoins">0</span></div>
-            <div class="avg-box">AVG RATING: <span id="teamAvg">0</span></div>
+            <div id="coins-container" class="coins-box">🪙 <span id="userCoins">0</span></div>
+            <div id="avg-container" class="avg-box">AVG RATING: <span id="teamAvg">0</span></div>
             <button class="btn-reset" onclick="resetGame()">Reset Data</button>
         </div>
         <nav>
-            <button onclick="showSection('squad')" id="nav-squad" class="active">Squad</button>
+            <button onclick="showSection('home')" id="nav-home">Home</button>
+            <button onclick="showSection('squad')" id="nav-squad">Squad</button>
             <button onclick="showSection('market')" id="nav-market">Market</button>
             <button onclick="showSection('store')" id="nav-store">Store</button>
             <button onclick="showSection('club')" id="nav-club">Club</button>
         </nav>
-        <div id="timer-box">03:00</div>
+        <div id="timer-box"><span id="timer-box-display">03:00</span></div>
     </header>
 
-    <main id="squad" class="active-section">
+    <main id="home" class="active-section">
+        <div class="menu-hub">
+            <div class="tile tile-main" onclick="showSection('squad')">
+                <div class="tile-icon">⚽</div>
+                <div class="tile-title">PLANTILLA<br>ACTIVA</div>
+            </div>
+            <div class="tile" onclick="showSection('store')">
+                <div class="tile-icon">💎</div>
+                <div class="tile-title">TIENDA</div>
+            </div>
+            <div class="tile" onclick="showSection('market')">
+                <div class="tile-icon">📈</div>
+                <div class="tile-title">MERCADO</div>
+            </div>
+            <div class="tile" style="grid-column: span 2;" onclick="showSection('club')">
+                <div class="tile-icon">📁</div>
+                <div class="tile-title">MI CLUB</div>
+            </div>
+        </div>
+    </main>
+
+    <main id="squad">
         <div class="pitch-container">
             <div style="display:flex; gap:10px; width:100%; max-width:450px;">
                 <button class="btn-auto" onclick="autoFillSquad()" style="background: #4a90e2; color: white; margin-bottom: 10px;">AUTO FILL</button>
@@ -210,7 +263,7 @@
     </div>
 
     <script>
-       const database = [
+        const database = [
     // --- CLASS X ---
     { n: "Guanactolay", g: 99, p: ["DF"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-9C8983D80DEEDB042CB08AD1ACCB0123-Png/150/150/AvatarHeadshot/Webp/noFilter" },
     { n: "Jessnaldo", g: 93, p: ["ST"], r: "especial", img: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-F79097C46D75C4274224832944D564BA-Png/150/150/AvatarHeadshot/Webp/noFilter" },
@@ -451,11 +504,29 @@
         }
 
         function resetGame() {
-            if (confirm("Are you sure? Your coins will be reset to 10,000.")) {
+            if (confirm("¿Seguro? Se borrará todo tu equipo.")) {
                 if (intervalRef) clearInterval(intervalRef);
                 localStorage.clear();
                 window.location.reload();
             }
+        }
+
+        function getCardHTML(p, isBig = false) {
+            if(!p) return '';
+            let visualClass = "bronce";
+            if (p.g >= 80) visualClass = "oro";
+            else if (p.g >= 70) visualClass = "plata";
+            let imgTag = p.img ? `<img src="${p.img}" class="card-img">` : `<div style="height:50px;"></div>`;
+            return `
+                <div class="card ${visualClass} ${isBig ? 'big-card' : ''} ${isBig && p.g >= 87 ? 'walkout-rainbow' : ''}">
+                    <div class="card-rating">${p.g}</div>
+                    <div class="card-pos-container">
+                        <div class="card-pos">${p.p[0]}</div>
+                        ${p.p[1] ? `<div class="card-pos-sec">${p.p[1]}</div>` : ''}
+                    </div>
+                    ${imgTag}
+                    <div class="card-name">${p.n}</div>
+                </div>`;
         }
 
         function smartRound(value) {
@@ -465,7 +536,7 @@
             return Math.round(value / 10) * 10;
         }
 
-        function calculatePlayerValue(grl, rarity) {
+        function calculatePlayerValue(grl) {
             let baseValue = 0;
             if (grl < 65) baseValue = 150 + (grl - 30) * 5;
             else if (grl < 75) baseValue = 350 + (grl - 65) * 30;
@@ -473,8 +544,7 @@
             else if (grl < 88) baseValue = 6000 + Math.pow(grl - 83, 3.5) * 150;
             else if (grl < 92) baseValue = 25000 + Math.pow(grl - 87, 4) * 2000;
             else baseValue = 150000 + Math.pow(grl - 91, 4.5) * 15000;
-            let multiplier = (rarity === "especial") ? 1.8 : (rarity.includes("raro") ? 1.2 : 1.0);
-            let finalPrice = baseValue * multiplier;
+            let finalPrice = baseValue;
             const luck = Math.random();
             let status = "normal";
             if (grl >= 88) {
@@ -488,13 +558,13 @@
             return { price: smartRound(finalPrice), status: status };
         }
 
-        function calculateDiscardValue(grl, rarity) {
+        function calculateDiscardValue(grl) {
             if (grl < 65) return 15;
-            if (grl < 75) return 32;
-            if (grl < 82) return 300;
+            if (grl < 70) return 32;
+            if (grl < 80) return 300;
             if (grl < 84) return 500;
             if (grl < 86) return 650;
-            if (rarity === "especial") return 10000 + (grl - 85) * 500;
+            if (grl >= 90) return 2000 + (grl - 90) * 1000;
             return 750 + (grl - 84) * 50;
         }
 
@@ -530,7 +600,8 @@
             for (const r of config) { if (rand < r.w) { selectedRange = r; break; } rand -= r.w; }
             let pool = database.filter(p => p.g >= selectedRange.min && p.g <= selectedRange.max);
             if(pool.length === 0) pool = database.filter(p => p.g >= selectedRange.min - 10);
-            return {...pool[Math.floor(Math.random()*pool.length)], uId: Math.random()};
+            let p = pool[Math.floor(Math.random()*pool.length)];
+            return {...p, uId: Math.random()};
         }
 
         function updateCoins(amount) {
@@ -539,51 +610,28 @@
             saveGame();
         }
 
-        function getCardHTML(p, isBig = false) {
-            if(!p) return '';
-            let imgTag = p.img ? `<img src="${p.img}" class="card-img">` : `<div style="height:50px;"></div>`;
-            return `
-                <div class="card ${p.r} ${isBig ? 'big-card' : ''} ${isBig && p.g >= 87 ? 'walkout-rainbow' : ''}">
-                    <div class="card-rating">${p.g}</div>
-                    <div class="card-pos-container">
-                        <div class="card-pos">${p.p[0]}</div>
-                        ${p.p[1] ? `<div class="card-pos-sec">${p.p[1]}</div>` : ''}
-                    </div>
-                    ${imgTag}
-                    <div class="card-name">${p.n}</div>
-                </div>`;
-        }
-
         function generateInitialSquad() {
             const selectedNames = new Set();
             club = [];
             currentFormationIndex = 0; 
-
             const getUniquePlayer = (position, minG, maxG) => {
                 let pool = database.filter(x => x.p.includes(position) && x.g >= minG && x.g <= maxG && !selectedNames.has(x.n));
-                if (pool.length === 0) pool = database.filter(x => x.p.includes(position) && x.g >= minG && x.g <= maxG);
                 if (pool.length === 0) pool = database.filter(x => x.p.includes(position)); 
                 const player = pool[Math.floor(Math.random() * pool.length)];
                 selectedNames.add(player.n);
                 return { ...player, uId: Math.random() };
             };
-
             const positions = ["GK", "DF", "DF", "MC", "MC", "ST", "ST"];
             const starIndex = Math.floor(Math.random() * positions.length);
-
             positions.forEach((pos, idx) => {
-                if(idx === starIndex) {
-                    club.push(getUniquePlayer(pos, 66, 70));
-                } else {
-                    club.push(getUniquePlayer(pos, 0, 65));
-                }
+                if(idx === starIndex) { club.push(getUniquePlayer(pos, 66, 70)); } 
+                else { club.push(getUniquePlayer(pos, 30, 65)); }
             });
-            
             autoFillSquad(); renderClub();
         }
 
         function initPackOpening(type, price) {
-            if(coins < price) return alert("Not enough coins.");
+            if(coins < price) return alert("Monedas insuficientes.");
             updateCoins(-price);
             if (currentPacked) club.push({ ...currentPacked, uId: Math.random() });
             const p = getPlayerByWeight(type); currentPacked = p;
@@ -599,7 +647,7 @@
                 document.getElementById('flash').style.animation = 'flashAnim 0.5s ease-out';
                 cardCont.innerHTML = getCardHTML(p, true); cardCont.style.display = 'block';
                 document.getElementById('packActions').style.display = 'flex';
-                if (p.g >= 88) confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
+                if (p.g >= 87) confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
             }, 2800);
         }
 
@@ -613,7 +661,7 @@
         
         function openSelector(idx) {
             const slot = formations[currentFormationIndex].slots[idx]; const grid = document.getElementById('selectorGrid');
-            document.getElementById('selectorTitle').innerText = `SELECT ${slot.p}`; grid.innerHTML = '';
+            document.getElementById('selectorTitle').innerText = `SELECCIONAR ${slot.p}`; grid.innerHTML = '';
             club.filter(c => c.p.includes(slot.p) && !squad.some((s, i) => s && s.uId === c.uId && i !== idx)).sort((a, b) => b.g - a.g).forEach(p => {
                 let div = document.createElement('div'); div.className = 'selector-item'; div.innerHTML = getCardHTML(p);
                 div.onclick = () => { squad[idx] = p; renderPitch(); closeSelector(); saveGame(); }; grid.appendChild(div);
@@ -627,25 +675,18 @@
             grid.innerHTML = '';
             formations.forEach((f, idx) => {
                 let div = document.createElement('div');
-                div.className = 'formation-option';
-                div.innerText = f.name;
-                div.onclick = () => selectFormation(idx);
-                grid.appendChild(div);
+                div.className = 'formation-option'; div.innerText = f.name;
+                div.onclick = () => selectFormation(idx); grid.appendChild(div);
             });
             document.getElementById('formationMenu').style.display = 'flex';
         }
 
-        function closeFormationMenu() {
-            document.getElementById('formationMenu').style.display = 'none';
-        }
+        function closeFormationMenu() { document.getElementById('formationMenu').style.display = 'none'; }
 
         function selectFormation(idx) {
             currentFormationIndex = idx;
             squad = [null, null, null, null, null, null, null];
-            autoFillSquad();
-            renderPitch();
-            closeFormationMenu();
-            saveGame();
+            autoFillSquad(); renderPitch(); closeFormationMenu(); saveGame();
         }
 
         function renderPitch() {
@@ -670,7 +711,7 @@
         function refreshMarket() {
             marketCards = [];
             database.forEach((player) => {
-                let valuation = calculatePlayerValue(player.g, player.r);
+                let valuation = calculatePlayerValue(player.g);
                 marketCards.push({ ...player, marketId: `m-${player.n}-${Math.random()}`, currentPrice: valuation.price, status: valuation.status, sold: false });
             });
             renderMarket(); saveGame();
@@ -681,14 +722,14 @@
             marketCards.forEach(p => {
                 let div = document.createElement('div'); div.className = `item-container`;
                 if (p.sold) { div.style.opacity = "0.5"; div.style.filter = "grayscale(1)"; }
-                let offerTag = (p.status === "cheap" && !p.sold) ? `<div class="offer-badge">OFFER!</div>` : '';
-                let buttonHTML = p.sold ? `<button class="btn-buy" style="background:#444;">ACQUIRED</button>` : `<button class="btn-buy ${p.status === "cheap" ? 'is-cheap' : ''}" onclick="buy('${p.marketId}', ${p.currentPrice})">${p.currentPrice.toLocaleString()} 🪙</button>`;
+                let offerTag = (p.status === "cheap" && !p.sold) ? `<div class="offer-badge">¡OFERTA!</div>` : '';
+                let buttonHTML = p.sold ? `<button class="btn-buy" style="background:#444;">ADQUIRIDO</button>` : `<button class="btn-buy ${p.status === "cheap" ? 'is-cheap' : ''}" onclick="buy('${p.marketId}', ${p.currentPrice})">${p.currentPrice.toLocaleString()} 🪙</button>`;
                 div.innerHTML = `${offerTag}${getCardHTML(p)}${buttonHTML}`; grid.appendChild(div);
             });
         }
 
         function buy(mId, price) {
-            if(coins < price) return alert("Not enough coins.");
+            if(coins < price) return alert("Monedas insuficientes.");
             let item = marketCards.find(c => c.marketId === mId);
             if(item && !item.sold) { updateCoins(-price); item.sold = true; club.push({...item, uId: Math.random()}); renderMarket(); renderClub(); }
         }
@@ -696,9 +737,9 @@
         function renderClub() {
             const grid = document.getElementById('clubGrid'); grid.innerHTML = '';
             club.forEach(p => {
-                let discardVal = calculateDiscardValue(p.g, p.r);
+                let discardVal = calculateDiscardValue(p.g);
                 let div = document.createElement('div'); div.className = 'item-container';
-                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DISCARD (+${discardVal})</button>`;
+                div.innerHTML = `${getCardHTML(p)}<button class="btn-discard" onclick="discard(${p.uId}, ${discardVal})">DESCARTAR (+${discardVal})</button>`;
                 grid.appendChild(div);
             });
         }
@@ -710,49 +751,44 @@
         }
 
         function sellDuplicates() {
-            const counts = {};
-            const toDiscard = [];
-            let totalProfit = 0;
-
-            club.forEach(p => {
-                if (!counts[p.n]) {
-                    counts[p.n] = 1;
-                } else {
-                    // Check if player is NOT in current squad before selling
-                    const inSquad = squad.some(s => s && s.uId === p.uId);
-                    if (!inSquad) {
-                        toDiscard.push(p);
-                    }
-                }
-            });
-
-            if (toDiscard.length === 0) {
-                alert("No non-squad duplicates found!");
-                return;
-            }
-
-            toDiscard.forEach(p => {
-                const val = calculateDiscardValue(p.g, p.r);
-                totalProfit += val;
-                club = club.filter(c => c.uId !== p.uId);
-            });
-
-            updateCoins(totalProfit);
-            renderClub();
-            alert(`Sold ${toDiscard.length} duplicates for ${totalProfit.toLocaleString()} coins!`);
+            const counts = {}; const toDiscard = []; let totalProfit = 0;
+            club.forEach(p => { if (!counts[p.n]) { counts[p.n] = 1; } else { const inSquad = squad.some(s => s && s.uId === p.uId); if (!inSquad) { toDiscard.push(p); } } });
+            if (toDiscard.length === 0) { alert("No hay duplicados."); return; }
+            toDiscard.forEach(p => { const val = calculateDiscardValue(p.g); totalProfit += val; club = club.filter(c => c.uId !== p.uId); });
+            updateCoins(totalProfit); renderClub(); alert(`¡Has vendido ${toDiscard.length} duplicados por ${totalProfit.toLocaleString()} monedas!`);
         }
 
+        // LÓGICA DE VISIBILIDAD DE TOP STATS SEGÚN LA SECCIÓN
         function showSection(id) { 
             document.querySelectorAll('main').forEach(m => m.classList.remove('active-section')); 
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active')); 
-            document.getElementById(id).classList.add('active-section'); 
-            document.getElementById('nav-' + id).classList.add('active'); 
+            
+            const activeMain = document.getElementById(id);
+            activeMain.classList.add('active-section'); 
+            
+            const navBtn = document.getElementById('nav-' + id);
+            if(navBtn) navBtn.classList.add('active'); 
+
+            // Control de visibilidad del Header
+            const avgCont = document.getElementById('avg-container');
+            const coinsCont = document.getElementById('coins-container');
+            const timerBox = document.getElementById('timer-box');
+
+            // 1. AVG Rating: Solo en Squad
+            avgCont.style.display = (id === 'squad') ? 'block' : 'none';
+
+            // 2. Dinero: Solo en Market, Store y Club
+            coinsCont.style.display = (['market', 'store', 'club'].includes(id)) ? 'block' : 'none';
+
+            // 3. Cronómetro: No sale en Home
+            timerBox.style.display = (id !== 'home') ? 'block' : 'none';
+
             if(id === 'club') renderClub(); 
         }
 
         intervalRef = setInterval(() => {
             timeLeft--;
-            const timerBox = document.getElementById('timer-box');
+            const timerBox = document.getElementById('timer-box-display');
             if(timeLeft <= 0) { timeLeft = 180; refreshMarket(); }
             let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
             timerBox.innerText = `${m}:${s < 10 ? '0'+s : s}`;
@@ -763,6 +799,7 @@
             if (!loadGame()) { generateInitialSquad(); refreshMarket(); }
             document.getElementById('userCoins').innerText = coins.toLocaleString();
             renderPitch(); renderClub(); renderMarket();
+            showSection('home'); // Iniciar siempre en Home para aplicar filtros de visibilidad
         };
     </script>
 </body>
