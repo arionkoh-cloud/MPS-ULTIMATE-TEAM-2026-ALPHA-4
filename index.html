@@ -9,7 +9,11 @@
             --primary: #00ffaa;
             --bg: #050508;
             --smooth-curve: cubic-bezier(0.19, 1, 0.22, 1);
-            --gold: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
+            /* Gradientes de Rareza */
+            --oro: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
+            --plata: linear-gradient(135deg, #d1d1d1 0%, #959595 100%);
+            --bronce: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
+            --especial: linear-gradient(135deg, #00ffaa 0%, #0066ff 100%);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DIN Condensed', 'Arial Narrow', sans-serif; }
@@ -68,7 +72,14 @@
         #club-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 500; display: none; padding: 60px; overflow-y: auto; }
         .club-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
         .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
-        .card { background: var(--gold); aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; }
+        
+        /* CARTAS DINÁMICAS */
+        .card { aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; }
+        .card.oro { background: var(--oro); }
+        .card.plata { background: var(--plata); }
+        .card.bronce { background: var(--bronce); }
+        .card.especial { background: var(--especial); color: white; }
+        
         .card img { width: 100%; margin-top: 10px; }
         .card .ovr { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; font-weight: bold; }
         .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
@@ -146,8 +157,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // URL CORREGIDA
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj/pub?output=csv";
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/1TRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnB/export?format=csv";
         let databaseJugadores = [];
         let gameData = {};
 
@@ -172,7 +182,7 @@
                     username: userNick.toUpperCase(),
                     coins: 5000,
                     points: 0,
-                    inventario: ["191", "190", "188", "189", "182", "187", "186"]
+                    inventario: [] // EMPIEZA SIN JUGADORES
                 });
             } catch (err) { alert("Error al registrar."); }
         };
@@ -203,7 +213,6 @@
             const bar = document.getElementById('progress');
             bar.style.width = "20%";
 
-            // 1. CARGA DE EXCEL (Si falla, el juego continúa)
             try {
                 const res = await fetch(SHEET_URL);
                 if(res.ok){
@@ -211,14 +220,14 @@
                     const filas = csv.split('\n').slice(1);
                     databaseJugadores = filas.map(f => {
                         const d = f.split(',');
-                        return { id: d[0]?.trim(), name: d[1]?.trim(), grl: d[2]?.trim(), pos: d[3]?.trim(), rareza: d[4]?.trim(), foto: d[5]?.trim() };
+                        // Columna E (índice 4) es la Rareza
+                        return { id: d[0]?.trim(), name: d[1]?.trim(), grl: d[2]?.trim(), pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
                     });
                 }
-            } catch (e) { console.warn("Error cargando Sheets, continuando..."); }
+            } catch (e) { console.warn("Error cargando Sheets"); }
             
             bar.style.width = "60%";
 
-            // 2. CARGA DE FIREBASE
             try {
                 const docSnap = await getDoc(doc(db, "jugadores", uid));
                 if (docSnap.exists()) {
@@ -239,7 +248,7 @@
                     await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
                         coins: gameData.coins,
                         points: gameData.points,
-                        inventario: gameData.inventario // Corregido para guardar inventario
+                        inventario: gameData.inventario
                     });
                 } catch (e) { console.error("Error al guardar."); }
             }
@@ -249,10 +258,17 @@
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
             const misJugadores = databaseJugadores.filter(j => gameData.inventario.includes(j.id));
+            
             misJugadores.forEach(j => {
                 const card = document.createElement('div');
-                card.className = "card";
-                card.innerHTML = `<div class="ovr">${j.grl}</div><div class="pos">${j.pos}</div><img src="${j.foto}"><div class="name">${j.name}</div>`;
+                // Añade la clase 'card' y también la clase de la rareza (ej: 'oro')
+                card.className = `card ${j.rareza}`; 
+                card.innerHTML = `
+                    <div class="ovr">${j.grl}</div>
+                    <div class="pos">${j.pos}</div>
+                    <img src="${j.foto}">
+                    <div class="name">${j.name}</div>
+                `;
                 grid.appendChild(card);
             });
             document.getElementById('club-section').style.display = "block";
@@ -276,5 +292,3 @@
     </script>
 </body>
 </html>
-
-
