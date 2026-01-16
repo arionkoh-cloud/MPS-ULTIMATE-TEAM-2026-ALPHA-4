@@ -320,37 +320,62 @@
         const auth = getAuth(app);
 
         // CONFIGURACION GOOGLE SHEETS
-        const SHEET_URL = "const SHEET_URL = "https://docs.google.com/spreadsheets/d/1TRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnB/export?format=csv";
-        let databaseJugadores = [];
+        // 1. Asegúrate de que la URL sea EXACTAMENTE esta (con comillas)
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1TRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnB/export?format=csv";
 
-        let gameData = {};
+async function cargarDatosGlobales(uid) {
+    const bar = document.getElementById('progress');
+    bar.style.width = "20%";
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                startGameLoad(user.uid);
-            } else {
-                document.getElementById('auth-form').style.display = 'flex';
-                document.getElementById('p-container').style.display = 'none';
+    // Intentar cargar Google Sheets (Si falla, el juego sigue)
+    try {
+        const res = await fetch(SHEET_URL);
+        if (res.ok) {
+            const csv = await res.text();
+            const filas = csv.split('\n').slice(1);
+            databaseJugadores = filas.map(f => {
+                const d = f.split(',');
+                return { 
+                    id: d[0]?.trim(), 
+                    name: d[1]?.trim(), 
+                    grl: d[2]?.trim(), 
+                    pos: d[3]?.trim(), 
+                    rareza: d[4]?.trim(), 
+                    foto: d[5]?.trim() 
+                };
+            });
+            console.log("Excel cargado correctamente");
+        }
+    } catch (e) { 
+        console.warn("No se pudo cargar el Excel, se usará base vacía:", e);
+        databaseJugadores = []; 
+    }
+
+    bar.style.width = "60%";
+
+    // Cargar datos de Firebase
+    try {
+        const docRef = doc(db, "jugadores", uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+            gameData = docSnap.data();
+            // Si el usuario es nuevo y no tiene inventario, le damos uno inicial
+            if(!gameData.inventario) {
+                gameData.inventario = ["1", "2", "3"]; 
             }
-        });
-
-        document.getElementById('register-btn').onclick = async () => {
-            const userNick = document.getElementById('auth-user').value.trim();
-            const pass = document.getElementById('auth-pass').value;
-            if(!userNick || pass.length < 6) return alert("Usuario requerido y contraseña mín. 6 caracteres.");
-            const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
-
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
-                await setDoc(doc(db, "jugadores", cred.user.uid), {
-                    username: userNick.toUpperCase(),
-                    coins: 5000,
-                    points: 0,
-                    inventario: ["1", "2"] // Jugadores iniciales de prueba (Guanactolay y Jessnaldo)
-                });
-            } catch (err) { alert("Error: El usuario ya existe o datos inválidos."); }
-        };
+            bar.style.width = "100%";
+            document.getElementById('continue-btn').classList.add('ready');
+        } else {
+            alert("Error: Usuario no encontrado en Firestore.");
+            await signOut(auth);
+            location.reload();
+        }
+    } catch (e) { 
+        console.error("Error en Firebase:", e);
+        alert("Error de conexión con el servidor.");
+    }
+}
 
         document.getElementById('login-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
@@ -469,4 +494,5 @@
         }
     </script>
 </body>
+
 </html>
