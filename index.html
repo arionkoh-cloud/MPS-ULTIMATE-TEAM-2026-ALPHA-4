@@ -9,11 +9,9 @@
             --primary: #00ffaa;
             --bg: #050508;
             --smooth-curve: cubic-bezier(0.19, 1, 0.22, 1);
-            
-            /* TEXTURAS DE CARTAS */
-            --bg-oro: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_gold.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=f0389e2700687b8be1ceb7f5294462ae');
-            --bg-plata: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_silver.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=b1079f24f16767420cb6396ed3f5fe9b');
-            --bg-bronce: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_bronze.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=4ad307433d3abe0e4eaf4e06573784e0');
+            --oro: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
+            --plata: linear-gradient(135deg, #d1d1d1 0%, #959595 100%);
+            --bronce: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
             --especial: linear-gradient(135deg, #00ffaa 0%, #0066ff 100%);
         }
 
@@ -22,10 +20,14 @@
 
         /* --- PANTALLA DE CARGA Y ACCESO --- */
         #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 30% 50%, #1a1a2e 0%, #050508 100%);
-            display: flex; align-items: center; z-index: 1000;
-            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s; padding: 0 10%;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s;
+            padding: 0 10%;
         }
 
         .loader-left { position: relative; flex: 1; z-index: 10; }
@@ -65,7 +67,7 @@
         .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* --- SECCIONES FULL SCREEN --- */
+        /* --- SECCIONES FULL SCREEN (CLUB Y MERCADO) --- */
         .full-screen-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #10101a 0%, #050508 100%);
@@ -75,193 +77,95 @@
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(0, 255, 170, 0.2); padding-bottom: 20px; }
         .italic-title { font-size: 3.5rem; font-style: italic; text-transform: uppercase; }
         .primary-text { color: var(--primary); }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
 
-        /* MODIFICADO: Ajuste de Grid para soportar contenedores más altos (carta + botones) */
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 50px 25px; /* Más espacio vertical */
-            align-items: start; 
-        }
-
-        /* --- CONTENEDOR DE CARTA Y ACCIONES --- */
-        .card-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 8px; /* Espacio entre carta y botones */
-        }
-
-        .card {
-            aspect-ratio: 2/3;
-            border-radius: 0; 
-            padding: 0; 
-            position: relative;
-            color: #3e3e3e; 
-            text-align: center;
-            transition: transform 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            background-position: center;
-            overflow: hidden; 
-        }
-
-        .card:hover { transform: translateY(-5px) scale(1.02); z-index: 2; }
-
-        /* Backgrounds */
-        .card.oro { background-image: var(--bg-oro); color: #3e3e3e; }
-        .card.plata { background-image: var(--bg-plata); color: #3e3e3e; }
-        .card.bronce { background-image: var(--bg-bronce); color: #3e3e3e; }
-        .card.especial { background: var(--especial); color: white; border-radius: 10px; }
+        /* CARTAS */
+        .card { aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        .card:hover { transform: translateY(-10px); z-index: 2; }
+        .card.oro { background: var(--oro); }
+        .card.plata { background: var(--plata); }
+        .card.bronce { background: var(--bronce); }
+        .card.especial { background: var(--especial); color: white; }
         
-        /* Stats y Foto */
-        .card img { width: 80%; position: absolute; top: 22%; left: 50%; transform: translateX(-50%); z-index: 0; }
-        .card .ovr { position: absolute; top: 18%; left: 18%; font-size: 1.6rem; font-weight: 900; z-index: 1; }
-        .card .pos { position: absolute; top: 32%; left: 18%; font-size: 0.9rem; font-weight: bold; z-index: 1; }
+        .card img { width: 100%; margin-top: 10px; }
+        .card .ovr { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; font-weight: bold; }
+        .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
+        .card .name { width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        /* MODIFICADO: Nombre bajado considerablemente */
-        .card .name { 
-            position: absolute;
-            bottom: 18%; /* Antes 38%, ahora 18% para que quede debajo de la foto */
-            width: 100%; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            text-align: center;
-            font-size: 1rem;
-            z-index: 1;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            padding: 0 10px;
-        }
-
-        /* --- BOTONES DEBAJO DE LA CARTA (NUEVO) --- */
-        .card-actions-container {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            width: 100%;
-        }
-
-        .btn-card-action { 
-            /* Quitamos posición absoluta y estilos antiguos */
-            position: static;
-            width: 100%;
-            background: rgba(255,255,255,0.1); 
-            color: white; 
-            border: 1px solid rgba(255,255,255,0.2); 
-            padding: 8px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 0.75rem; 
-            font-weight: bold; 
-            transition: 0.2s; 
-            text-transform: uppercase; 
-        }
-        .btn-card-action:hover { background: var(--primary); color: black; border-color: var(--primary); }
-        
-        .seller-info { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
+        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
+        .btn-card-action:hover { background: var(--primary); color: black; }
+        .seller-info { font-size: 0.65rem; margin-top: 4px; opacity: 0.8; text-transform: uppercase; color: inherit; }
 
         .btn-ui { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
         .btn-back { background: white; color: black; }
         .btn-back:hover { background: var(--primary); }
         .btn-duplicates { background: #ff3232; color: white; margin-right: 10px; }
 
+        /* --- MODAL DE VENTA PERSONALIZADO --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
-            z-index: 2000; display: none; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000; display: none;
+            align-items: center; justify-content: center;
         }
 
         .modal-content {
-            background: #1a1a2e; border: 2px solid var(--primary);
-            padding: 30px; border-radius: 15px; text-align: center; width: 320px;
-            box-shadow: 0 0 50px rgba(0, 255, 170, 0.2); animation: slideUp 0.3s var(--smooth-curve);
+            background: #1a1a2e;
+            border: 2px solid var(--primary);
+            padding: 30px; border-radius: 15px;
+            text-align: center; width: 320px;
+            box-shadow: 0 0 50px rgba(0, 255, 170, 0.2);
+            animation: slideUp 0.3s var(--smooth-curve);
         }
 
         #input-precio-venta {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--primary); padding: 12px;
-            color: white; border-radius: 4px; font-size: 1.5rem; margin-top: 20px; outline: none; text-align: center;
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--primary); padding: 12px;
+            color: white; border-radius: 4px; font-size: 1.5rem;
+            margin-top: 20px; outline: none; text-align: center;
         }
 
-        #modal-card-preview { margin: 15px auto; width: 160px; }
+        #modal-card-preview {
+            margin: 15px auto; width: 120px;
+        }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     
-        .sub-titulo {
-            font-size: 1.8rem; font-style: italic; color: var(--primary); margin-bottom: 20px;
-            text-transform: uppercase; border-left: 4px solid var(--primary); padding-left: 15px;
-        }
+    .sub-titulo {
+        font-size: 1.8rem;
+        font-style: italic;
+        color: var(--primary);
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        border-left: 4px solid var(--primary);
+        padding-left: 15px;
+    }
 
-        .card-venda { filter: saturate(0.5); }
-        .badge-venta {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
-            background: #ff3232; color: white; padding: 5px 15px; font-weight: bold; font-size: 1.2rem;
-            border: 2px solid white; z-index: 15; pointer-events: none; box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
-        }
-
-        /* --- ESTILOS DE LA TIENDA --- */
-        /* --- ESTILOS DE LA TIENDA --- */
-        .store-header-stats {
-            display: flex; gap: 20px; justify-content: center;
-            margin-bottom: 30px; background: rgba(255,255,255,0.05);
-            padding: 15px; border-radius: 10px; border: 1px solid var(--primary);
-        }
-
-        .store-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px; padding: 20px;
-        }
-
-        .pack-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
-            padding: 30px; text-align: center; transition: 0.3s;
-            display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;
-        }
-
-        .pack-card:hover { transform: translateY(-10px); border-color: var(--primary); }
-        .pack-title { font-size: 3rem; font-style: italic; font-weight: 900; text-transform: uppercase; }
-        .pack-img { height: 150px; margin: 20px auto; animation: float 3s infinite ease-in-out; }
-
-        .btn-buy {
-            padding: 12px; font-size: 1.1rem; font-weight: bold; text-transform: uppercase;
-            cursor: pointer; width: 100%; border-radius: 4px; transition: 0.2s; border: none;
-        }
-        .btn-buy.coins { background: var(--primary); color: black; margin-bottom: 8px; }
-        .btn-buy.points { background: #00d4ff; color: white; }
-        .btn-buy:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* --- WALKOUT REVEAL --- */
-        #reveal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 5000; display: none; flex-direction: column;
-            align-items: center; justify-content: center; background: #000;
-            transition: background 1.5s ease;
-        }
-
-        .reveal-bg-bronce { background: radial-gradient(circle, #5e3700 0%, #000 100%) !important; }
-        .reveal-bg-plata { background: radial-gradient(circle, #555 0%, #000 100%) !important; }
-        .reveal-bg-oro { background: radial-gradient(circle, #8a6d00 0%, #000 100%) !important; }
-        .reveal-bg-especial { background: radial-gradient(circle, #004d33 0%, #000 100%) !important; }
-
-        .reveal-step {
-            font-size: 12rem; font-weight: 900; font-style: italic; color: white;
-            opacity: 0; transform: scale(0.5); position: absolute; transition: 0.5s;
-        }
-        .reveal-active { opacity: 1; transform: scale(1); }
-        .reveal-out { opacity: 0; transform: scale(1.5); filter: blur(10px); }
-
-        #final-card-container {
-            opacity: 0; transform: scale(0.5); transition: 0.8s;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        #final-card-container.show { opacity: 1; transform: scale(1); }
+    /* Estilo para cartas que están en venta */
+    .card-venda {
+        filter: saturate(0.5);
+    }
+    .badge-venta {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-15deg);
+        background: #ff3232;
+        color: white;
+        padding: 5px 15px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        border: 2px solid white;
+        z-index: 5;
+        pointer-events: none;
+        box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
+    }
     </style>
 </head>
+<body>
 
-    <body>
     <div id="loader">
         <div class="loader-left">
             <div class="loader-logo">MPS UT</div>
@@ -342,56 +246,6 @@
         </div>
     </div>
 
-        <div id="tienda-section" class="full-screen-overlay">
-        <div class="section-header">
-            <h1 class="italic-title">TIENDA DE <span class="primary-text">PACKS</span></h1>
-            <button class="btn-ui btn-back" onclick="cerrarSeccion('tienda-section')">VOLVER</button>
-        </div>
-
-        <div class="store-header-stats">
-            <span id="store-coins" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">🪙 --</span>
-            <span id="store-points" style="font-size: 1.5rem; font-weight: bold; color: #00d4ff;">💎 --</span>
-        </div>
-
-        <div class="store-grid">
-            <div class="pack-card" style="border-color: #cd7f32;">
-                <div class="pack-title" style="color: #cd7f32;">BRONCE</div>
-                <img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_bronze.png?raw=true" class="pack-img">
-                <button class="btn-buy coins" onclick="abrirSobre('bronce', 'coins')">GRATIS</button>
-            </div>
-
-            <div class="pack-card" style="border-color: #c0c0c0;">
-                <div class="pack-title" style="color: #c0c0c0;">PLATA</div>
-                <img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_silver.png?raw=true" class="pack-img">
-                <div>
-                    <button class="btn-buy coins" onclick="abrirSobre('plata', 'coins')">1,000 🪙</button>
-                    <button class="btn-buy points" onclick="abrirSobre('plata', 'points')">20 💎</button>
-                </div>
-            </div>
-
-            <div class="pack-card" style="border-color: #ffd700;">
-                <div class="pack-title" style="color: #ffd700;">ORO</div>
-                <img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_gold.png?raw=true" class="pack-img">
-                <div>
-                    <button class="btn-buy coins" onclick="abrirSobre('oro', 'coins')">5,000 🪙</button>
-                    <button class="btn-buy points" onclick="abrirSobre('oro', 'points')">100 💎</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="reveal-overlay">
-        <div id="reveal-pos" class="reveal-step"></div>
-        <div id="reveal-ovr" class="reveal-step"></div>
-        <div id="final-card-container">
-            <div id="new-card-wrapper"></div>
-            <div style="display:flex; gap:15px; margin-top:30px;">
-                <button class="btn-action" id="btn-save-club" style="background:var(--primary); color:black; padding:15px 30px;">ENVIAR AL CLUB</button>
-                <button class="btn-action" id="btn-quick-sell" style="background:#ff3232; color:white; padding:15px 30px;">VENTA RÁPIDA</button>
-            </div>
-        </div>
-    </div>
-        
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, addDoc, deleteDoc, query, orderBy, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -523,23 +377,17 @@
                         const oferta = docSnap.data();
                         const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
                         if(j) {
-                            // MODIFICADO: Usamos wrapper para separar carta y botones
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'card-wrapper';
-                            wrapper.innerHTML = `
-                                <div class="card ${j.rareza} card-venda">
-                                    <div class="badge-venta">EN VENTA</div>
-                                    <div class="ovr">${j.grl}</div>
-                                    <div class="pos">${j.pos}</div>
-                                    <img src="${j.foto}">
-                                    <div class="name">${j.name}</div>
-                                </div>
-                                <div class="card-actions-container">
-                                    <div style="font-weight:bold; color:var(--primary); text-align:center;">🪙 ${oferta.precio.toLocaleString()}</div>
-                                    <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
-                                </div>
+                            const card = document.createElement('div');
+                            card.className = `card ${j.rareza} card-venda`;
+                            card.innerHTML = `
+                                <div class="badge-venta">EN VENTA</div>
+                                <div class="ovr">${j.grl}</div>
+                                <img src="${j.foto}">
+                                <div class="name">${j.name}</div>
+                                <div style="font-weight:bold; color:black; margin-top:5px;">🪙 ${oferta.precio.toLocaleString()}</div>
+                                <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
                             `;
-                            gridVentas.appendChild(wrapper);
+                            gridVentas.appendChild(card);
                         }
                     });
                 } else {
@@ -555,23 +403,18 @@
                 misJugadores.sort((a, b) => b.grl - a.grl);
                 
                 misJugadores.forEach((j) => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'card-wrapper'; // Usamos wrapper
+                    const card = document.createElement('div');
+                    card.className = `card ${j.rareza}`; 
                     const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
-                    
-                    wrapper.innerHTML = `
-                        <div class="card ${j.rareza}">
-                            <div class="ovr">${j.grl}</div>
-                            <div class="pos">${j.pos}</div>
-                            <img src="${j.foto}">
-                            <div class="name">${j.name}</div>
-                        </div>
-                        <div class="card-actions-container">
-                            <button class="btn-card-action" style="background:white; color:black;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
-                            <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
-                        </div>
+                    card.innerHTML = `
+                        <div class="ovr">${j.grl}</div>
+                        <div class="pos">${j.pos}</div>
+                        <img src="${j.foto}">
+                        <div class="name">${j.name}</div>
+                        <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
+                        <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
                     `;
-                    gridInventario.appendChild(wrapper);
+                    gridInventario.appendChild(card);
                 });
             }
         };
@@ -623,11 +466,9 @@
         window.venderEnMercado = (idJugador) => {
             jugadorSeleccionadoParaVenta = idJugador;
             const j = databaseJugadores.find(p => p.id === idJugador);
-            // El preview del modal solo muestra la carta, sin botones
             document.getElementById('modal-card-preview').innerHTML = `
-                <div class="card ${j.rareza}" style="transform: scale(0.9); margin: 0 auto;">
+                <div class="card ${j.rareza}" style="transform: scale(0.7); margin: -20px auto;">
                     <div class="ovr">${j.grl}</div>
-                    <div class="pos">${j.pos}</div>
                     <img src="${j.foto}">
                     <div class="name">${j.name}</div>
                 </div>
@@ -673,24 +514,18 @@
                 const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
                 if(!j) return;
 
-                // MODIFICADO: Usamos wrapper
-                const wrapper = document.createElement('div');
-                wrapper.className = 'card-wrapper';
-                wrapper.innerHTML = `
-                    <div class="card ${j.rareza}">
-                        <div class="ovr">${j.grl}</div>
-                        <div class="pos">${j.pos}</div>
-                        <img src="${j.foto}">
-                        <div class="name">${j.name}</div>
-                    </div>
-                    <div class="card-actions-container">
-                        <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
-                        <button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">
-                            COMPRAR 🪙${oferta.precio.toLocaleString()}
-                        </button>
-                    </div>
+                const card = document.createElement('div');
+                card.className = `card ${j.rareza}`;
+                card.innerHTML = `
+                    <div class="ovr">${j.grl}</div>
+                    <img src="${j.foto}">
+                    <div class="name">${j.name}</div>
+                    <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
+                    <button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">
+                        COMPRAR 🪙${oferta.precio.toLocaleString()}
+                    </button>
                 `;
-                grid.appendChild(wrapper);
+                grid.appendChild(card);
             });
         }
 
@@ -714,10 +549,7 @@
         window.abrirSeccion = (id) => { 
             document.getElementById(id).style.display = "block"; 
             if(id === 'club-section') renderizarClub();
-            // Si abrimos la tienda, actualizamos los marcadores de monedas/joyas
-            if(id === 'tienda-section') actualizarTiendaStats();
         };
-
         window.cerrarSeccion = (id) => { document.getElementById(id).style.display = "none"; };
 
         window.enterGame = function() {
@@ -729,139 +561,6 @@
                 document.getElementById('main-content').style.pointerEvents = "auto";
             }, 800);
         }
-
-        // --- LÓGICA DE TIENDA Y PROBABILIDADES ---
-        const PACK_DATA = {
-            bronce: { coins: 0, points: 0, ranges: [[55,60,90], [60,65,9], [65,70,1], [70,75,0.2]] },
-            plata: { coins: 1000, points: 20, ranges: [[65,70,90], [70,75,9], [75,80,1], [80,85,0.2]] },
-            oro: { coins: 5000, points: 100, ranges: [[75,80,90], [80,85,9], [85,90,1], [90,95,0.2]] }
-        };
-
-        function actualizarTiendaStats() {
-            const sc = document.getElementById('store-coins');
-            const sp = document.getElementById('store-points');
-            if(sc) sc.innerText = `🪙 ${gameData.coins.toLocaleString()}`;
-            if(sp) sp.innerText = `💎 ${gameData.points.toLocaleString()}`;
-        }
-
-        window.abrirSobre = async (tipo, moneda) => {
-            const pack = PACK_DATA[tipo];
-            const precio = pack[moneda];
-
-            // 1. Verificar si tiene saldo suficiente
-            if (moneda === 'coins' && gameData.coins < precio) return alert("No tienes suficientes monedas.");
-            if (moneda === 'points' && gameData.points < precio) return alert("No tienes suficientes MPS Points.");
-
-            // 2. Cobrar en Firebase y actualizar localmente
-            try {
-                const updates = {};
-                if (moneda === 'coins') {
-                    updates.coins = gameData.coins - precio;
-                    gameData.coins -= precio;
-                } else {
-                    updates.points = gameData.points - precio;
-                    gameData.points -= precio;
-                }
-                
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), updates);
-                actualizarTiendaStats(); // Refrescar visualmente los puntos en la tienda
-            } catch (e) { 
-                return alert("Error al procesar la compra."); 
-            }
-
-            // 3. Lógica de Probabilidades
-            const rand = Math.random() * 100;
-            let acumulado = 0;
-            let rangoSelected = pack.ranges[0];
-
-            for (let r of pack.ranges) {
-                acumulado += r[2];
-                if (rand <= acumulado) {
-                    rangoSelected = r;
-                    break;
-                }
-            }
-
-            // 4. Selección del jugador
-            let posibles = databaseJugadores.filter(p => p.grl >= rangoSelected[0] && p.grl < rangoSelected[1]);
-            if(posibles.length === 0) posibles = databaseJugadores; 
-            const ganado = posibles[Math.floor(Math.random() * posibles.length)];
-
-            // 5. Lanzar Animación
-            ejecutarAnimacionWalkout(ganado);
-        };
-
-        function ejecutarAnimacionWalkout(j) {
-            const overlay = document.getElementById('reveal-overlay');
-            const posEl = document.getElementById('reveal-pos');
-            const ovrEl = document.getElementById('reveal-ovr');
-            const cardCont = document.getElementById('final-card-container');
-            const cardWrapper = document.getElementById('new-card-wrapper');
-
-            // Resetear estados
-            overlay.className = ''; 
-            overlay.style.display = 'flex';
-            posEl.className = 'reveal-step';
-            ovrEl.className = 'reveal-step';
-            cardCont.classList.remove('show');
-            cardWrapper.innerHTML = ''; // Limpiar carta anterior
-
-            // Paso 1: Color de fondo según rareza
-            let bgClass = 'reveal-bg-bronce';
-            if (j.grl >= 75) bgClass = 'reveal-bg-oro';
-            if (j.grl >= 65 && j.grl < 75) bgClass = 'reveal-bg-plata';
-            if (j.rareza === 'especial' || j.grl >= 88) bgClass = 'reveal-bg-especial';
-            
-            setTimeout(() => { overlay.classList.add(bgClass); }, 100);
-
-            posEl.innerText = j.pos;
-            ovrEl.innerText = j.grl;
-
-            // Secuencia de tiempos (Reveal)
-            setTimeout(() => { posEl.classList.add('reveal-active'); }, 500);
-
-            setTimeout(() => { 
-                posEl.classList.replace('reveal-active', 'reveal-out');
-                ovrEl.classList.add('reveal-active');
-            }, 1800);
-
-            setTimeout(() => {
-                ovrEl.classList.replace('reveal-active', 'reveal-out');
-                
-                // Renderizado de la carta final con las variables de fondo correctas
-                cardWrapper.innerHTML = `
-                    <div class="card" style="background-image: var(--bg-${j.rareza}); transform: scale(1.4); margin-bottom: 40px;">
-                        <div class="ovr">${j.grl}</div>
-                        <div class="pos">${j.pos}</div>
-                        <img src="${j.foto}" onerror="this.src='https://via.placeholder.com/150'">
-                        <div class="name">${j.name}</div>
-                    </div>
-                `;
-                cardCont.classList.add('show');
-            }, 3200);
-
-            // Botones Finales
-            document.getElementById('btn-save-club').onclick = async () => {
-                const nuevoInv = [...gameData.inventario, j.id];
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
-                gameData.inventario = nuevoInv;
-                overlay.style.display = 'none';
-                alert(`${j.name} guardado.`);
-            };
-
-            document.getElementById('btn-quick-sell').onclick = async () => {
-                const valor = (j.grl >= 85) ? 500 : (j.grl >= 75 ? 250 : 50);
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { coins: gameData.coins + valor });
-                gameData.coins += valor;
-                overlay.style.display = 'none';
-                alert(`Vendido por 🪙 ${valor}`);
-            };
-        }
-
-        // Evento para el botón de la tienda en el menú principal
-        document.querySelector('.menu-btn:last-child').onclick = () => {
-            abrirSeccion('tienda-section');
-        };
     </script>
 </body>
 </html>
