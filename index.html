@@ -204,50 +204,6 @@
         .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* --- SECCIÓN CLUB (PESTAÑA APARTE) --- */
-        #club-section {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100vh;
-            background: #050508;
-            z-index: 2000;
-            display: none;
-            padding: 40px 60px;
-            overflow-y: auto;
-        }
-
-        .club-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 20px;
-        }
-
-        .players-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 25px;
-            justify-items: center;
-        }
-
-        /* --- ESTILO DE LA CARTA UT --- */
-        .ut-card {
-            width: 170px;
-            height: 240px;
-            background: url('https://seliganadieta.com.br/wp-content/uploads/2023/10/cartas-do-ea-sports-fc-24-ut.png');
-            background-size: 100% 100%;
-            position: relative;
-            color: #463105;
-            transition: transform 0.3s var(--smooth-curve);
-            cursor: pointer;
-        }
-        .ut-card:hover { transform: scale(1.05); }
-        .card-grl { position: absolute; top: 38px; left: 25px; font-size: 2.2rem; font-weight: bold; line-height: 1; }
-        .card-pos { position: absolute; top: 72px; left: 28px; font-size: 1rem; font-weight: bold; }
-        .card-img { position: absolute; top: 45px; right: 10px; width: 110px; height: 110px; object-fit: contain; }
-        .card-name { position: absolute; bottom: 62px; width: 100%; text-align: center; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; }
-
     </style>
 </head>
 <body>
@@ -278,16 +234,6 @@
         </div>
     </div>
 
-    <div id="club-section">
-        <div class="club-header">
-            <h1 style="font-size: 4rem; font-style: italic;">MI CLUB</h1>
-            <button onclick="closeClub()" class="btn-action" style="width: auto; padding: 10px 40px; background: var(--primary); color: black; font-size: 1.5rem;">
-                VOLVER AL MENÚ
-            </button>
-        </div>
-        <div class="players-grid" id="club-grid"></div>
-    </div>
-
     <div id="main-content">
         <header>
             <div class="user-box">
@@ -303,7 +249,7 @@
         <main class="main-menu">
             <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
             <div class="menu-btn"><h2>MI<br>PLANTILLA</h2></div>
-            <div class="menu-btn" onclick="openClub()"><h2>MI<br>CLUB</h2></div>
+            <div class="menu-btn"><h2>MI<br>CLUB</h2></div>
             <div class="menu-btn"><h2>MERCADO DE<br>FICHAJES</h2></div>
             <div class="menu-btn"><h2>TIENDA</h2></div>
         </main>
@@ -328,26 +274,6 @@
         const auth = getAuth(app);
 
         let gameData = {};
-        let masterPlayers = [];
-
-        // CARGAR BASE DE DATOS DESDE GOOGLE SHEETS
-        async function fetchMasterPlayers() {
-            const sheetId = '1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj';
-            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-            try {
-                const response = await fetch(url);
-                const text = await response.text();
-                const json = JSON.parse(text.substr(47).slice(0, -2));
-                masterPlayers = json.table.rows.map(row => ({
-                    username: row.c[0]?.v || "Desconocido",
-                    grl: row.c[1]?.v || 0,
-                    pos: row.c[2]?.v || "ST",
-                    rareza: row.c[3]?.v || "oro",
-                    id_img: row.c[4]?.v || ""
-                }));
-                console.log("DB Cargada con", masterPlayers.length, "jugadores.");
-            } catch (e) { console.error("Error cargando Google Sheets:", e); }
-        }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -355,7 +281,6 @@
             } else {
                 document.getElementById('auth-form').style.display = 'flex';
                 document.getElementById('p-container').style.display = 'none';
-                fetchMasterPlayers(); // Cargar DB para cuando se registre
             }
         });
 
@@ -368,19 +293,12 @@
             try {
                 await setPersistence(auth, browserLocalPersistence);
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
-                
-                // TEST: Dar los 50 mejores jugadores al registrarse
-                const starterClub = [...masterPlayers]
-                    .sort((a, b) => b.grl - a.grl)
-                    .slice(0, 50);
-
                 await setDoc(doc(db, "jugadores", cred.user.uid), {
                     username: userNick.toUpperCase(),
                     coins: 5000,
-                    points: 0,
-                    club: starterClub
+                    points: 0
                 });
-            } catch (err) { alert("Error al registrar: " + err.message); }
+            } catch (err) { alert("Error: El usuario ya existe o datos inválidos."); }
         };
 
         document.getElementById('login-btn').onclick = async () => {
@@ -402,7 +320,7 @@
         function startGameLoad(uid) {
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('p-container').style.display = 'block';
-            fetchMasterPlayers().then(() => loadPlayerData(uid));
+            loadPlayerData(uid);
         }
 
         async function loadPlayerData(uid) {
@@ -412,10 +330,11 @@
                 const docRef = doc(db, "jugadores", uid);
                 const docSnap = await getDoc(docRef);
                 
+                // PROTOCOLO DE SEGURIDAD: Si el documento no existe
                 if (!docSnap.exists()) {
-                    alert("EL USUARIO FUE ELIMINADO.");
-                    await signOut(auth);
-                    location.reload();
+                    alert("EL USUARIO FUE ELIMINADO DE LA BASE DE DATOS.");
+                    await signOut(auth); // Cerramos sesión de Auth
+                    location.reload();   // Recargamos para limpiar todo
                     return;
                 }
 
@@ -424,6 +343,7 @@
                 document.getElementById('continue-btn').classList.add('ready');
             } catch (e) { 
                 console.error(e);
+                alert("Error al cargar datos. Reintente.");
                 location.reload();
             }
         }
@@ -434,10 +354,9 @@
                     const docRef = doc(db, "jugadores", auth.currentUser.uid);
                     await updateDoc(docRef, {
                         coins: gameData.coins,
-                        points: gameData.points,
-                        club: gameData.club || []
+                        points: gameData.points
                     });
-                } catch (e) { console.error("No se pudo guardar."); }
+                } catch (e) { console.error("No se pudo guardar (Usuario quizás eliminado)."); }
             }
         }
 
@@ -456,36 +375,6 @@
                 document.getElementById('main-content').style.opacity = "1";
                 document.getElementById('main-content').style.pointerEvents = "auto";
             }, 800);
-        }
-
-        // LÓGICA DE NAVEGACIÓN DEL CLUB
-        window.openClub = function() {
-            document.getElementById('main-content').style.display = 'none';
-            document.getElementById('club-section').style.display = 'block';
-            renderClub();
-        }
-
-        window.closeClub = function() {
-            document.getElementById('club-section').style.display = 'none';
-            document.getElementById('main-content').style.display = 'flex';
-        }
-
-        function renderClub() {
-            const grid = document.getElementById('club-grid');
-            grid.innerHTML = '';
-            const playersToShow = gameData.club || [];
-
-            playersToShow.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'ut-card';
-                card.innerHTML = `
-                    <div class="card-grl">${p.grl}</div>
-                    <div class="card-pos">${p.pos}</div>
-                    <img class="card-img" src="${p.id_img}" onerror="this.src='https://via.placeholder.com/150'">
-                    <div class="card-name">${p.username}</div>
-                `;
-                grid.appendChild(card);
-            });
         }
     </script>
 </body>
