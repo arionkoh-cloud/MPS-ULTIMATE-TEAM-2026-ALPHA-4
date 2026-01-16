@@ -9,10 +9,6 @@
             --primary: #00ffaa;
             --bg: #050508;
             --smooth-curve: cubic-bezier(0.19, 1, 0.22, 1);
-            --oro: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
-            --plata: linear-gradient(135deg, #d1d1d1 0%, #959595 100%);
-            --bronce: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
-            --especial: linear-gradient(135deg, #00ffaa 0%, #0066ff 100%);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DIN Condensed', 'Arial Narrow', sans-serif; }
@@ -20,148 +16,51 @@
 
         /* --- PANTALLA DE CARGA Y ACCESO --- */
         #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 30% 50%, #1a1a2e 0%, #050508 100%);
-            display: flex;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s;
-            padding: 0 10%;
+            display: flex; align-items: center; z-index: 1000;
+            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s; padding: 0 10%;
         }
-
         .loader-left { position: relative; flex: 1; z-index: 10; }
-        .loader-logo { font-size: 8rem; font-weight: 900; font-style: italic; margin-bottom: -10px; color: white; letter-spacing: -3px; line-height: 1; }
+        .loader-logo { font-size: 8rem; font-weight: 900; font-style: italic; color: white; letter-spacing: -3px; line-height: 1; }
         .edition { color: var(--primary); font-size: 1.8rem; margin-bottom: 30px; letter-spacing: 8px; font-weight: bold; }
-
-        #auth-form { display: flex; flex-direction: column; gap: 12px; width: 350px; margin-bottom: 20px; }
-        #auth-form input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 170, 0.3); padding: 12px; color: white; border-radius: 4px; outline: none; font-size: 1.1rem; transition: 0.3s; }
-        #auth-form input:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.1); }
-
+        #auth-form { display: flex; flex-direction: column; gap: 12px; width: 350px; }
+        #auth-form input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 170, 0.3); padding: 12px; color: white; border-radius: 4px; outline: none; }
         .auth-buttons { display: flex; gap: 10px; }
-        .btn-action { flex: 1; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; transition: 0.3s; }
-        #login-btn { background: var(--primary); color: black; border: none; }
+        .btn-action { flex: 1; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; border: none; }
+        #login-btn { background: var(--primary); color: black; }
         #register-btn { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-        
-        .progress-container { width: 350px; height: 6px; background: rgba(255,255,255,0.1); margin-bottom: 30px; border-radius: 10px; overflow: hidden; display: none; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 20px var(--primary); transition: width 0.4s ease; }
+        .progress-container { width: 350px; height: 6px; background: rgba(255,255,255,0.1); margin-bottom: 30px; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.4s; }
+        #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; cursor: pointer; opacity: 0; pointer-events: none; transition: 0.5s; }
+        #continue-btn.ready { opacity: 1; pointer-events: auto; }
 
-        #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; text-transform: uppercase; font-style: italic; cursor: pointer; opacity: 0; transform: translateY(30px); transition: all 0.5s var(--smooth-curve); pointer-events: none; border-radius: 4px; }
-        #continue-btn.ready { opacity: 1; transform: translateY(0); pointer-events: auto; animation: blink 1.5s infinite; }
+        /* --- NUEVO SISTEMA DE CARTAS POR CAPAS --- */
+        .card { 
+            aspect-ratio: 2/3; position: relative; color: white; text-align: center; 
+            transition: transform 0.3s; cursor: pointer; width: 100%; max-width: 200px; margin: auto;
+        }
+        .card:hover { transform: translateY(-10px) scale(1.05); z-index: 10; }
+        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .card-player { position: absolute; bottom: 12%; right: -5%; width: 105%; height: auto; z-index: 2; filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.6)); }
+        .card .ovr { position: absolute; top: 14%; left: 14%; font-size: 2.2rem; font-weight: 900; z-index: 3; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .card .pos { position: absolute; top: 32%; left: 14%; font-size: 0.9rem; font-weight: bold; z-index: 3; }
+        .card .name { position: absolute; bottom: 12%; width: 100%; font-size: 1.1rem; font-weight: bold; text-transform: uppercase; z-index: 3; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
 
-        .player-render { position: absolute; left: 15%; bottom: -5%; height: 115vh; z-index: 1; pointer-events: none; }
-        .player-render img { height: 100%; width: auto; filter: drop-shadow(20px 0 50px rgba(0, 255, 170, 0.15)); animation: slideIn 1.8s var(--smooth-curve); }
-
-        @keyframes slideIn { from { transform: translateX(-150px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes blink { 0%, 100% { opacity: 1; box-shadow: 0 0 5px var(--primary); } 50% { opacity: 0.7; box-shadow: 0 0 25px var(--primary); } }
-
-        /* --- MENÚ PRINCIPAL --- */
+        /* --- INTERFAZ --- */
         #main-content { opacity: 0; display: flex; flex-direction: column; height: 100vh; transition: opacity 1s ease; pointer-events: none; }
         header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: center; }
-        .user-box { display: flex; align-items: center; gap: 20px; }
-        #logout-btn { background: rgba(255, 50, 50, 0.2); border: 1px solid #ff3232; color: #ff3232; padding: 5px 15px; cursor: pointer; text-transform: uppercase; font-weight: bold; border-radius: 4px; }
         .stats { display: flex; gap: 20px; background: rgba(255, 255, 255, 0.05); padding: 10px 25px; border-radius: 50px; }
-        
         .main-menu { flex: 1; display: flex; padding: 0 40px 60px; gap: 15px; }
-        .menu-btn { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; transition: flex 0.6s var(--smooth-curve), background 0.4s ease; cursor: pointer; position: relative; overflow: hidden; }
-        .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
+        .menu-btn { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; transition: 0.4s; cursor: pointer; overflow: hidden; }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* --- SECCIONES FULL SCREEN (CLUB Y MERCADO) --- */
-        .full-screen-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #10101a 0%, #050508 100%);
-            z-index: 500; display: none; padding: 60px; overflow-y: auto;
-            animation: fadeIn 0.4s var(--smooth-curve);
-        }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(0, 255, 170, 0.2); padding-bottom: 20px; }
-        .italic-title { font-size: 3.5rem; font-style: italic; text-transform: uppercase; }
-        .primary-text { color: var(--primary); }
+        .full-screen-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #10101a 0%, #050508 100%); z-index: 500; display: none; padding: 60px; overflow-y: auto; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
+        .btn-ui { padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; background: white; color: black; }
+        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
 
-        /* CARTAS */
-        .card { aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .card:hover { transform: translateY(-10px); z-index: 2; }
-        .card.oro { background: var(--oro); }
-        .card.plata { background: var(--plata); }
-        .card.bronce { background: var(--bronce); }
-        .card.especial { background: var(--especial); color: white; }
-        
-        .card img { width: 100%; margin-top: 10px; }
-        .card .ovr { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; font-weight: bold; }
-        .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
-        .card .name { width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
-        .btn-card-action:hover { background: var(--primary); color: black; }
-        .seller-info { font-size: 0.65rem; margin-top: 4px; opacity: 0.8; text-transform: uppercase; color: inherit; }
-
-        .btn-ui { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
-        .btn-back { background: white; color: black; }
-        .btn-back:hover { background: var(--primary); }
-        .btn-duplicates { background: #ff3232; color: white; margin-right: 10px; }
-
-        /* --- MODAL DE VENTA PERSONALIZADO --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 2000; display: none;
-            align-items: center; justify-content: center;
-        }
-
-        .modal-content {
-            background: #1a1a2e;
-            border: 2px solid var(--primary);
-            padding: 30px; border-radius: 15px;
-            text-align: center; width: 320px;
-            box-shadow: 0 0 50px rgba(0, 255, 170, 0.2);
-            animation: slideUp 0.3s var(--smooth-curve);
-        }
-
-        #input-precio-venta {
-            width: 100%; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--primary); padding: 12px;
-            color: white; border-radius: 4px; font-size: 1.5rem;
-            margin-top: 20px; outline: none; text-align: center;
-        }
-
-        #modal-card-preview {
-            margin: 15px auto; width: 120px;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    
-    .sub-titulo {
-        font-size: 1.8rem;
-        font-style: italic;
-        color: var(--primary);
-        margin-bottom: 20px;
-        text-transform: uppercase;
-        border-left: 4px solid var(--primary);
-        padding-left: 15px;
-    }
-
-    /* Estilo para cartas que están en venta */
-    .card-venda {
-        filter: saturate(0.5);
-    }
-    .badge-venta {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(-15deg);
-        background: #ff3232;
-        color: white;
-        padding: 5px 15px;
-        font-weight: bold;
-        font-size: 1.2rem;
-        border: 2px solid white;
-        z-index: 5;
-        pointer-events: none;
-        box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
-    }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
@@ -178,70 +77,50 @@
                     <button class="btn-action" id="register-btn">REGISTRAR</button>
                 </div>
             </div>
-            <div class="progress-container" id="p-container">
-                <div id="progress" class="progress-bar"></div>
-            </div>
+            <div class="progress-container" id="p-container"><div id="progress" class="progress-bar"></div></div>
             <button id="continue-btn" onclick="enterGame()">CLICK PARA EMPEZAR</button>
         </div>
-        <div class="player-render">
-            <img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true">
-        </div>
+        <div class="player-render"><img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true" style="height: 110vh; position: absolute; left: 20%; bottom: -5%;"></div>
     </div>
 
     <div id="main-content">
         <header>
-            <div class="user-box">
-                <div id="user-display">CONECTANDO...</div>
-                <button id="logout-btn">CERRAR SESIÓN</button>
-            </div>
-            <div class="stats">
-                <span id="coins-display">🪙 --</span>
-                <span id="points-display">💎 --</span>
-            </div>
+            <div class="user-box"><div id="user-display">CONECTANDO...</div><button id="logout-btn" style="margin-left:15px; background:none; color:red; border:none; cursor:pointer;">CERRAR SESIÓN</button></div>
+            <div class="stats"><span id="coins-display">🪙 --</span><span id="points-display">💎 --</span></div>
         </header>
         <main class="main-menu">
-            <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
             <div class="menu-btn" onclick="abrirSeccion('club-section')"><h2>MI<br>CLUB</h2></div>
             <div class="menu-btn" onclick="abrirSeccion('mercado-section')"><h2>MERCADO DE<br>FICHAJES</h2></div>
-            <div class="menu-btn"><h2>TIENDA</h2></div>
         </main>
     </div>
 
-   <div id="club-section" class="full-screen-overlay">
-    <div class="section-header">
-        <h1 class="italic-title">MI <span class="primary-text">CLUB</span></h1>
-        <div>
-            <button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button>
-            <button class="btn-ui btn-back" onclick="cerrarSeccion('club-section')">VOLVER</button>
+    <div id="club-section" class="full-screen-overlay">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1 style="font-size:3rem; font-style:italic;">MI <span style="color:var(--primary)">CLUB</span></h1>
+            <div>
+                <button class="btn-ui" style="background:#ff3232; color:white; margin-right:10px;" onclick="venderRepetidos()">REPETIDOS</button>
+                <button class="btn-ui" onclick="cerrarSeccion('club-section')">VOLVER</button>
+            </div>
         </div>
+        <div id="club-grid" class="grid-container"></div>
     </div>
-
-    <div id="seccion-mis-ventas" style="display: none; margin-bottom: 40px;">
-        <h2 class="sub-titulo">MIS SUBASTAS ACTIVAS</h2>
-        <div class="grid-container" id="club-ventas-grid"></div>
-        <hr style="border: 0; border-top: 1px solid rgba(0, 255, 170, 0.2); margin-top: 30px;">
-    </div>
-
-    <h2 class="sub-titulo">MI PLANTILLA</h2>
-    <div class="grid-container" id="club-grid"></div>
-</div>
 
     <div id="mercado-section" class="full-screen-overlay">
-        <div class="section-header">
-            <h1 class="italic-title">MERCADO DE <span class="primary-text">FICHAJES</span></h1>
-            <button class="btn-ui btn-back" onclick="cerrarSeccion('mercado-section')">VOLVER</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h1 style="font-size:3rem; font-style:italic;">MERCADO DE <span style="color:var(--primary)">FICHAJES</span></h1>
+            <button class="btn-ui" onclick="cerrarSeccion('mercado-section')">VOLVER</button>
         </div>
-        <div class="grid-container" id="mercado-grid"></div>
+        <div id="mercado-grid" class="grid-container"></div>
     </div>
 
     <div id="venta-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 class="italic-title" style="font-size: 2rem;">PONER EN <span class="primary-text">VENTA</span></h2>
-            <div id="modal-card-preview"></div>
-            <input type="number" id="input-precio-venta" placeholder="PRECIO MONEDAS">
-            <div class="auth-buttons" style="margin-top: 20px;">
-                <button class="btn-action" id="confirmar-venta-btn" style="background: var(--primary); color: black;">PUBLICAR</button>
-                <button class="btn-action" onclick="cerrarModalVenta()" style="background: #ff3232; color: white;">CANCELAR</button>
+        <div style="background:#1a1a2e; padding:30px; border-radius:15px; border:2px solid var(--primary); text-align:center; width:320px;">
+            <h2 style="font-style:italic;">VENDER JUGADOR</h2>
+            <div id="modal-card-preview" style="margin:20px 0;"></div>
+            <input type="number" id="input-precio-venta" placeholder="PRECIO" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); color:white; border:1px solid var(--primary);">
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-ui" id="confirmar-venta-btn" style="flex:1; background:var(--primary);">PUBLICAR</button>
+                <button class="btn-ui" onclick="cerrarModalVenta()" style="flex:1; background:#ff3232; color:white;">X</button>
             </div>
         </div>
     </div>
@@ -264,29 +143,32 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // --- MAPEO DE MARCOS POR RAREZA ---
+        const MARCOS = {
+            oro: "https://i.ibb.co/688S88S/gold-card.png",
+            plata: "https://i.ibb.co/mS6S4S6/silver-card.png",
+            bronce: "https://i.ibb.co/R9S7S8S/bronze-card.png",
+            especial: "https://i.postimg.cc/85zK2Ym4/image-4992eb.jpg" 
+        };
+
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj/pub?output=csv";
         let databaseJugadores = [];
         let gameData = { coins: 0, points: 0, inventario: [], username: "" };
-        let jugadorSeleccionadoParaVenta = null;
-        const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
+        let jugadorParaVenta = null;
+        const PRECIOS_DESCARTES = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                startGameLoad(user.uid);
-            } else {
-                document.getElementById('auth-form').style.display = 'flex';
-                document.getElementById('p-container').style.display = 'none';
-            }
+            if (user) startGameLoad(user.uid);
+            else document.getElementById('auth-form').style.display = 'flex';
         });
 
-        // --- AUTH LÓGICA ---
+        // --- LÓGICA DE REGISTRO (RESTAURADA) ---
         document.getElementById('register-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
             if(!userNick || pass.length < 6) return alert("Mín. 6 caracteres.");
             const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
             try {
-                await setPersistence(auth, browserLocalPersistence);
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
                 await setDoc(doc(db, "jugadores", cred.user.uid), {
                     username: userNick.toUpperCase(),
@@ -301,266 +183,123 @@
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
             const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                await signInWithEmailAndPassword(auth, fakeEmail, pass);
-            } catch (err) { alert("Datos incorrectos."); }
+            try { await signInWithEmailAndPassword(auth, fakeEmail, pass); } catch (err) { alert("Datos incorrectos."); }
         };
 
-        document.getElementById('logout-btn').onclick = async () => {
-            await signOut(auth);
-            location.reload();
-        };
+        // --- RENDERIZADO POR CAPAS ---
+        function crearHTMLCarta(j) {
+            const marco = MARCOS[j.rareza] || MARCOS.oro;
+            return `
+                <div class="card">
+                    <img src="${marco}" class="card-bg">
+                    <img src="${j.foto}" class="card-player">
+                    <div class="ovr">${j.grl}</div>
+                    <div class="pos">${j.pos}</div>
+                    <div class="name">${j.name}</div>
+                </div>
+            `;
+        }
 
-        // --- CARGA Y TIEMPO REAL ---
         async function startGameLoad(uid) {
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('p-container').style.display = 'block';
-            const bar = document.getElementById('progress');
-            
             try {
                 const res = await fetch(SHEET_URL);
-                if(res.ok){
-                    const csv = await res.text();
-                    const filas = csv.split('\n').slice(1);
-                    databaseJugadores = filas.map(f => {
-                        const d = f.split(',');
-                        return { id: d[0]?.trim(), name: d[1]?.trim(), grl: parseInt(d[2]?.trim()) || 0, pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
-                    });
-                }
-            } catch (e) { console.warn("Error Sheets"); }
-
-            bar.style.width = "50%";
+                const csv = await res.text();
+                const filas = csv.split('\n').slice(1);
+                databaseJugadores = filas.map(f => {
+                    const d = f.split(',');
+                    return { id: d[0]?.trim(), name: d[1]?.trim(), grl: d[2]?.trim(), pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
+                });
+            } catch (e) { console.error("Error Sheets"); }
 
             onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
                 if (docSnap.exists()) {
                     gameData = docSnap.data();
-                    if(!gameData.inventario) gameData.inventario = [];
-                    actualizarUI();
-                    if(document.getElementById('club-section').style.display === "block") renderizarClub();
-                    
-                    bar.style.width = "100%";
+                    document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString()}`;
+                    document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
+                    document.getElementById('progress').style.width = "100%";
                     document.getElementById('continue-btn').classList.add('ready');
+                    if(document.getElementById('club-section').style.display === "block") renderizarClub();
                 }
             });
 
-            const qMercado = query(collection(db, "mercado"), orderBy("fecha", "desc"));
-            onSnapshot(qMercado, (snapshot) => {
-                renderizarMercado(snapshot);
-            });
+            onSnapshot(query(collection(db, "mercado"), orderBy("fecha", "desc")), (snap) => renderizarMercado(snap));
         }
 
-        function actualizarUI() {
-            document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString('es-ES')}`;
-            document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString('es-ES')}`;
-        }
-
-        // --- CLUB ---
-        window.renderizarClub = async function() {
-            const gridInventario = document.getElementById('club-grid');
-            const gridVentas = document.getElementById('club-ventas-grid');
-            const seccionVentas = document.getElementById('seccion-mis-ventas');
-            
-            if (!gridInventario || !gridVentas) return;
-
-            gridInventario.innerHTML = "";
-            gridVentas.innerHTML = "";
-
-            // 1. OBTENER MIS VENTAS DESDE FIREBASE
-            try {
-                const q = query(collection(db, "mercado"), where("vendedorId", "==", auth.currentUser.uid));
-                const querySnapshot = await getDocs(q);
-                
-                if (!querySnapshot.empty) {
-                    seccionVentas.style.display = "block";
-                    querySnapshot.forEach((docSnap) => {
-                        const oferta = docSnap.data();
-                        const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
-                        if(j) {
-                            const card = document.createElement('div');
-                            card.className = `card ${j.rareza} card-venda`;
-                            card.innerHTML = `
-                                <div class="badge-venta">EN VENTA</div>
-                                <div class="ovr">${j.grl}</div>
-                                <img src="${j.foto}">
-                                <div class="name">${j.name}</div>
-                                <div style="font-weight:bold; color:black; margin-top:5px;">🪙 ${oferta.precio.toLocaleString()}</div>
-                                <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
-                            `;
-                            gridVentas.appendChild(card);
-                        }
-                    });
-                } else {
-                    seccionVentas.style.display = "none";
-                }
-            } catch (e) { 
-                console.error("Error cargando mis ventas", e); 
-            }
-
-            // 2. RENDERIZAR INVENTARIO NORMAL
-            if (gameData.inventario && gameData.inventario.length > 0) {
-                let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
-                misJugadores.sort((a, b) => b.grl - a.grl);
-                
-                misJugadores.forEach((j) => {
-                    const card = document.createElement('div');
-                    card.className = `card ${j.rareza}`; 
-                    const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
-                    card.innerHTML = `
-                        <div class="ovr">${j.grl}</div>
-                        <div class="pos">${j.pos}</div>
-                        <img src="${j.foto}">
-                        <div class="name">${j.name}</div>
-                        <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
-                        <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
+        window.renderizarClub = () => {
+            const grid = document.getElementById('club-grid');
+            grid.innerHTML = "";
+            gameData.inventario.forEach((id, index) => {
+                const j = databaseJugadores.find(p => p.id === id);
+                if(j) {
+                    const div = document.createElement('div');
+                    div.innerHTML = crearHTMLCarta(j) + `
+                        <button class="btn-card-action" onclick="descartarJugador('${id}', ${index})">DESCARTAR (🪙${PRECIOS_DESCARTES[j.rareza]})</button>
+                        <button class="btn-card-action" style="background:white; color:black;" onclick="prepararVenta('${id}', ${index})">MERCADO</button>
                     `;
-                    gridInventario.appendChild(card);
-                });
-            }
-        };
+                    grid.appendChild(div);
+                }
+            });
+        }
 
-        window.cancelarVenta = async (docId, jugadorId) => {
-            try {
-                await deleteDoc(doc(db, "mercado", docId));
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
-                    inventario: [...gameData.inventario, jugadorId]
-                });
-                alert("Jugador retirado del mercado.");
-            } catch (e) { alert("Error al retirar."); }
-        };
-
-        window.descartarJugador = async (id) => {
+        window.descartarJugador = async (id, index) => {
             const j = databaseJugadores.find(p => p.id === id);
-            const valor = PRECIOS_VENTA[j.rareza] || 30;
-            const index = gameData.inventario.indexOf(id);
-            if(index > -1) {
-                const nuevoInv = [...gameData.inventario];
-                nuevoInv.splice(index, 1);
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
-                    inventario: nuevoInv,
-                    coins: gameData.coins + valor
-                });
-            }
-        };
+            const nuevoInv = [...gameData.inventario]; nuevoInv.splice(index, 1);
+            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + (PRECIOS_DESCARTES[j.rareza] || 30) });
+        }
 
         window.venderRepetidos = async () => {
-            let monedasGanadas = 0;
-            let unicos = [];
-            let nuevoInv = [];
+            let monedas = 0, unicos = [], nuevoInv = [];
             gameData.inventario.forEach(id => {
-                if (!unicos.includes(id)) {
-                    unicos.push(id);
-                    nuevoInv.push(id);
-                } else {
-                    const j = databaseJugadores.find(p => p.id === id);
-                    monedasGanadas += (PRECIOS_VENTA[j.rareza] || 30);
-                }
+                if(!unicos.includes(id)) { unicos.push(id); nuevoInv.push(id); }
+                else { const j = databaseJugadores.find(p => p.id === id); monedas += (PRECIOS_DESCARTES[j.rareza] || 30); }
             });
-            if (monedasGanadas > 0) {
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + monedasGanadas });
-                alert(`Repetidos vendidos por 🪙 ${monedasGanadas}`);
-            } else alert("No hay repetidos.");
-        };
+            if(monedas > 0) await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + monedas });
+        }
 
-        // --- LÓGICA DE VENTA (MODAL) ---
-        window.venderEnMercado = (idJugador) => {
-            jugadorSeleccionadoParaVenta = idJugador;
-            const j = databaseJugadores.find(p => p.id === idJugador);
-            document.getElementById('modal-card-preview').innerHTML = `
-                <div class="card ${j.rareza}" style="transform: scale(0.7); margin: -20px auto;">
-                    <div class="ovr">${j.grl}</div>
-                    <img src="${j.foto}">
-                    <div class="name">${j.name}</div>
-                </div>
-            `;
-            document.getElementById('input-precio-venta').value = "";
+        window.prepararVenta = (id, index) => {
+            jugadorParaVenta = { id, index };
+            const j = databaseJugadores.find(p => p.id === id);
+            document.getElementById('modal-card-preview').innerHTML = crearHTMLCarta(j);
             document.getElementById('venta-modal').style.display = "flex";
-        };
-
-        window.cerrarModalVenta = () => {
-            document.getElementById('venta-modal').style.display = "none";
-            jugadorSeleccionadoParaVenta = null;
-        };
+        }
 
         document.getElementById('confirmar-venta-btn').onclick = async () => {
             const precio = parseInt(document.getElementById('input-precio-venta').value);
-            if(!precio || precio <= 0) return alert("Introduce un precio válido.");
+            if(!precio || precio <= 0) return alert("Precio inválido.");
+            const nuevoInv = [...gameData.inventario]; nuevoInv.splice(jugadorParaVenta.index, 1);
+            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
+            await addDoc(collection(db, "mercado"), { jugadorId: jugadorParaVenta.id, precio, vendedorId: auth.currentUser.uid, vendedorNombre: gameData.username, fecha: Date.now() });
+            document.getElementById('venta-modal').style.display = "none";
+        }
 
-            const idJugador = jugadorSeleccionadoParaVenta;
-            const index = gameData.inventario.indexOf(idJugador);
-            const nuevoInv = [...gameData.inventario];
-            nuevoInv.splice(index, 1);
-
-            try {
-                cerrarModalVenta();
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
-                await addDoc(collection(db, "mercado"), {
-                    jugadorId: idJugador,
-                    precio: precio,
-                    vendedorId: auth.currentUser.uid,
-                    vendedorNombre: gameData.username,
-                    fecha: Date.now()
-                });
-            } catch (e) { alert("Error al publicar."); }
-        };
-
-        // --- MERCADO ---
-        function renderizarMercado(snapshot) {
+        function renderizarMercado(snap) {
             const grid = document.getElementById('mercado-grid');
-            if(!grid) return;
             grid.innerHTML = "";
-            snapshot.forEach(docSnap => {
-                const oferta = docSnap.data();
-                const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
-                if(!j) return;
-
-                const card = document.createElement('div');
-                card.className = `card ${j.rareza}`;
-                card.innerHTML = `
-                    <div class="ovr">${j.grl}</div>
-                    <img src="${j.foto}">
-                    <div class="name">${j.name}</div>
-                    <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
-                    <button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">
-                        COMPRAR 🪙${oferta.precio.toLocaleString()}
-                    </button>
-                `;
-                grid.appendChild(card);
+            snap.forEach(d => {
+                const oferta = d.data(), j = databaseJugadores.find(p => p.id === oferta.jugadorId);
+                if(j) {
+                    const div = document.createElement('div');
+                    div.innerHTML = crearHTMLCarta(j) + `<button class="btn-card-action" onclick="fichar('${d.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">FICHAR 🪙${oferta.precio}</button>`;
+                    grid.appendChild(div);
+                }
             });
         }
 
-        window.ficharJugador = async (ofertaId, precio, vendedorId, jugadorId) => {
-            if (gameData.coins < precio) return alert("Monedas insuficientes.");
-            if (vendedorId === auth.currentUser.uid) return alert("Tu propia carta.");
-
-            try {
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
-                    coins: gameData.coins - precio,
-                    inventario: [...gameData.inventario, jugadorId]
-                });
-                const vRef = doc(db, "jugadores", vendedorId);
-                const vSnap = await getDoc(vRef);
-                await updateDoc(vRef, { coins: vSnap.data().coins + precio });
-                await deleteDoc(doc(db, "mercado", ofertaId));
-            } catch (e) { alert("Error en el fichaje."); }
-        };
-
-        // --- NAVEGACIÓN ---
-        window.abrirSeccion = (id) => { 
-            document.getElementById(id).style.display = "block"; 
-            if(id === 'club-section') renderizarClub();
-        };
-        window.cerrarSeccion = (id) => { document.getElementById(id).style.display = "none"; };
-
-        window.enterGame = function() {
-            document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
-            document.getElementById('loader').style.opacity = "0";
-            setTimeout(() => {
-                document.getElementById('loader').style.visibility = "hidden";
-                document.getElementById('main-content').style.opacity = "1";
-                document.getElementById('main-content').style.pointerEvents = "auto";
-            }, 800);
+        window.fichar = async (oId, precio, vId, jId) => {
+            if(gameData.coins < precio || vId === auth.currentUser.uid) return alert("No posible.");
+            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { coins: gameData.coins - precio, inventario: [...gameData.inventario, jId] });
+            const vSnap = await getDoc(doc(db, "jugadores", vId));
+            await updateDoc(doc(db, "jugadores", vId), { coins: vSnap.data().coins + precio });
+            await deleteDoc(doc(db, "mercado", oId));
         }
+
+        window.abrirSeccion = (id) => { document.getElementById(id).style.display = "block"; if(id === 'club-section') renderizarClub(); }
+        window.cerrarSeccion = (id) => document.getElementById(id).style.display = "none";
+        window.cerrarModalVenta = () => document.getElementById('venta-modal').style.display = "none";
+        window.enterGame = () => { document.getElementById('loader').style.opacity = "0"; setTimeout(() => { document.getElementById('loader').style.visibility = "hidden"; document.getElementById('main-content').style.opacity = "1"; document.getElementById('main-content').style.pointerEvents = "auto"; }, 800); }
+        document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
     </script>
 </body>
 </html>
