@@ -24,42 +24,57 @@
         .loader-left { position: relative; flex: 1; z-index: 10; }
         .loader-logo { font-size: 8rem; font-weight: 900; font-style: italic; color: white; letter-spacing: -3px; line-height: 1; }
         .edition { color: var(--primary); font-size: 1.8rem; margin-bottom: 30px; letter-spacing: 8px; font-weight: bold; }
+        
         #auth-form { display: flex; flex-direction: column; gap: 12px; width: 350px; }
         #auth-form input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 170, 0.3); padding: 12px; color: white; border-radius: 4px; outline: none; }
         .auth-buttons { display: flex; gap: 10px; }
-        .btn-action { flex: 1; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; border: none; }
+        
+        .btn-action { flex: 1; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; border: none; transition: 0.3s; }
         #login-btn { background: var(--primary); color: black; }
         #register-btn { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-        .progress-container { width: 350px; height: 6px; background: rgba(255,255,255,0.1); margin-bottom: 30px; display: none; }
+        
+        .progress-container { width: 350px; height: 6px; background: rgba(255,255,255,0.1); margin-bottom: 30px; border-radius: 3px; overflow: hidden; display: none; }
         .progress-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.4s; }
-        #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; cursor: pointer; opacity: 0; pointer-events: none; transition: 0.5s; }
+        
+        #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; cursor: pointer; opacity: 0; pointer-events: none; transition: 0.5s; text-transform: uppercase; font-weight: bold; }
         #continue-btn.ready { opacity: 1; pointer-events: auto; }
 
-        /* --- NUEVO SISTEMA DE CARTAS POR CAPAS --- */
+        .player-render { flex: 1; height: 100%; position: relative; pointer-events: none; }
+
+        /* --- SISTEMA DE CARTAS POR CAPAS (ESTILO PROFESIONAL) --- */
         .card { 
             aspect-ratio: 2/3; position: relative; color: white; text-align: center; 
-            transition: transform 0.3s; cursor: pointer; width: 100%; max-width: 200px; margin: auto;
+            transition: transform 0.3s; cursor: pointer; border-radius: 10px; overflow: hidden;
+            width: 100%; max-width: 200px; margin: auto;
         }
         .card:hover { transform: translateY(-10px) scale(1.05); z-index: 10; }
-        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .card-player { position: absolute; bottom: 12%; right: -5%; width: 105%; height: auto; z-index: 2; filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.6)); }
-        .card .ovr { position: absolute; top: 14%; left: 14%; font-size: 2.2rem; font-weight: 900; z-index: 3; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .card .pos { position: absolute; top: 32%; left: 14%; font-size: 0.9rem; font-weight: bold; z-index: 3; }
-        .card .name { position: absolute; bottom: 12%; width: 100%; font-size: 1.1rem; font-weight: bold; text-transform: uppercase; z-index: 3; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .card-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: cover; }
+        .card-player { position: absolute; bottom: 15%; right: -5%; width: 105%; height: auto; z-index: 2; filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.6)); }
+        .card .ovr { position: absolute; top: 14%; left: 14%; font-size: 2.5rem; font-weight: 900; z-index: 3; line-height: 0.8; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .card .pos { position: absolute; top: 32%; left: 14%; font-size: 1rem; font-weight: bold; z-index: 3; }
+        .card .name { position: absolute; bottom: 12%; width: 100%; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; z-index: 3; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
 
-        /* --- INTERFAZ --- */
+        /* --- INTERFAZ PRINCIPAL --- */
         #main-content { opacity: 0; display: flex; flex-direction: column; height: 100vh; transition: opacity 1s ease; pointer-events: none; }
         header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: center; }
-        .stats { display: flex; gap: 20px; background: rgba(255, 255, 255, 0.05); padding: 10px 25px; border-radius: 50px; }
+        .user-box { display: flex; align-items: center; font-size: 1.2rem; }
+        .stats { display: flex; gap: 20px; background: rgba(255, 255, 255, 0.05); padding: 10px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); }
+        
         .main-menu { flex: 1; display: flex; padding: 0 40px 60px; gap: 15px; }
-        .menu-btn { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; transition: 0.4s; cursor: pointer; overflow: hidden; }
-        .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
+        .menu-btn { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; transition: 0.4s; cursor: pointer; position: relative; overflow: hidden; }
+        .menu-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
+        .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; position: relative; z-index: 2; }
 
+        /* --- SECCIONES (OVERLAYS) --- */
         .full-screen-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #10101a 0%, #050508 100%); z-index: 500; display: none; padding: 60px; overflow-y: auto; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
-        .btn-ui { padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; background: white; color: black; }
-        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; margin-top: 30px; }
+        
+        .btn-ui { padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; background: white; color: black; transition: 0.2s; }
+        .btn-ui:hover { transform: scale(1.05); background: var(--primary); }
+        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-card-action:hover { background: var(--primary); color: black; }
 
+        /* --- MODALES --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -69,58 +84,76 @@
         <div class="loader-left">
             <div class="loader-logo">MPS UT</div>
             <div class="edition">SEASON 2026</div>
+            
             <div id="auth-form">
-                <input type="text" id="auth-user" placeholder="USUARIO">
+                <input type="text" id="auth-user" placeholder="NOMBRE DE USUARIO">
                 <input type="password" id="auth-pass" placeholder="CONTRASEÑA">
                 <div class="auth-buttons">
-                    <button class="btn-action" id="login-btn">ENTRAR</button>
-                    <button class="btn-action" id="register-btn">REGISTRAR</button>
+                    <button class="btn-action" id="login-btn">INICIAR SESIÓN</button>
+                    <button class="btn-action" id="register-btn">REGISTRARSE</button>
                 </div>
             </div>
-            <div class="progress-container" id="p-container"><div id="progress" class="progress-bar"></div></div>
-            <button id="continue-btn" onclick="enterGame()">CLICK PARA EMPEZAR</button>
+
+            <div class="progress-container" id="p-container">
+                <div id="progress" class="progress-bar"></div>
+            </div>
+
+            <button id="continue-btn" onclick="enterGame()">ENTRAR AL JUEGO</button>
         </div>
-        <div class="player-render"><img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true" style="height: 110vh; position: absolute; left: 20%; bottom: -5%;"></div>
+        <div class="player-render">
+            <img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true" style="height: 110vh; position: absolute; left: 20%; bottom: -5%;">
+        </div>
     </div>
 
     <div id="main-content">
         <header>
-            <div class="user-box"><div id="user-display">CONECTANDO...</div><button id="logout-btn" style="margin-left:15px; background:none; color:red; border:none; cursor:pointer;">CERRAR SESIÓN</button></div>
-            <div class="stats"><span id="coins-display">🪙 --</span><span id="points-display">💎 --</span></div>
+            <div class="user-box">
+                <div id="user-display">CONECTANDO...</div>
+                <button id="logout-btn" style="margin-left:20px; background:none; color:#ff4444; border:none; cursor:pointer; font-weight:bold; font-size:0.9rem; text-transform:uppercase;">Cerrar Sesión</button>
+            </div>
+            <div class="stats">
+                <span id="coins-display">🪙 0</span>
+                <span id="points-display">💎 0</span>
+            </div>
         </header>
+
         <main class="main-menu">
-            <div class="menu-btn" onclick="abrirSeccion('club-section')"><h2>MI<br>CLUB</h2></div>
-            <div class="menu-btn" onclick="abrirSeccion('mercado-section')"><h2>MERCADO DE<br>FICHAJES</h2></div>
+            <div class="menu-btn" onclick="abrirSeccion('club-section')">
+                <h2>MI<br>CLUB</h2>
+            </div>
+            <div class="menu-btn" onclick="abrirSeccion('mercado-section')">
+                <h2>MERCADO DE<br>FICHAJES</h2>
+            </div>
         </main>
     </div>
 
     <div id="club-section" class="full-screen-overlay">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1 style="font-size:3rem; font-style:italic;">MI <span style="color:var(--primary)">CLUB</span></h1>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 style="font-size:3.5rem; font-style:italic; text-transform:uppercase;">MI <span style="color:var(--primary)">CLUB</span></h1>
             <div>
-                <button class="btn-ui" style="background:#ff3232; color:white; margin-right:10px;" onclick="venderRepetidos()">REPETIDOS</button>
-                <button class="btn-ui" onclick="cerrarSeccion('club-section')">VOLVER</button>
+                <button class="btn-ui" style="background:#ff4444; color:white; margin-right:15px;" onclick="venderRepetidos()">Vender Repetidos</button>
+                <button class="btn-ui" onclick="cerrarSeccion('club-section')">Volver</button>
             </div>
         </div>
         <div id="club-grid" class="grid-container"></div>
     </div>
 
     <div id="mercado-section" class="full-screen-overlay">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1 style="font-size:3rem; font-style:italic;">MERCADO DE <span style="color:var(--primary)">FICHAJES</span></h1>
-            <button class="btn-ui" onclick="cerrarSeccion('mercado-section')">VOLVER</button>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 style="font-size:3.5rem; font-style:italic; text-transform:uppercase;">MERCADO DE <span style="color:var(--primary)">FICHAJES</span></h1>
+            <button class="btn-ui" onclick="cerrarSeccion('mercado-section')">Volver</button>
         </div>
         <div id="mercado-grid" class="grid-container"></div>
     </div>
 
     <div id="venta-modal" class="modal-overlay">
-        <div style="background:#1a1a2e; padding:30px; border-radius:15px; border:2px solid var(--primary); text-align:center; width:320px;">
-            <h2 style="font-style:italic;">VENDER JUGADOR</h2>
-            <div id="modal-card-preview" style="margin:20px 0;"></div>
-            <input type="number" id="input-precio-venta" placeholder="PRECIO" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); color:white; border:1px solid var(--primary);">
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button class="btn-ui" id="confirmar-venta-btn" style="flex:1; background:var(--primary);">PUBLICAR</button>
-                <button class="btn-ui" onclick="cerrarModalVenta()" style="flex:1; background:#ff3232; color:white;">X</button>
+        <div style="background:#1a1a2e; padding:40px; border-radius:15px; border:2px solid var(--primary); text-align:center; width:350px;">
+            <h2 style="font-style:italic; text-transform:uppercase; margin-bottom:20px;">Poner en <span style="color:var(--primary)">Venta</span></h2>
+            <div id="modal-card-preview" style="margin-bottom:20px;"></div>
+            <input type="number" id="input-precio-venta" placeholder="PRECIO DE VENTA" style="width:100%; padding:12px; margin-bottom:20px; background:rgba(255,255,255,0.05); color:white; border:1px solid var(--primary); outline:none;">
+            <div style="display:flex; gap:10px;">
+                <button class="btn-ui" id="confirmar-venta-btn" style="flex:2; background:var(--primary);">Publicar</button>
+                <button class="btn-ui" onclick="cerrarModalVenta()" style="flex:1; background:#ff4444; color:white;">X</button>
             </div>
         </div>
     </div>
@@ -143,7 +176,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // --- MAPEO DE MARCOS POR RAREZA ---
+        // --- MAPEO DE MARCOS (URL de tus imágenes) ---
         const MARCOS = {
             oro: "https://i.ibb.co/688S88S/gold-card.png",
             plata: "https://i.ibb.co/mS6S4S6/silver-card.png",
@@ -155,18 +188,23 @@
         let databaseJugadores = [];
         let gameData = { coins: 0, points: 0, inventario: [], username: "" };
         let jugadorParaVenta = null;
-        const PRECIOS_DESCARTES = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
+
+        const PRECIOS_DESCARTE = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
+
+        // CONFIGURAR PERSISTENCIA
+        setPersistence(auth, browserLocalPersistence);
 
         onAuthStateChanged(auth, (user) => {
-            if (user) startGameLoad(user.uid);
-            else document.getElementById('auth-form').style.display = 'flex';
+            if (user) { startGameLoad(user.uid); }
+            else { document.getElementById('auth-form').style.display = 'flex'; }
         });
 
-        // --- LÓGICA DE REGISTRO (RESTAURADA) ---
+        // REGISTRO
         document.getElementById('register-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
-            if(!userNick || pass.length < 6) return alert("Mín. 6 caracteres.");
+            if (!userNick || pass.length < 6) return alert("Nombre de usuario y contraseña (min. 6 caracteres).");
+            
             const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
             try {
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
@@ -176,17 +214,54 @@
                     points: 0,
                     inventario: []
                 });
-            } catch (err) { alert("Error al registrar."); }
+            } catch (err) { alert("Error: El usuario ya existe o es inválido."); }
         };
 
+        // LOGIN
         document.getElementById('login-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
             const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
-            try { await signInWithEmailAndPassword(auth, fakeEmail, pass); } catch (err) { alert("Datos incorrectos."); }
+            try { await signInWithEmailAndPassword(auth, fakeEmail, pass); } catch (err) { alert("Credenciales incorrectas."); }
         };
 
-        // --- RENDERIZADO POR CAPAS ---
+        // LOGOUT
+        document.getElementById('logout-btn').onclick = () => {
+            signOut(auth).then(() => { location.reload(); });
+        };
+
+        // CARGA INICIAL
+        async function startGameLoad(uid) {
+            document.getElementById('auth-form').style.display = 'none';
+            document.getElementById('p-container').style.display = 'block';
+            
+            try {
+                const res = await fetch(SHEET_URL);
+                const csv = await res.text();
+                const filas = csv.split('\n').slice(1);
+                databaseJugadores = filas.map(f => {
+                    const d = f.split(',');
+                    return { id: d[0]?.trim(), name: d[1]?.trim(), grl: d[2]?.trim(), pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
+                });
+            } catch (e) { console.error("Error al cargar la base de datos."); }
+
+            onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    gameData = docSnap.data();
+                    document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString()}`;
+                    document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString()}`;
+                    document.getElementById('progress').style.width = "100%";
+                    document.getElementById('continue-btn').classList.add('ready');
+                    if(document.getElementById('club-section').style.display === 'block') renderizarClub();
+                }
+            });
+
+            onSnapshot(query(collection(db, "mercado"), orderBy("fecha", "desc")), (snap) => {
+                renderizarMercado(snap);
+            });
+        }
+
+        // FUNCIÓN MAESTRA DE RENDERIZADO DE CARTA (POR CAPAS)
         function crearHTMLCarta(j) {
             const marco = MARCOS[j.rareza] || MARCOS.oro;
             return `
@@ -200,106 +275,149 @@
             `;
         }
 
-        async function startGameLoad(uid) {
-            document.getElementById('auth-form').style.display = 'none';
-            document.getElementById('p-container').style.display = 'block';
-            try {
-                const res = await fetch(SHEET_URL);
-                const csv = await res.text();
-                const filas = csv.split('\n').slice(1);
-                databaseJugadores = filas.map(f => {
-                    const d = f.split(',');
-                    return { id: d[0]?.trim(), name: d[1]?.trim(), grl: d[2]?.trim(), pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
-                });
-            } catch (e) { console.error("Error Sheets"); }
-
-            onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
-                if (docSnap.exists()) {
-                    gameData = docSnap.data();
-                    document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString()}`;
-                    document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
-                    document.getElementById('progress').style.width = "100%";
-                    document.getElementById('continue-btn').classList.add('ready');
-                    if(document.getElementById('club-section').style.display === "block") renderizarClub();
-                }
-            });
-
-            onSnapshot(query(collection(db, "mercado"), orderBy("fecha", "desc")), (snap) => renderizarMercado(snap));
-        }
-
+        // --- FUNCIONES DEL CLUB ---
         window.renderizarClub = () => {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
-            gameData.inventario.forEach((id, index) => {
+            
+            // Ordenar por GRL
+            const invOrdenado = [...gameData.inventario].sort((a, b) => {
+                const jA = databaseJugadores.find(p => p.id === a);
+                const jB = databaseJugadores.find(p => p.id === b);
+                return (jB?.grl || 0) - (jA?.grl || 0);
+            });
+
+            invOrdenado.forEach((id, index) => {
                 const j = databaseJugadores.find(p => p.id === id);
-                if(j) {
+                if (j) {
                     const div = document.createElement('div');
                     div.innerHTML = crearHTMLCarta(j) + `
-                        <button class="btn-card-action" onclick="descartarJugador('${id}', ${index})">DESCARTAR (🪙${PRECIOS_DESCARTES[j.rareza]})</button>
-                        <button class="btn-card-action" style="background:white; color:black;" onclick="prepararVenta('${id}', ${index})">MERCADO</button>
+                        <button class="btn-card-action" onclick="descartarJugador('${id}', ${index})">Descarte (🪙${PRECIOS_DESCARTE[j.rareza]})</button>
+                        <button class="btn-card-action" style="background:white; color:black;" onclick="prepararVenta('${id}', ${index})">Vender Mercado</button>
+                    `;
+                    grid.appendChild(div);
+                }
+            });
+        };
+
+        window.descartarJugador = async (id, index) => {
+            const j = databaseJugadores.find(p => p.id === id);
+            const valor = PRECIOS_DESCARTE[j.rareza] || 30;
+            const nuevoInv = [...gameData.inventario];
+            const originalIndex = gameData.inventario.lastIndexOf(id); 
+            nuevoInv.splice(originalIndex, 1);
+            
+            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                inventario: nuevoInv,
+                coins: gameData.coins + valor
+            });
+        };
+
+        window.venderRepetidos = async () => {
+            let totalGanado = 0;
+            let unicos = [];
+            let nuevoInv = [];
+            
+            gameData.inventario.forEach(id => {
+                if (!unicos.includes(id)) { unicos.push(id); nuevoInv.push(id); }
+                else {
+                    const j = databaseJugadores.find(p => p.id === id);
+                    totalGanado += (PRECIOS_DESCARTE[j.rareza] || 30);
+                }
+            });
+
+            if (totalGanado > 0) {
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    inventario: nuevoInv,
+                    coins: gameData.coins + totalGanado
+                });
+                alert(`¡Se vendieron los repetidos por 🪙 ${totalGanado.toLocaleString()}!`);
+            } else { alert("No tienes jugadores repetidos."); }
+        };
+
+        // --- MERCADO ---
+        window.prepararVenta = (id, index) => {
+            jugadorParaVenta = { id, index };
+            const j = databaseJugadores.find(p => p.id === id);
+            document.getElementById('modal-card-preview').innerHTML = crearHTMLCarta(j);
+            document.getElementById('venta-modal').style.display = "flex";
+        };
+
+        window.cerrarModalVenta = () => { document.getElementById('venta-modal').style.display = "none"; };
+
+        document.getElementById('confirmar-venta-btn').onclick = async () => {
+            const precio = parseInt(document.getElementById('input-precio-venta').value);
+            if (!precio || precio <= 0) return alert("Ingresa un precio válido.");
+
+            const nuevoInv = [...gameData.inventario];
+            const idx = nuevoInv.indexOf(jugadorParaVenta.id);
+            nuevoInv.splice(idx, 1);
+
+            try {
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
+                await addDoc(collection(db, "mercado"), {
+                    jugadorId: jugadorParaVenta.id,
+                    precio: precio,
+                    vendedorId: auth.currentUser.uid,
+                    vendedorNombre: gameData.username,
+                    fecha: Date.now()
+                });
+                cerrarModalVenta();
+            } catch (e) { alert("Error al publicar."); }
+        };
+
+        function renderizarMercado(snap) {
+            const grid = document.getElementById('mercado-grid');
+            if(!grid) return;
+            grid.innerHTML = "";
+            snap.forEach(d => {
+                const oferta = d.data();
+                const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
+                if (j) {
+                    const div = document.createElement('div');
+                    div.innerHTML = crearHTMLCarta(j) + `
+                        <div style="font-size:0.8rem; text-align:center; margin-top:5px; color:var(--primary);">Vendedor: ${oferta.vendedorNombre}</div>
+                        <button class="btn-card-action" onclick="fichar('${d.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">Comprar 🪙 ${oferta.precio.toLocaleString()}</button>
                     `;
                     grid.appendChild(div);
                 }
             });
         }
 
-        window.descartarJugador = async (id, index) => {
-            const j = databaseJugadores.find(p => p.id === id);
-            const nuevoInv = [...gameData.inventario]; nuevoInv.splice(index, 1);
-            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + (PRECIOS_DESCARTES[j.rareza] || 30) });
-        }
-
-        window.venderRepetidos = async () => {
-            let monedas = 0, unicos = [], nuevoInv = [];
-            gameData.inventario.forEach(id => {
-                if(!unicos.includes(id)) { unicos.push(id); nuevoInv.push(id); }
-                else { const j = databaseJugadores.find(p => p.id === id); monedas += (PRECIOS_DESCARTES[j.rareza] || 30); }
-            });
-            if(monedas > 0) await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + monedas });
-        }
-
-        window.prepararVenta = (id, index) => {
-            jugadorParaVenta = { id, index };
-            const j = databaseJugadores.find(p => p.id === id);
-            document.getElementById('modal-card-preview').innerHTML = crearHTMLCarta(j);
-            document.getElementById('venta-modal').style.display = "flex";
-        }
-
-        document.getElementById('confirmar-venta-btn').onclick = async () => {
-            const precio = parseInt(document.getElementById('input-precio-venta').value);
-            if(!precio || precio <= 0) return alert("Precio inválido.");
-            const nuevoInv = [...gameData.inventario]; nuevoInv.splice(jugadorParaVenta.index, 1);
-            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
-            await addDoc(collection(db, "mercado"), { jugadorId: jugadorParaVenta.id, precio, vendedorId: auth.currentUser.uid, vendedorNombre: gameData.username, fecha: Date.now() });
-            document.getElementById('venta-modal').style.display = "none";
-        }
-
-        function renderizarMercado(snap) {
-            const grid = document.getElementById('mercado-grid');
-            grid.innerHTML = "";
-            snap.forEach(d => {
-                const oferta = d.data(), j = databaseJugadores.find(p => p.id === oferta.jugadorId);
-                if(j) {
-                    const div = document.createElement('div');
-                    div.innerHTML = crearHTMLCarta(j) + `<button class="btn-card-action" onclick="fichar('${d.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">FICHAR 🪙${oferta.precio}</button>`;
-                    grid.appendChild(div);
-                }
-            });
-        }
-
         window.fichar = async (oId, precio, vId, jId) => {
-            if(gameData.coins < precio || vId === auth.currentUser.uid) return alert("No posible.");
-            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { coins: gameData.coins - precio, inventario: [...gameData.inventario, jId] });
-            const vSnap = await getDoc(doc(db, "jugadores", vId));
-            await updateDoc(doc(db, "jugadores", vId), { coins: vSnap.data().coins + precio });
-            await deleteDoc(doc(db, "mercado", oId));
-        }
+            if (gameData.coins < precio) return alert("No tienes suficientes monedas.");
+            if (vId === auth.currentUser.uid) return alert("No puedes comprar tu propia carta.");
 
-        window.abrirSeccion = (id) => { document.getElementById(id).style.display = "block"; if(id === 'club-section') renderizarClub(); }
-        window.cerrarSeccion = (id) => document.getElementById(id).style.display = "none";
-        window.cerrarModalVenta = () => document.getElementById('venta-modal').style.display = "none";
-        window.enterGame = () => { document.getElementById('loader').style.opacity = "0"; setTimeout(() => { document.getElementById('loader').style.visibility = "hidden"; document.getElementById('main-content').style.opacity = "1"; document.getElementById('main-content').style.pointerEvents = "auto"; }, 800); }
-        document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
+            try {
+                // Comprador
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    coins: gameData.coins - precio,
+                    inventario: [...gameData.inventario, jId]
+                });
+                // Vendedor
+                const vRef = doc(db, "jugadores", vId);
+                const vSnap = await getDoc(vRef);
+                await updateDoc(vRef, { coins: vSnap.data().coins + precio });
+                // Eliminar del mercado
+                await deleteDoc(doc(db, "mercado", oId));
+            } catch (e) { alert("Error en la transacción."); }
+        };
+
+        // --- NAVEGACIÓN ---
+        window.abrirSeccion = (id) => {
+            document.getElementById(id).style.display = "block";
+            if (id === 'club-section') renderizarClub();
+        };
+        window.cerrarSeccion = (id) => { document.getElementById(id).style.display = "none"; };
+        window.enterGame = () => {
+            document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
+            document.getElementById('loader').style.opacity = "0";
+            setTimeout(() => {
+                document.getElementById('loader').style.visibility = "hidden";
+                document.getElementById('main-content').style.opacity = "1";
+                document.getElementById('main-content').style.pointerEvents = "auto";
+            }, 800);
+        };
     </script>
 </body>
 </html>
