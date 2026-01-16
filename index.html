@@ -65,6 +65,7 @@
         .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
+        /* --- SECCIONES FULL SCREEN --- */
         .full-screen-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #10101a 0%, #050508 100%);
@@ -75,49 +76,95 @@
         .italic-title { font-size: 3.5rem; font-style: italic; text-transform: uppercase; }
         .primary-text { color: var(--primary); }
 
+        /* MODIFICADO: Ajuste de Grid para soportar contenedores más altos (carta + botones) */
         .grid-container { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
-            gap: 50px 25px;
+            gap: 50px 25px; /* Más espacio vertical */
             align-items: start; 
         }
 
-        .card-wrapper { display: flex; flex-direction: column; gap: 8px; }
+        /* --- CONTENEDOR DE CARTA Y ACCIONES --- */
+        .card-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Espacio entre carta y botones */
+        }
 
         .card {
-            aspect-ratio: 2/3; border-radius: 0; padding: 0; position: relative;
-            color: #3e3e3e; text-align: center; transition: transform 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4); background-size: 100% 100%;
-            background-repeat: no-repeat; background-position: center; overflow: hidden; 
+            aspect-ratio: 2/3;
+            border-radius: 0; 
+            padding: 0; 
+            position: relative;
+            color: #3e3e3e; 
+            text-align: center;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            overflow: hidden; 
         }
 
         .card:hover { transform: translateY(-5px) scale(1.02); z-index: 2; }
-        .card.oro { background-image: var(--bg-oro); }
-        .card.plata { background-image: var(--bg-plata); }
-        .card.bronce { background-image: var(--bg-bronce); }
+
+        /* Backgrounds */
+        .card.oro { background-image: var(--bg-oro); color: #3e3e3e; }
+        .card.plata { background-image: var(--bg-plata); color: #3e3e3e; }
+        .card.bronce { background-image: var(--bg-bronce); color: #3e3e3e; }
         .card.especial { background: var(--especial); color: white; border-radius: 10px; }
         
+        /* Stats y Foto */
         .card img { width: 80%; position: absolute; top: 22%; left: 50%; transform: translateX(-50%); z-index: 0; }
         .card .ovr { position: absolute; top: 18%; left: 18%; font-size: 1.6rem; font-weight: 900; z-index: 1; }
         .card .pos { position: absolute; top: 32%; left: 18%; font-size: 0.9rem; font-weight: bold; z-index: 1; }
+        
+        /* MODIFICADO: Nombre bajado considerablemente */
         .card .name { 
-            position: absolute; bottom: 18%; width: 100%; font-weight: 900; 
-            text-transform: uppercase; text-align: center; font-size: 1rem; z-index: 1;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px;
+            position: absolute;
+            bottom: 18%; /* Antes 38%, ahora 18% para que quede debajo de la foto */
+            width: 100%; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            text-align: center;
+            font-size: 1rem;
+            z-index: 1;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            padding: 0 10px;
         }
 
-        .card-actions-container { display: flex; flex-direction: column; gap: 5px; width: 100%; }
+        /* --- BOTONES DEBAJO DE LA CARTA (NUEVO) --- */
+        .card-actions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+        }
+
         .btn-card-action { 
-            position: static; width: 100%; background: rgba(255,255,255,0.1); 
-            color: white; border: 1px solid rgba(255,255,255,0.2); padding: 8px; 
-            border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; 
-            transition: 0.2s; text-transform: uppercase; 
+            /* Quitamos posición absoluta y estilos antiguos */
+            position: static;
+            width: 100%;
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            padding: 8px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            text-transform: uppercase; 
         }
         .btn-card-action:hover { background: var(--primary); color: black; border-color: var(--primary); }
+        
         .seller-info { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
 
         .btn-ui { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
         .btn-back { background: white; color: black; }
+        .btn-back:hover { background: var(--primary); }
         .btn-duplicates { background: #ff3232; color: white; margin-right: 10px; }
 
         .modal-overlay {
@@ -137,7 +184,16 @@
             color: white; border-radius: 4px; font-size: 1.5rem; margin-top: 20px; outline: none; text-align: center;
         }
 
-        .sub-titulo { font-size: 1.8rem; font-style: italic; color: var(--primary); margin-bottom: 20px; text-transform: uppercase; border-left: 4px solid var(--primary); padding-left: 15px; }
+        #modal-card-preview { margin: 15px auto; width: 160px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+        .sub-titulo {
+            font-size: 1.8rem; font-style: italic; color: var(--primary); margin-bottom: 20px;
+            text-transform: uppercase; border-left: 4px solid var(--primary); padding-left: 15px;
+        }
+
         .card-venda { filter: saturate(0.5); }
         .badge-venta {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
@@ -145,29 +201,67 @@
             border: 2px solid white; z-index: 15; pointer-events: none; box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
         }
 
-        .store-header-stats { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; border: 1px solid var(--primary); }
-        .store-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; padding: 20px; }
-        .pack-card { background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; min-height: 400px; }
+        /* --- ESTILOS DE LA TIENDA --- */
+        /* --- ESTILOS DE LA TIENDA --- */
+        .store-header-stats {
+            display: flex; gap: 20px; justify-content: center;
+            margin-bottom: 30px; background: rgba(255,255,255,0.05);
+            padding: 15px; border-radius: 10px; border: 1px solid var(--primary);
+        }
+
+        .store-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px; padding: 20px;
+        }
+
+        .pack-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px;
+            padding: 30px; text-align: center; transition: 0.3s;
+            display: flex; flex-direction: column; justify-content: space-between; min-height: 400px;
+        }
+
         .pack-card:hover { transform: translateY(-10px); border-color: var(--primary); }
         .pack-title { font-size: 3rem; font-style: italic; font-weight: 900; text-transform: uppercase; }
         .pack-img { height: 150px; margin: 20px auto; animation: float 3s infinite ease-in-out; }
-        .btn-buy { padding: 12px; font-size: 1.1rem; font-weight: bold; text-transform: uppercase; cursor: pointer; width: 100%; border-radius: 4px; transition: 0.2s; border: none; }
+
+        .btn-buy {
+            padding: 12px; font-size: 1.1rem; font-weight: bold; text-transform: uppercase;
+            cursor: pointer; width: 100%; border-radius: 4px; transition: 0.2s; border: none;
+        }
         .btn-buy.coins { background: var(--primary); color: black; margin-bottom: 8px; }
         .btn-buy.points { background: #00d4ff; color: white; }
+        .btn-buy:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        #reveal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; background: #000; transition: background 1.5s ease; }
+        /* --- WALKOUT REVEAL --- */
+        #reveal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5000; display: none; flex-direction: column;
+            align-items: center; justify-content: center; background: #000;
+            transition: background 1.5s ease;
+        }
+
         .reveal-bg-bronce { background: radial-gradient(circle, #5e3700 0%, #000 100%) !important; }
         .reveal-bg-plata { background: radial-gradient(circle, #555 0%, #000 100%) !important; }
         .reveal-bg-oro { background: radial-gradient(circle, #8a6d00 0%, #000 100%) !important; }
         .reveal-bg-especial { background: radial-gradient(circle, #004d33 0%, #000 100%) !important; }
-        .reveal-step { font-size: 12rem; font-weight: 900; font-style: italic; color: white; opacity: 0; transform: scale(0.5); position: absolute; transition: 0.5s; }
+
+        .reveal-step {
+            font-size: 12rem; font-weight: 900; font-style: italic; color: white;
+            opacity: 0; transform: scale(0.5); position: absolute; transition: 0.5s;
+        }
         .reveal-active { opacity: 1; transform: scale(1); }
         .reveal-out { opacity: 0; transform: scale(1.5); filter: blur(10px); }
-        #final-card-container { opacity: 0; transform: scale(0.5); transition: 0.8s; display: flex; flex-direction: column; align-items: center; }
+
+        #final-card-container {
+            opacity: 0; transform: scale(0.5); transition: 0.8s;
+            display: flex; flex-direction: column; align-items: center;
+        }
         #final-card-container.show { opacity: 1; transform: scale(1); }
     </style>
 </head>
-<body>
+
+    <body>
     <div id="loader">
         <div class="loader-left">
             <div class="loader-logo">MPS UT</div>
@@ -180,16 +274,26 @@
                     <button class="btn-action" id="register-btn">REGISTRAR</button>
                 </div>
             </div>
-            <div class="progress-container" id="p-container"><div id="progress" class="progress-bar"></div></div>
+            <div class="progress-container" id="p-container">
+                <div id="progress" class="progress-bar"></div>
+            </div>
             <button id="continue-btn" onclick="enterGame()">CLICK PARA EMPEZAR</button>
         </div>
-        <div class="player-render"><img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true"></div>
+        <div class="player-render">
+            <img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true">
+        </div>
     </div>
 
     <div id="main-content">
         <header>
-            <div class="user-box"><div id="user-display">CONECTANDO...</div><button id="logout-btn">CERRAR SESIÓN</button></div>
-            <div class="stats"><span id="coins-display">🪙 --</span><span id="points-display">💎 --</span></div>
+            <div class="user-box">
+                <div id="user-display">CONECTANDO...</div>
+                <button id="logout-btn">CERRAR SESIÓN</button>
+            </div>
+            <div class="stats">
+                <span id="coins-display">🪙 --</span>
+                <span id="points-display">💎 --</span>
+            </div>
         </header>
         <main class="main-menu">
             <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
@@ -199,44 +303,31 @@
         </main>
     </div>
 
-    <div id="club-section" class="full-screen-overlay">
-        <div class="section-header">
-            <h1 class="italic-title">MI <span class="primary-text">CLUB</span></h1>
-            <div><button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button><button class="btn-ui btn-back" onclick="cerrarSeccion('club-section')">VOLVER</button></div>
+   <div id="club-section" class="full-screen-overlay">
+    <div class="section-header">
+        <h1 class="italic-title">MI <span class="primary-text">CLUB</span></h1>
+        <div>
+            <button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button>
+            <button class="btn-ui btn-back" onclick="cerrarSeccion('club-section')">VOLVER</button>
         </div>
-        <div id="seccion-mis-ventas" style="display: none; margin-bottom: 40px;">
-            <h2 class="sub-titulo">MIS SUBASTAS ACTIVAS</h2>
-            <div class="grid-container" id="club-ventas-grid"></div>
-        </div>
-        <h2 class="sub-titulo">MI PLANTILLA</h2>
-        <div class="grid-container" id="club-grid"></div>
     </div>
+
+    <div id="seccion-mis-ventas" style="display: none; margin-bottom: 40px;">
+        <h2 class="sub-titulo">MIS SUBASTAS ACTIVAS</h2>
+        <div class="grid-container" id="club-ventas-grid"></div>
+        <hr style="border: 0; border-top: 1px solid rgba(0, 255, 170, 0.2); margin-top: 30px;">
+    </div>
+
+    <h2 class="sub-titulo">MI PLANTILLA</h2>
+    <div class="grid-container" id="club-grid"></div>
+</div>
 
     <div id="mercado-section" class="full-screen-overlay">
-        <div class="section-header"><h1 class="italic-title">MERCADO DE <span class="primary-text">FICHAJES</span></h1><button class="btn-ui btn-back" onclick="cerrarSeccion('mercado-section')">VOLVER</button></div>
+        <div class="section-header">
+            <h1 class="italic-title">MERCADO DE <span class="primary-text">FICHAJES</span></h1>
+            <button class="btn-ui btn-back" onclick="cerrarSeccion('mercado-section')">VOLVER</button>
+        </div>
         <div class="grid-container" id="mercado-grid"></div>
-    </div>
-
-    <div id="tienda-section" class="full-screen-overlay">
-        <div class="section-header"><h1 class="italic-title">TIENDA DE <span class="primary-text">PACKS</span></h1><button class="btn-ui btn-back" onclick="cerrarSeccion('tienda-section')">VOLVER</button></div>
-        <div class="store-header-stats"><span id="store-coins">🪙 --</span><span id="store-points">💎 --</span></div>
-        <div class="store-grid">
-            <div class="pack-card" style="border-color: #cd7f32;"><div class="pack-title" style="color: #cd7f32;">BRONCE</div><img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_bronze.png?raw=true" class="pack-img"><button class="btn-buy coins" onclick="abrirSobre('bronce', 'coins')">GRATIS</button></div>
-            <div class="pack-card" style="border-color: #c0c0c0;"><div class="pack-title" style="color: #c0c0c0;">PLATA</div><img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_silver.png?raw=true" class="pack-img"><div><button class="btn-buy coins" onclick="abrirSobre('plata', 'coins')">1,000 🪙</button><button class="btn-buy points" onclick="abrirSobre('plata', 'points')">20 💎</button></div></div>
-            <div class="pack-card" style="border-color: #ffd700;"><div class="pack-title" style="color: #ffd700;">ORO</div><img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_gold.png?raw=true" class="pack-img"><div><button class="btn-buy coins" onclick="abrirSobre('oro', 'coins')">5,000 🪙</button><button class="btn-buy points" onclick="abrirSobre('oro', 'points')">100 💎</button></div></div>
-        </div>
-    </div>
-
-    <div id="reveal-overlay">
-        <div id="reveal-pos" class="reveal-step"></div>
-        <div id="reveal-ovr" class="reveal-step"></div>
-        <div id="final-card-container">
-            <div id="new-card-wrapper"></div>
-            <div style="display:flex; gap:15px; margin-top:30px;">
-                <button class="btn-action" id="btn-save-club" style="background:var(--primary); color:black;">ENVIAR AL CLUB</button>
-                <button class="btn-action" id="btn-quick-sell" style="background:#ff3232; color:white;">VENTA RÁPIDA</button>
-            </div>
-        </div>
     </div>
 
     <div id="venta-modal" class="modal-overlay">
@@ -251,6 +342,56 @@
         </div>
     </div>
 
+        <div id="tienda-section" class="full-screen-overlay">
+        <div class="section-header">
+            <h1 class="italic-title">TIENDA DE <span class="primary-text">PACKS</span></h1>
+            <button class="btn-ui btn-back" onclick="cerrarSeccion('tienda-section')">VOLVER</button>
+        </div>
+
+        <div class="store-header-stats">
+            <span id="store-coins" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">🪙 --</span>
+            <span id="store-points" style="font-size: 1.5rem; font-weight: bold; color: #00d4ff;">💎 --</span>
+        </div>
+
+        <div class="store-grid">
+            <div class="pack-card" style="border-color: #cd7f32;">
+                <div class="pack-title" style="color: #cd7f32;">BRONCE</div>
+                <img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_bronze.png?raw=true" class="pack-img">
+                <button class="btn-buy coins" onclick="abrirSobre('bronce', 'coins')">GRATIS</button>
+            </div>
+
+            <div class="pack-card" style="border-color: #c0c0c0;">
+                <div class="pack-title" style="color: #c0c0c0;">PLATA</div>
+                <img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_silver.png?raw=true" class="pack-img">
+                <div>
+                    <button class="btn-buy coins" onclick="abrirSobre('plata', 'coins')">1,000 🪙</button>
+                    <button class="btn-buy points" onclick="abrirSobre('plata', 'points')">20 💎</button>
+                </div>
+            </div>
+
+            <div class="pack-card" style="border-color: #ffd700;">
+                <div class="pack-title" style="color: #ffd700;">ORO</div>
+                <img src="https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_gold.png?raw=true" class="pack-img">
+                <div>
+                    <button class="btn-buy coins" onclick="abrirSobre('oro', 'coins')">5,000 🪙</button>
+                    <button class="btn-buy points" onclick="abrirSobre('oro', 'points')">100 💎</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="reveal-overlay">
+        <div id="reveal-pos" class="reveal-step"></div>
+        <div id="reveal-ovr" class="reveal-step"></div>
+        <div id="final-card-container">
+            <div id="new-card-wrapper"></div>
+            <div style="display:flex; gap:15px; margin-top:30px;">
+                <button class="btn-action" id="btn-save-club" style="background:var(--primary); color:black; padding:15px 30px;">ENVIAR AL CLUB</button>
+                <button class="btn-action" id="btn-quick-sell" style="background:#ff3232; color:white; padding:15px 30px;">VENTA RÁPIDA</button>
+            </div>
+        </div>
+    </div>
+        
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, addDoc, deleteDoc, query, orderBy, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -276,10 +417,15 @@
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
         onAuthStateChanged(auth, (user) => {
-            if (user) startGameLoad(user.uid);
-            else { document.getElementById('auth-form').style.display = 'flex'; document.getElementById('p-container').style.display = 'none'; }
+            if (user) {
+                startGameLoad(user.uid);
+            } else {
+                document.getElementById('auth-form').style.display = 'flex';
+                document.getElementById('p-container').style.display = 'none';
+            }
         });
 
+        // --- AUTH LÓGICA ---
         document.getElementById('register-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
@@ -288,7 +434,12 @@
             try {
                 await setPersistence(auth, browserLocalPersistence);
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
-                await setDoc(doc(db, "jugadores", cred.user.uid), { username: userNick.toUpperCase(), coins: 5000, points: 0, inventario: [] });
+                await setDoc(doc(db, "jugadores", cred.user.uid), {
+                    username: userNick.toUpperCase(),
+                    coins: 5000,
+                    points: 0,
+                    inventario: []
+                });
             } catch (err) { alert("Error al registrar."); }
         };
 
@@ -302,12 +453,17 @@
             } catch (err) { alert("Datos incorrectos."); }
         };
 
-        document.getElementById('logout-btn').onclick = async () => { await signOut(auth); location.reload(); };
+        document.getElementById('logout-btn').onclick = async () => {
+            await signOut(auth);
+            location.reload();
+        };
 
+        // --- CARGA Y TIEMPO REAL ---
         async function startGameLoad(uid) {
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('p-container').style.display = 'block';
             const bar = document.getElementById('progress');
+            
             try {
                 const res = await fetch(SHEET_URL);
                 if(res.ok){
@@ -319,19 +475,25 @@
                     });
                 }
             } catch (e) { console.warn("Error Sheets"); }
+
             bar.style.width = "50%";
+
             onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
                 if (docSnap.exists()) {
                     gameData = docSnap.data();
                     if(!gameData.inventario) gameData.inventario = [];
                     actualizarUI();
                     if(document.getElementById('club-section').style.display === "block") renderizarClub();
+                    
                     bar.style.width = "100%";
                     document.getElementById('continue-btn').classList.add('ready');
                 }
             });
+
             const qMercado = query(collection(db, "mercado"), orderBy("fecha", "desc"));
-            onSnapshot(qMercado, (snapshot) => { renderizarMercado(snapshot); });
+            onSnapshot(qMercado, (snapshot) => {
+                renderizarMercado(snapshot);
+            });
         }
 
         function actualizarUI() {
@@ -339,44 +501,89 @@
             document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString('es-ES')}`;
         }
 
+        // --- CLUB ---
         window.renderizarClub = async function() {
             const gridInventario = document.getElementById('club-grid');
             const gridVentas = document.getElementById('club-ventas-grid');
             const seccionVentas = document.getElementById('seccion-mis-ventas');
+            
             if (!gridInventario || !gridVentas) return;
-            gridInventario.innerHTML = ""; gridVentas.innerHTML = "";
+
+            gridInventario.innerHTML = "";
+            gridVentas.innerHTML = "";
+
+            // 1. OBTENER MIS VENTAS DESDE FIREBASE
             try {
                 const q = query(collection(db, "mercado"), where("vendedorId", "==", auth.currentUser.uid));
                 const querySnapshot = await getDocs(q);
+                
                 if (!querySnapshot.empty) {
                     seccionVentas.style.display = "block";
                     querySnapshot.forEach((docSnap) => {
                         const oferta = docSnap.data();
                         const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
                         if(j) {
+                            // MODIFICADO: Usamos wrapper para separar carta y botones
                             const wrapper = document.createElement('div');
                             wrapper.className = 'card-wrapper';
-                            wrapper.innerHTML = `<div class="card ${j.rareza} card-venda"><div class="badge-venta">EN VENTA</div><div class="ovr">${j.grl}</div><div class="pos">${j.pos}</div><img src="${j.foto}"><div class="name">${j.name}</div></div><div class="card-actions-container"><div style="font-weight:bold; color:var(--primary); text-align:center;">🪙 ${oferta.precio.toLocaleString()}</div><button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button></div>`;
+                            wrapper.innerHTML = `
+                                <div class="card ${j.rareza} card-venda">
+                                    <div class="badge-venta">EN VENTA</div>
+                                    <div class="ovr">${j.grl}</div>
+                                    <div class="pos">${j.pos}</div>
+                                    <img src="${j.foto}">
+                                    <div class="name">${j.name}</div>
+                                </div>
+                                <div class="card-actions-container">
+                                    <div style="font-weight:bold; color:var(--primary); text-align:center;">🪙 ${oferta.precio.toLocaleString()}</div>
+                                    <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
+                                </div>
+                            `;
                             gridVentas.appendChild(wrapper);
                         }
                     });
-                } else seccionVentas.style.display = "none";
-            } catch (e) { console.error(e); }
-            if (gameData.inventario) {
+                } else {
+                    seccionVentas.style.display = "none";
+                }
+            } catch (e) { 
+                console.error("Error cargando mis ventas", e); 
+            }
+
+            // 2. RENDERIZAR INVENTARIO NORMAL
+            if (gameData.inventario && gameData.inventario.length > 0) {
                 let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
                 misJugadores.sort((a, b) => b.grl - a.grl);
+                
                 misJugadores.forEach((j) => {
                     const wrapper = document.createElement('div');
-                    wrapper.className = 'card-wrapper';
+                    wrapper.className = 'card-wrapper'; // Usamos wrapper
                     const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
-                    wrapper.innerHTML = `<div class="card ${j.rareza}"><div class="ovr">${j.grl}</div><div class="pos">${j.pos}</div><img src="${j.foto}"><div class="name">${j.name}</div></div><div class="card-actions-container"><button class="btn-card-action" style="background:white; color:black;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button><button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button></div>`;
+                    
+                    wrapper.innerHTML = `
+                        <div class="card ${j.rareza}">
+                            <div class="ovr">${j.grl}</div>
+                            <div class="pos">${j.pos}</div>
+                            <img src="${j.foto}">
+                            <div class="name">${j.name}</div>
+                        </div>
+                        <div class="card-actions-container">
+                            <button class="btn-card-action" style="background:white; color:black;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
+                            <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
+                        </div>
+                    `;
                     gridInventario.appendChild(wrapper);
                 });
             }
         };
 
         window.cancelarVenta = async (docId, jugadorId) => {
-            try { await deleteDoc(doc(db, "mercado", docId)); await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: [...gameData.inventario, jugadorId] }); } catch (e) { alert("Error"); }
+            try {
+                await deleteDoc(doc(db, "mercado", docId));
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    inventario: [...gameData.inventario, jugadorId]
+                });
+                alert("Jugador retirado del mercado.");
+            } catch (e) { alert("Error al retirar."); }
         };
 
         window.descartarJugador = async (id) => {
@@ -384,56 +591,130 @@
             const valor = PRECIOS_VENTA[j.rareza] || 30;
             const index = gameData.inventario.indexOf(id);
             if(index > -1) {
-                const nuevoInv = [...gameData.inventario]; nuevoInv.splice(index, 1);
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + valor });
+                const nuevoInv = [...gameData.inventario];
+                nuevoInv.splice(index, 1);
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    inventario: nuevoInv,
+                    coins: gameData.coins + valor
+                });
             }
         };
 
         window.venderRepetidos = async () => {
-            let monedasGanadas = 0; let unicos = []; let nuevoInv = [];
-            gameData.inventario.forEach(id => { if (!unicos.includes(id)) { unicos.push(id); nuevoInv.push(id); } else { const j = databaseJugadores.find(p => p.id === id); monedasGanadas += (PRECIOS_VENTA[j.rareza] || 30); } });
-            if (monedasGanadas > 0) await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + monedasGanadas });
+            let monedasGanadas = 0;
+            let unicos = [];
+            let nuevoInv = [];
+            gameData.inventario.forEach(id => {
+                if (!unicos.includes(id)) {
+                    unicos.push(id);
+                    nuevoInv.push(id);
+                } else {
+                    const j = databaseJugadores.find(p => p.id === id);
+                    monedasGanadas += (PRECIOS_VENTA[j.rareza] || 30);
+                }
+            });
+            if (monedasGanadas > 0) {
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + monedasGanadas });
+                alert(`Repetidos vendidos por 🪙 ${monedasGanadas}`);
+            } else alert("No hay repetidos.");
         };
 
+        // --- LÓGICA DE VENTA (MODAL) ---
         window.venderEnMercado = (idJugador) => {
             jugadorSeleccionadoParaVenta = idJugador;
             const j = databaseJugadores.find(p => p.id === idJugador);
-            document.getElementById('modal-card-preview').innerHTML = `<div class="card ${j.rareza}" style="transform: scale(0.9); margin: 0 auto;"><div class="ovr">${j.grl}</div><div class="pos">${j.pos}</div><img src="${j.foto}"><div class="name">${j.name}</div></div>`;
+            // El preview del modal solo muestra la carta, sin botones
+            document.getElementById('modal-card-preview').innerHTML = `
+                <div class="card ${j.rareza}" style="transform: scale(0.9); margin: 0 auto;">
+                    <div class="ovr">${j.grl}</div>
+                    <div class="pos">${j.pos}</div>
+                    <img src="${j.foto}">
+                    <div class="name">${j.name}</div>
+                </div>
+            `;
+            document.getElementById('input-precio-venta').value = "";
             document.getElementById('venta-modal').style.display = "flex";
         };
 
-        window.cerrarModalVenta = () => { document.getElementById('venta-modal').style.display = "none"; };
+        window.cerrarModalVenta = () => {
+            document.getElementById('venta-modal').style.display = "none";
+            jugadorSeleccionadoParaVenta = null;
+        };
 
         document.getElementById('confirmar-venta-btn').onclick = async () => {
             const precio = parseInt(document.getElementById('input-precio-venta').value);
-            if(!precio || precio <= 0) return alert("Precio inválido.");
+            if(!precio || precio <= 0) return alert("Introduce un precio válido.");
+
             const idJugador = jugadorSeleccionadoParaVenta;
             const index = gameData.inventario.indexOf(idJugador);
-            const nuevoInv = [...gameData.inventario]; nuevoInv.splice(index, 1);
-            try { cerrarModalVenta(); await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv }); await addDoc(collection(db, "mercado"), { jugadorId: idJugador, precio: precio, vendedorId: auth.currentUser.uid, vendedorNombre: gameData.username, fecha: Date.now() }); } catch (e) { alert("Error"); }
+            const nuevoInv = [...gameData.inventario];
+            nuevoInv.splice(index, 1);
+
+            try {
+                cerrarModalVenta();
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
+                await addDoc(collection(db, "mercado"), {
+                    jugadorId: idJugador,
+                    precio: precio,
+                    vendedorId: auth.currentUser.uid,
+                    vendedorNombre: gameData.username,
+                    fecha: Date.now()
+                });
+            } catch (e) { alert("Error al publicar."); }
         };
 
+        // --- MERCADO ---
         function renderizarMercado(snapshot) {
             const grid = document.getElementById('mercado-grid');
-            if(!grid) return; grid.innerHTML = "";
+            if(!grid) return;
+            grid.innerHTML = "";
             snapshot.forEach(docSnap => {
-                const oferta = docSnap.data(); const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
+                const oferta = docSnap.data();
+                const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
                 if(!j) return;
-                const wrapper = document.createElement('div'); wrapper.className = 'card-wrapper';
-                wrapper.innerHTML = `<div class="card ${j.rareza}"><div class="ovr">${j.grl}</div><div class="pos">${j.pos}</div><img src="${j.foto}"><div class="name">${j.name}</div></div><div class="card-actions-container"><div class="seller-info">POR: ${oferta.vendedorNombre}</div><button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">COMPRAR 🪙${oferta.precio.toLocaleString()}</button></div>`;
+
+                // MODIFICADO: Usamos wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'card-wrapper';
+                wrapper.innerHTML = `
+                    <div class="card ${j.rareza}">
+                        <div class="ovr">${j.grl}</div>
+                        <div class="pos">${j.pos}</div>
+                        <img src="${j.foto}">
+                        <div class="name">${j.name}</div>
+                    </div>
+                    <div class="card-actions-container">
+                        <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
+                        <button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">
+                            COMPRAR 🪙${oferta.precio.toLocaleString()}
+                        </button>
+                    </div>
+                `;
                 grid.appendChild(wrapper);
             });
         }
 
         window.ficharJugador = async (ofertaId, precio, vendedorId, jugadorId) => {
-            if (gameData.coins < precio || vendedorId === auth.currentUser.uid) return;
-            try { await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { coins: gameData.coins - precio, inventario: [...gameData.inventario, jugadorId] }); const vRef = doc(db, "jugadores", vendedorId); const vSnap = await getDoc(vRef); await updateDoc(vRef, { coins: vSnap.data().coins + precio }); await deleteDoc(doc(db, "mercado", ofertaId)); } catch (e) { alert("Error"); }
+            if (gameData.coins < precio) return alert("Monedas insuficientes.");
+            if (vendedorId === auth.currentUser.uid) return alert("Tu propia carta.");
+
+            try {
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    coins: gameData.coins - precio,
+                    inventario: [...gameData.inventario, jugadorId]
+                });
+                const vRef = doc(db, "jugadores", vendedorId);
+                const vSnap = await getDoc(vRef);
+                await updateDoc(vRef, { coins: vSnap.data().coins + precio });
+                await deleteDoc(doc(db, "mercado", ofertaId));
+            } catch (e) { alert("Error en el fichaje."); }
         };
 
         // --- NAVEGACIÓN ---
         window.abrirSeccion = (id) => { 
             document.getElementById(id).style.display = "block"; 
             if(id === 'club-section') renderizarClub();
+            // Si abrimos la tienda, actualizamos los marcadores de monedas/joyas
             if(id === 'tienda-section') actualizarTiendaStats();
         };
 
@@ -449,7 +730,7 @@
             }, 800);
         }
 
-        // --- LÓGICA DE TIENDA CORREGIDA ---
+        // --- LÓGICA DE TIENDA Y PROBABILIDADES ---
         const PACK_DATA = {
             bronce: { coins: 0, points: 0, ranges: [[55,60,90], [60,65,9], [65,70,1], [70,75,0.2]] },
             plata: { coins: 1000, points: 20, ranges: [[65,70,90], [70,75,9], [75,80,1], [80,85,0.2]] },
@@ -466,30 +747,50 @@
         window.abrirSobre = async (tipo, moneda) => {
             const pack = PACK_DATA[tipo];
             const precio = pack[moneda];
-            if (moneda === 'coins' && gameData.coins < precio) return alert("No tienes monedas.");
-            if (moneda === 'points' && gameData.points < precio) return alert("No tienes MPS Points.");
 
+            // 1. Verificar si tiene saldo suficiente
+            if (moneda === 'coins' && gameData.coins < precio) return alert("No tienes suficientes monedas.");
+            if (moneda === 'points' && gameData.points < precio) return alert("No tienes suficientes MPS Points.");
+
+            // 2. Cobrar en Firebase y actualizar localmente
             try {
                 const updates = {};
-                if (moneda === 'coins') { updates.coins = gameData.coins - precio; gameData.coins -= precio; }
-                else { updates.points = gameData.points - precio; gameData.points -= precio; }
+                if (moneda === 'coins') {
+                    updates.coins = gameData.coins - precio;
+                    gameData.coins -= precio;
+                } else {
+                    updates.points = gameData.points - precio;
+                    gameData.points -= precio;
+                }
+                
                 await updateDoc(doc(db, "jugadores", auth.currentUser.uid), updates);
-                actualizarTiendaStats();
-                actualizarUI();
-            } catch (e) { return; }
+                actualizarTiendaStats(); // Refrescar visualmente los puntos en la tienda
+            } catch (e) { 
+                return alert("Error al procesar la compra."); 
+            }
 
+            // 3. Lógica de Probabilidades
             const rand = Math.random() * 100;
-            let acumulado = 0; let rangoSelected = pack.ranges[0];
-            for (let r of pack.ranges) { acumulado += r[2]; if (rand <= acumulado) { rangoSelected = r; break; } }
+            let acumulado = 0;
+            let rangoSelected = pack.ranges[0];
 
+            for (let r of pack.ranges) {
+                acumulado += r[2];
+                if (rand <= acumulado) {
+                    rangoSelected = r;
+                    break;
+                }
+            }
+
+            // 4. Selección del jugador
             let posibles = databaseJugadores.filter(p => p.grl >= rangoSelected[0] && p.grl < rangoSelected[1]);
             if(posibles.length === 0) posibles = databaseJugadores; 
             const ganado = posibles[Math.floor(Math.random() * posibles.length)];
 
+            // 5. Lanzar Animación
             ejecutarAnimacionWalkout(ganado);
         };
 
-        // FUNCIÓN CORREGIDA: Referencia a clases CSS directa para mostrar la carta
         function ejecutarAnimacionWalkout(j) {
             const overlay = document.getElementById('reveal-overlay');
             const posEl = document.getElementById('reveal-pos');
@@ -497,13 +798,15 @@
             const cardCont = document.getElementById('final-card-container');
             const cardWrapper = document.getElementById('new-card-wrapper');
 
+            // Resetear estados
             overlay.className = ''; 
             overlay.style.display = 'flex';
             posEl.className = 'reveal-step';
             ovrEl.className = 'reveal-step';
             cardCont.classList.remove('show');
-            cardWrapper.innerHTML = '';
+            cardWrapper.innerHTML = ''; // Limpiar carta anterior
 
+            // Paso 1: Color de fondo según rareza
             let bgClass = 'reveal-bg-bronce';
             if (j.grl >= 75) bgClass = 'reveal-bg-oro';
             if (j.grl >= 65 && j.grl < 75) bgClass = 'reveal-bg-plata';
@@ -514,6 +817,7 @@
             posEl.innerText = j.pos;
             ovrEl.innerText = j.grl;
 
+            // Secuencia de tiempos (Reveal)
             setTimeout(() => { posEl.classList.add('reveal-active'); }, 500);
 
             setTimeout(() => { 
@@ -524,9 +828,9 @@
             setTimeout(() => {
                 ovrEl.classList.replace('reveal-active', 'reveal-out');
                 
-                // CORRECCIÓN: Se usa la clase exacta j.rareza (oro, plata, bronce) para que cargue la textura del CSS
+                // Renderizado de la carta final con las variables de fondo correctas
                 cardWrapper.innerHTML = `
-                    <div class="card ${j.rareza}" style="transform: scale(1.4); margin-bottom: 40px;">
+                    <div class="card" style="background-image: var(--bg-${j.rareza}); transform: scale(1.4); margin-bottom: 40px;">
                         <div class="ovr">${j.grl}</div>
                         <div class="pos">${j.pos}</div>
                         <img src="${j.foto}" onerror="this.src='https://via.placeholder.com/150'">
@@ -536,6 +840,7 @@
                 cardCont.classList.add('show');
             }, 3200);
 
+            // Botones Finales
             document.getElementById('btn-save-club').onclick = async () => {
                 const nuevoInv = [...gameData.inventario, j.id];
                 await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
@@ -550,11 +855,13 @@
                 gameData.coins += valor;
                 overlay.style.display = 'none';
                 alert(`Vendido por 🪙 ${valor}`);
-                actualizarUI();
             };
         }
 
-        document.querySelector('.menu-btn:last-child').onclick = () => { abrirSeccion('tienda-section'); };
+        // Evento para el botón de la tienda en el menú principal
+        document.querySelector('.menu-btn:last-child').onclick = () => {
+            abrirSeccion('tienda-section');
+        };
     </script>
 </body>
 </html>
