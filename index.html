@@ -9,9 +9,11 @@
             --primary: #00ffaa;
             --bg: #050508;
             --smooth-curve: cubic-bezier(0.19, 1, 0.22, 1);
-            --oro: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
-            --plata: linear-gradient(135deg, #d1d1d1 0%, #959595 100%);
-            --bronce: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
+            
+            /* TEXTURAS DE CARTAS */
+            --bg-oro: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_gold.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=f0389e2700687b8be1ceb7f5294462ae');
+            --bg-plata: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_silver.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=b1079f24f16767420cb6396ed3f5fe9b');
+            --bg-bronce: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_bronze.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=4ad307433d3abe0e4eaf4e06573784e0');
             --especial: linear-gradient(135deg, #00ffaa 0%, #0066ff 100%);
         }
 
@@ -20,14 +22,10 @@
 
         /* --- PANTALLA DE CARGA Y ACCESO --- */
         #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 30% 50%, #1a1a2e 0%, #050508 100%);
-            display: flex;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s;
-            padding: 0 10%;
+            display: flex; align-items: center; z-index: 1000;
+            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s; padding: 0 10%;
         }
 
         .loader-left { position: relative; flex: 1; z-index: 10; }
@@ -67,7 +65,7 @@
         .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* --- SECCIONES FULL SCREEN (CLUB Y MERCADO) --- */
+        /* --- SECCIONES FULL SCREEN --- */
         .full-screen-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #10101a 0%, #050508 100%);
@@ -77,95 +75,135 @@
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(0, 255, 170, 0.2); padding-bottom: 20px; }
         .italic-title { font-size: 3.5rem; font-style: italic; text-transform: uppercase; }
         .primary-text { color: var(--primary); }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
 
-        /* CARTAS */
-        .card { aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .card:hover { transform: translateY(-10px); z-index: 2; }
-        .card.oro { background: var(--oro); }
-        .card.plata { background: var(--plata); }
-        .card.bronce { background: var(--bronce); }
-        .card.especial { background: var(--especial); color: white; }
+        /* MODIFICADO: Ajuste de Grid para soportar contenedores más altos (carta + botones) */
+        .grid-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); 
+            gap: 50px 25px; /* Más espacio vertical */
+            align-items: start; 
+        }
+
+        /* --- CONTENEDOR DE CARTA Y ACCIONES --- */
+        .card-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Espacio entre carta y botones */
+        }
+
+        .card {
+            aspect-ratio: 2/3;
+            border-radius: 0; 
+            padding: 0; 
+            position: relative;
+            color: #3e3e3e; 
+            text-align: center;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            overflow: hidden; 
+        }
+
+        .card:hover { transform: translateY(-5px) scale(1.02); z-index: 2; }
+
+        /* Backgrounds */
+        .card.oro { background-image: var(--bg-oro); color: #3e3e3e; }
+        .card.plata { background-image: var(--bg-plata); color: #3e3e3e; }
+        .card.bronce { background-image: var(--bg-bronce); color: #3e3e3e; }
+        .card.especial { background: var(--especial); color: white; border-radius: 10px; }
         
-        .card img { width: 100%; margin-top: 10px; }
-        .card .ovr { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; font-weight: bold; }
-        .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
-        .card .name { width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* Stats y Foto */
+        .card img { width: 80%; position: absolute; top: 22%; left: 50%; transform: translateX(-50%); z-index: 0; }
+        .card .ovr { position: absolute; top: 18%; left: 18%; font-size: 1.6rem; font-weight: 900; z-index: 1; }
+        .card .pos { position: absolute; top: 32%; left: 18%; font-size: 0.9rem; font-weight: bold; z-index: 1; }
         
-        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
-        .btn-card-action:hover { background: var(--primary); color: black; }
-        .seller-info { font-size: 0.65rem; margin-top: 4px; opacity: 0.8; text-transform: uppercase; color: inherit; }
+        /* MODIFICADO: Nombre bajado considerablemente */
+        .card .name { 
+            position: absolute;
+            bottom: 18%; /* Antes 38%, ahora 18% para que quede debajo de la foto */
+            width: 100%; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            text-align: center;
+            font-size: 1rem;
+            z-index: 1;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            padding: 0 10px;
+        }
+
+        /* --- BOTONES DEBAJO DE LA CARTA (NUEVO) --- */
+        .card-actions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .btn-card-action { 
+            /* Quitamos posición absoluta y estilos antiguos */
+            position: static;
+            width: 100%;
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            padding: 8px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            text-transform: uppercase; 
+        }
+        .btn-card-action:hover { background: var(--primary); color: black; border-color: var(--primary); }
+        
+        .seller-info { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
 
         .btn-ui { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
         .btn-back { background: white; color: black; }
         .btn-back:hover { background: var(--primary); }
         .btn-duplicates { background: #ff3232; color: white; margin-right: 10px; }
 
-        /* --- MODAL DE VENTA PERSONALIZADO --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 2000; display: none;
-            align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+            z-index: 2000; display: none; align-items: center; justify-content: center;
         }
 
         .modal-content {
-            background: #1a1a2e;
-            border: 2px solid var(--primary);
-            padding: 30px; border-radius: 15px;
-            text-align: center; width: 320px;
-            box-shadow: 0 0 50px rgba(0, 255, 170, 0.2);
-            animation: slideUp 0.3s var(--smooth-curve);
+            background: #1a1a2e; border: 2px solid var(--primary);
+            padding: 30px; border-radius: 15px; text-align: center; width: 320px;
+            box-shadow: 0 0 50px rgba(0, 255, 170, 0.2); animation: slideUp 0.3s var(--smooth-curve);
         }
 
         #input-precio-venta {
-            width: 100%; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--primary); padding: 12px;
-            color: white; border-radius: 4px; font-size: 1.5rem;
-            margin-top: 20px; outline: none; text-align: center;
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--primary); padding: 12px;
+            color: white; border-radius: 4px; font-size: 1.5rem; margin-top: 20px; outline: none; text-align: center;
         }
 
-        #modal-card-preview {
-            margin: 15px auto; width: 120px;
-        }
+        #modal-card-preview { margin: 15px auto; width: 160px; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     
-    .sub-titulo {
-        font-size: 1.8rem;
-        font-style: italic;
-        color: var(--primary);
-        margin-bottom: 20px;
-        text-transform: uppercase;
-        border-left: 4px solid var(--primary);
-        padding-left: 15px;
-    }
+        .sub-titulo {
+            font-size: 1.8rem; font-style: italic; color: var(--primary); margin-bottom: 20px;
+            text-transform: uppercase; border-left: 4px solid var(--primary); padding-left: 15px;
+        }
 
-    /* Estilo para cartas que están en venta */
-    .card-venda {
-        filter: saturate(0.5);
-    }
-    .badge-venta {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) rotate(-15deg);
-        background: #ff3232;
-        color: white;
-        padding: 5px 15px;
-        font-weight: bold;
-        font-size: 1.2rem;
-        border: 2px solid white;
-        z-index: 5;
-        pointer-events: none;
-        box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
-    }
+        .card-venda { filter: saturate(0.5); }
+        .badge-venta {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
+            background: #ff3232; color: white; padding: 5px 15px; font-weight: bold; font-size: 1.2rem;
+            border: 2px solid white; z-index: 15; pointer-events: none; box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
+        }
     </style>
 </head>
-<body>
 
+    <body>
     <div id="loader">
         <div class="loader-left">
             <div class="loader-logo">MPS UT</div>
@@ -377,17 +415,23 @@
                         const oferta = docSnap.data();
                         const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
                         if(j) {
-                            const card = document.createElement('div');
-                            card.className = `card ${j.rareza} card-venda`;
-                            card.innerHTML = `
-                                <div class="badge-venta">EN VENTA</div>
-                                <div class="ovr">${j.grl}</div>
-                                <img src="${j.foto}">
-                                <div class="name">${j.name}</div>
-                                <div style="font-weight:bold; color:black; margin-top:5px;">🪙 ${oferta.precio.toLocaleString()}</div>
-                                <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
+                            // MODIFICADO: Usamos wrapper para separar carta y botones
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'card-wrapper';
+                            wrapper.innerHTML = `
+                                <div class="card ${j.rareza} card-venda">
+                                    <div class="badge-venta">EN VENTA</div>
+                                    <div class="ovr">${j.grl}</div>
+                                    <div class="pos">${j.pos}</div>
+                                    <img src="${j.foto}">
+                                    <div class="name">${j.name}</div>
+                                </div>
+                                <div class="card-actions-container">
+                                    <div style="font-weight:bold; color:var(--primary); text-align:center;">🪙 ${oferta.precio.toLocaleString()}</div>
+                                    <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
+                                </div>
                             `;
-                            gridVentas.appendChild(card);
+                            gridVentas.appendChild(wrapper);
                         }
                     });
                 } else {
@@ -403,18 +447,23 @@
                 misJugadores.sort((a, b) => b.grl - a.grl);
                 
                 misJugadores.forEach((j) => {
-                    const card = document.createElement('div');
-                    card.className = `card ${j.rareza}`; 
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'card-wrapper'; // Usamos wrapper
                     const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
-                    card.innerHTML = `
-                        <div class="ovr">${j.grl}</div>
-                        <div class="pos">${j.pos}</div>
-                        <img src="${j.foto}">
-                        <div class="name">${j.name}</div>
-                        <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
-                        <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
+                    
+                    wrapper.innerHTML = `
+                        <div class="card ${j.rareza}">
+                            <div class="ovr">${j.grl}</div>
+                            <div class="pos">${j.pos}</div>
+                            <img src="${j.foto}">
+                            <div class="name">${j.name}</div>
+                        </div>
+                        <div class="card-actions-container">
+                            <button class="btn-card-action" style="background:white; color:black;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
+                            <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
+                        </div>
                     `;
-                    gridInventario.appendChild(card);
+                    gridInventario.appendChild(wrapper);
                 });
             }
         };
@@ -466,9 +515,11 @@
         window.venderEnMercado = (idJugador) => {
             jugadorSeleccionadoParaVenta = idJugador;
             const j = databaseJugadores.find(p => p.id === idJugador);
+            // El preview del modal solo muestra la carta, sin botones
             document.getElementById('modal-card-preview').innerHTML = `
-                <div class="card ${j.rareza}" style="transform: scale(0.7); margin: -20px auto;">
+                <div class="card ${j.rareza}" style="transform: scale(0.9); margin: 0 auto;">
                     <div class="ovr">${j.grl}</div>
+                    <div class="pos">${j.pos}</div>
                     <img src="${j.foto}">
                     <div class="name">${j.name}</div>
                 </div>
@@ -514,18 +565,24 @@
                 const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
                 if(!j) return;
 
-                const card = document.createElement('div');
-                card.className = `card ${j.rareza}`;
-                card.innerHTML = `
-                    <div class="ovr">${j.grl}</div>
-                    <img src="${j.foto}">
-                    <div class="name">${j.name}</div>
-                    <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
-                    <button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">
-                        COMPRAR 🪙${oferta.precio.toLocaleString()}
-                    </button>
+                // MODIFICADO: Usamos wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'card-wrapper';
+                wrapper.innerHTML = `
+                    <div class="card ${j.rareza}">
+                        <div class="ovr">${j.grl}</div>
+                        <div class="pos">${j.pos}</div>
+                        <img src="${j.foto}">
+                        <div class="name">${j.name}</div>
+                    </div>
+                    <div class="card-actions-container">
+                        <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
+                        <button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">
+                            COMPRAR 🪙${oferta.precio.toLocaleString()}
+                        </button>
+                    </div>
                 `;
-                grid.appendChild(card);
+                grid.appendChild(wrapper);
             });
         }
 
