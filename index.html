@@ -101,7 +101,37 @@
         .btn-back:hover { background: var(--primary); }
         .btn-duplicates { background: #ff3232; color: white; margin-right: 10px; }
 
+        /* --- MODAL DE VENTA PERSONALIZADO --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000; display: none;
+            align-items: center; justify-content: center;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border: 2px solid var(--primary);
+            padding: 30px; border-radius: 15px;
+            text-align: center; width: 320px;
+            box-shadow: 0 0 50px rgba(0, 255, 170, 0.2);
+            animation: slideUp 0.3s var(--smooth-curve);
+        }
+
+        #input-precio-venta {
+            width: 100%; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--primary); padding: 12px;
+            color: white; border-radius: 4px; font-size: 1.5rem;
+            margin-top: 20px; outline: none; text-align: center;
+        }
+
+        #modal-card-preview {
+            margin: 15px auto; width: 120px;
+        }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -166,6 +196,18 @@
         <div class="grid-container" id="mercado-grid"></div>
     </div>
 
+    <div id="venta-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="italic-title" style="font-size: 2rem;">PONER EN <span class="primary-text">VENTA</span></h2>
+            <div id="modal-card-preview"></div>
+            <input type="number" id="input-precio-venta" placeholder="PRECIO MONEDAS">
+            <div class="auth-buttons" style="margin-top: 20px;">
+                <button class="btn-action" id="confirmar-venta-btn" style="background: var(--primary); color: black;">PUBLICAR</button>
+                <button class="btn-action" onclick="cerrarModalVenta()" style="background: #ff3232; color: white;">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, addDoc, deleteDoc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -187,6 +229,7 @@
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj/pub?output=csv";
         let databaseJugadores = [];
         let gameData = { coins: 0, points: 0, inventario: [], username: "" };
+        let jugadorSeleccionadoParaVenta = null;
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
         onAuthStateChanged(auth, (user) => {
@@ -237,7 +280,6 @@
             document.getElementById('p-container').style.display = 'block';
             const bar = document.getElementById('progress');
             
-            // Cargar base de datos Sheets primero
             try {
                 const res = await fetch(SHEET_URL);
                 if(res.ok){
@@ -252,7 +294,6 @@
 
             bar.style.width = "50%";
 
-            // Listener Usuario
             onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
                 if (docSnap.exists()) {
                     gameData = docSnap.data();
@@ -265,7 +306,6 @@
                 }
             });
 
-            // Listener Mercado
             const qMercado = query(collection(db, "mercado"), orderBy("fecha", "desc"));
             onSnapshot(qMercado, (snapshot) => {
                 renderizarMercado(snapshot);
@@ -281,7 +321,6 @@
         window.renderizarClub = function() {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
-            
             let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
             misJugadores.sort((a, b) => b.grl - a.grl);
             
@@ -335,20 +374,41 @@
             } else alert("No hay repetidos.");
         };
 
-        // --- MERCADO ---
-        window.venderEnMercado = async (idJugador) => {
-            const precio = prompt("Precio de venta (Monedas):");
-            if(!precio || isNaN(precio) || precio <= 0) return;
+        // --- LÓGICA DE VENTA (MODAL) ---
+        window.venderEnMercado = (idJugador) => {
+            jugadorSeleccionadoParaVenta = idJugador;
+            const j = databaseJugadores.find(p => p.id === idJugador);
+            document.getElementById('modal-card-preview').innerHTML = `
+                <div class="card ${j.rareza}" style="transform: scale(0.7); margin: -20px auto;">
+                    <div class="ovr">${j.grl}</div>
+                    <img src="${j.foto}">
+                    <div class="name">${j.name}</div>
+                </div>
+            `;
+            document.getElementById('input-precio-venta').value = "";
+            document.getElementById('venta-modal').style.display = "flex";
+        };
 
+        window.cerrarModalVenta = () => {
+            document.getElementById('venta-modal').style.display = "none";
+            jugadorSeleccionadoParaVenta = null;
+        };
+
+        document.getElementById('confirmar-venta-btn').onclick = async () => {
+            const precio = parseInt(document.getElementById('input-precio-venta').value);
+            if(!precio || precio <= 0) return alert("Introduce un precio válido.");
+
+            const idJugador = jugadorSeleccionadoParaVenta;
             const index = gameData.inventario.indexOf(idJugador);
             const nuevoInv = [...gameData.inventario];
             nuevoInv.splice(index, 1);
 
             try {
+                cerrarModalVenta();
                 await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
                 await addDoc(collection(db, "mercado"), {
                     jugadorId: idJugador,
-                    precio: parseInt(precio),
+                    precio: precio,
                     vendedorId: auth.currentUser.uid,
                     vendedorNombre: gameData.username,
                     fecha: Date.now()
@@ -356,6 +416,7 @@
             } catch (e) { alert("Error al publicar."); }
         };
 
+        // --- MERCADO ---
         function renderizarMercado(snapshot) {
             const grid = document.getElementById('mercado-grid');
             if(!grid) return;
@@ -385,16 +446,13 @@
             if (vendedorId === auth.currentUser.uid) return alert("Tu propia carta.");
 
             try {
-                // Comprador
                 await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
                     coins: gameData.coins - precio,
                     inventario: [...gameData.inventario, jugadorId]
                 });
-                // Vendedor
                 const vRef = doc(db, "jugadores", vendedorId);
                 const vSnap = await getDoc(vRef);
                 await updateDoc(vRef, { coins: vSnap.data().coins + precio });
-                // Eliminar oferta
                 await deleteDoc(doc(db, "mercado", ofertaId));
             } catch (e) { alert("Error en el fichaje."); }
         };
