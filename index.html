@@ -9,7 +9,6 @@
             --primary: #00ffaa;
             --bg: #050508;
             --smooth-curve: cubic-bezier(0.19, 1, 0.22, 1);
-            /* Gradientes de Rareza */
             --oro: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
             --plata: linear-gradient(135deg, #d1d1d1 0%, #959595 100%);
             --bronce: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
@@ -68,14 +67,21 @@
         .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* --- CLUB --- */
-        #club-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 500; display: none; padding: 60px; overflow-y: auto; }
-        .club-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
-        
-        /* CARTAS DINÁMICAS */
+        /* --- SECCIONES FULL SCREEN (CLUB Y MERCADO) --- */
+        .full-screen-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #10101a 0%, #050508 100%);
+            z-index: 500; display: none; padding: 60px; overflow-y: auto;
+            animation: fadeIn 0.4s var(--smooth-curve);
+        }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(0, 255, 170, 0.2); padding-bottom: 20px; }
+        .italic-title { font-size: 3.5rem; font-style: italic; text-transform: uppercase; }
+        .primary-text { color: var(--primary); }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
+
+        /* CARTAS */
         .card { aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .card:hover { transform: scale(1.05); z-index: 2; }
+        .card:hover { transform: translateY(-10px); z-index: 2; }
         .card.oro { background: var(--oro); }
         .card.plata { background: var(--plata); }
         .card.bronce { background: var(--bronce); }
@@ -86,13 +92,16 @@
         .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
         .card .name { width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        /* Botón Descartar */
-        .btn-discard { margin-top: 8px; background: rgba(0,0,0,0.7); color: white; border: none; padding: 6px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; }
-        .btn-discard:hover { background: #ff3232; }
+        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
+        .btn-card-action:hover { background: var(--primary); color: black; }
+        .seller-info { font-size: 0.65rem; margin-top: 4px; opacity: 0.8; text-transform: uppercase; color: inherit; }
 
         .btn-ui { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
-        .btn-back { background: var(--primary); color: black; }
+        .btn-back { background: white; color: black; }
+        .btn-back:hover { background: var(--primary); }
         .btn-duplicates { background: #ff3232; color: white; margin-right: 10px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -132,25 +141,34 @@
         </header>
         <main class="main-menu">
             <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
-            <div class="menu-btn" onclick="abrirClub()"><h2>MI<br>CLUB</h2></div>
+            <div class="menu-btn" onclick="abrirSeccion('club-section')"><h2>MI<br>CLUB</h2></div>
+            <div class="menu-btn" onclick="abrirSeccion('mercado-section')"><h2>MERCADO DE<br>FICHAJES</h2></div>
             <div class="menu-btn"><h2>TIENDA</h2></div>
         </main>
     </div>
 
-    <div id="club-section">
-        <div class="club-header">
-            <h1 style="font-size: 3rem; font-style: italic;">MI CLUB <span id="club-coins" style="font-size: 1.5rem; color: var(--primary); margin-left: 20px;"></span></h1>
+    <div id="club-section" class="full-screen-overlay">
+        <div class="section-header">
+            <h1 class="italic-title">MI <span class="primary-text">CLUB</span></h1>
             <div>
                 <button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button>
-                <button class="btn-ui btn-back" onclick="cerrarClub()">VOLVER</button>
+                <button class="btn-ui btn-back" onclick="cerrarSeccion('club-section')">VOLVER</button>
             </div>
         </div>
-        <div class="club-grid" id="club-grid"></div>
+        <div class="grid-container" id="club-grid"></div>
+    </div>
+
+    <div id="mercado-section" class="full-screen-overlay">
+        <div class="section-header">
+            <h1 class="italic-title">MERCADO DE <span class="primary-text">FICHAJES</span></h1>
+            <button class="btn-ui btn-back" onclick="cerrarSeccion('mercado-section')">VOLVER</button>
+        </div>
+        <div class="grid-container" id="mercado-grid"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, addDoc, deleteDoc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -169,7 +187,6 @@
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj/pub?output=csv";
         let databaseJugadores = [];
         let gameData = { coins: 0, points: 0, inventario: [], username: "" };
-
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
         onAuthStateChanged(auth, (user) => {
@@ -181,6 +198,7 @@
             }
         });
 
+        // --- AUTH LÓGICA ---
         document.getElementById('register-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
@@ -209,21 +227,17 @@
         };
 
         document.getElementById('logout-btn').onclick = async () => {
-            await saveGameData();
             await signOut(auth);
             location.reload();
         };
 
-        function startGameLoad(uid) {
+        // --- CARGA Y TIEMPO REAL ---
+        async function startGameLoad(uid) {
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('p-container').style.display = 'block';
-            cargarDatosGlobales(uid);
-        }
-
-        async function cargarDatosGlobales(uid) {
             const bar = document.getElementById('progress');
-            bar.style.width = "20%";
-
+            
+            // Cargar base de datos Sheets primero
             try {
                 const res = await fetch(SHEET_URL);
                 if(res.ok){
@@ -231,130 +245,169 @@
                     const filas = csv.split('\n').slice(1);
                     databaseJugadores = filas.map(f => {
                         const d = f.split(',');
-                        return { 
-                            id: d[0]?.trim(), 
-                            name: d[1]?.trim(), 
-                            grl: parseInt(d[2]?.trim()) || 0, 
-                            pos: d[3]?.trim(), 
-                            rareza: d[4]?.trim().toLowerCase(), 
-                            foto: d[5]?.trim() 
-                        };
+                        return { id: d[0]?.trim(), name: d[1]?.trim(), grl: parseInt(d[2]?.trim()) || 0, pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
                     });
                 }
-            } catch (e) { console.warn("Error cargando Sheets"); }
-            
-            bar.style.width = "60%";
+            } catch (e) { console.warn("Error Sheets"); }
 
-            try {
-                const docSnap = await getDoc(doc(db, "jugadores", uid));
+            bar.style.width = "50%";
+
+            // Listener Usuario
+            onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
                 if (docSnap.exists()) {
                     gameData = docSnap.data();
                     if(!gameData.inventario) gameData.inventario = [];
+                    actualizarUI();
+                    if(document.getElementById('club-section').style.display === "block") renderizarClub();
+                    
                     bar.style.width = "100%";
                     document.getElementById('continue-btn').classList.add('ready');
-                } else {
-                    alert("Usuario no encontrado.");
-                    signOut(auth);
                 }
-            } catch (e) { console.error("Error Firebase:", e); }
-        }
+            });
 
-        async function saveGameData() {
-            if (auth.currentUser && gameData.username) {
-                try {
-                    await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
-                        coins: gameData.coins,
-                        points: gameData.points,
-                        inventario: gameData.inventario
-                    });
-                } catch (e) { console.error("Error al guardar."); }
-            }
+            // Listener Mercado
+            const qMercado = query(collection(db, "mercado"), orderBy("fecha", "desc"));
+            onSnapshot(qMercado, (snapshot) => {
+                renderizarMercado(snapshot);
+            });
         }
 
         function actualizarUI() {
-            const coinsStr = gameData.coins.toLocaleString('es-ES');
-            const pointsStr = gameData.points.toLocaleString('es-ES');
-            document.getElementById('coins-display').innerText = `🪙 ${coinsStr}`;
-            document.getElementById('points-display').innerText = `💎 ${pointsStr}`;
-            // Actualizar también el saldo dentro del club si está abierto
-            const clubCoinsLabel = document.getElementById('club-coins');
-            if(clubCoinsLabel) clubCoinsLabel.innerText = `🪙 ${coinsStr}`;
+            document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString('es-ES')}`;
+            document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString('es-ES')}`;
         }
 
-        window.abrirClub = function() {
+        // --- CLUB ---
+        window.renderizarClub = function() {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
-            actualizarUI(); // Sincroniza monedas
             
-            let misJugadores = gameData.inventario.map(id => {
-                return databaseJugadores.find(j => j.id === id);
-            }).filter(j => j);
-
+            let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
             misJugadores.sort((a, b) => b.grl - a.grl);
             
-            misJugadores.forEach((j, index) => {
+            misJugadores.forEach((j) => {
                 const card = document.createElement('div');
                 card.className = `card ${j.rareza}`; 
-                const valor = PRECIOS_VENTA[j.rareza] || 30;
+                const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
 
                 card.innerHTML = `
                     <div class="ovr">${j.grl}</div>
                     <div class="pos">${j.pos}</div>
                     <img src="${j.foto}">
                     <div class="name">${j.name}</div>
-                    <button class="btn-discard" onclick="descartarIndividual('${j.id}', ${index})">DESCARTAR (🪙${valor})</button>
+                    <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
+                    <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
                 `;
                 grid.appendChild(card);
             });
-            document.getElementById('club-section').style.display = "block";
         }
 
-        window.descartarIndividual = function(id, indexEnVista) {
-            const jugador = databaseJugadores.find(j => j.id === id);
-            const valor = PRECIOS_VENTA[jugador.rareza] || 30;
-
-            const realIndex = gameData.inventario.indexOf(id);
-            if(realIndex > -1) {
-                gameData.inventario.splice(realIndex, 1);
-                gameData.coins += valor;
-                actualizarUI();
-                abrirClub(); 
-                saveGameData();
+        window.descartarJugador = async (id) => {
+            const j = databaseJugadores.find(p => p.id === id);
+            const valor = PRECIOS_VENTA[j.rareza] || 30;
+            const index = gameData.inventario.indexOf(id);
+            if(index > -1) {
+                const nuevoInv = [...gameData.inventario];
+                nuevoInv.splice(index, 1);
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    inventario: nuevoInv,
+                    coins: gameData.coins + valor
+                });
             }
-        }
+        };
 
-        window.venderRepetidos = function() {
+        window.venderRepetidos = async () => {
             let monedasGanadas = 0;
             let unicos = [];
-            let nuevoInventario = [];
-
+            let nuevoInv = [];
             gameData.inventario.forEach(id => {
                 if (!unicos.includes(id)) {
                     unicos.push(id);
-                    nuevoInventario.push(id);
+                    nuevoInv.push(id);
                 } else {
                     const j = databaseJugadores.find(p => p.id === id);
                     monedasGanadas += (PRECIOS_VENTA[j.rareza] || 30);
                 }
             });
-
             if (monedasGanadas > 0) {
-                gameData.inventario = nuevoInventario;
-                gameData.coins += monedasGanadas;
-                alert(`¡Has vendido tus jugadores repetidos por 🪙 ${monedasGanadas.toLocaleString()}!`);
-                actualizarUI();
-                abrirClub();
-                saveGameData();
-            } else {
-                alert("No tienes jugadores repetidos en tu club.");
-            }
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + monedasGanadas });
+                alert(`Repetidos vendidos por 🪙 ${monedasGanadas}`);
+            } else alert("No hay repetidos.");
+        };
+
+        // --- MERCADO ---
+        window.venderEnMercado = async (idJugador) => {
+            const precio = prompt("Precio de venta (Monedas):");
+            if(!precio || isNaN(precio) || precio <= 0) return;
+
+            const index = gameData.inventario.indexOf(idJugador);
+            const nuevoInv = [...gameData.inventario];
+            nuevoInv.splice(index, 1);
+
+            try {
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv });
+                await addDoc(collection(db, "mercado"), {
+                    jugadorId: idJugador,
+                    precio: parseInt(precio),
+                    vendedorId: auth.currentUser.uid,
+                    vendedorNombre: gameData.username,
+                    fecha: Date.now()
+                });
+            } catch (e) { alert("Error al publicar."); }
+        };
+
+        function renderizarMercado(snapshot) {
+            const grid = document.getElementById('mercado-grid');
+            if(!grid) return;
+            grid.innerHTML = "";
+            snapshot.forEach(docSnap => {
+                const oferta = docSnap.data();
+                const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
+                if(!j) return;
+
+                const card = document.createElement('div');
+                card.className = `card ${j.rareza}`;
+                card.innerHTML = `
+                    <div class="ovr">${j.grl}</div>
+                    <img src="${j.foto}">
+                    <div class="name">${j.name}</div>
+                    <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
+                    <button class="btn-card-action" onclick="ficharJugador('${docSnap.id}', ${oferta.precio}, '${oferta.vendedorId}', '${j.id}')">
+                        COMPRAR 🪙${oferta.precio.toLocaleString()}
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        window.cerrarClub = function() { document.getElementById('club-section').style.display = "none"; }
+        window.ficharJugador = async (ofertaId, precio, vendedorId, jugadorId) => {
+            if (gameData.coins < precio) return alert("Monedas insuficientes.");
+            if (vendedorId === auth.currentUser.uid) return alert("Tu propia carta.");
+
+            try {
+                // Comprador
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    coins: gameData.coins - precio,
+                    inventario: [...gameData.inventario, jugadorId]
+                });
+                // Vendedor
+                const vRef = doc(db, "jugadores", vendedorId);
+                const vSnap = await getDoc(vRef);
+                await updateDoc(vRef, { coins: vSnap.data().coins + precio });
+                // Eliminar oferta
+                await deleteDoc(doc(db, "mercado", ofertaId));
+            } catch (e) { alert("Error en el fichaje."); }
+        };
+
+        // --- NAVEGACIÓN ---
+        window.abrirSeccion = (id) => { 
+            document.getElementById(id).style.display = "block"; 
+            if(id === 'club-section') renderizarClub();
+        };
+        window.cerrarSeccion = (id) => { document.getElementById(id).style.display = "none"; };
 
         window.enterGame = function() {
             document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
-            actualizarUI();
             document.getElementById('loader').style.opacity = "0";
             setTimeout(() => {
                 document.getElementById('loader').style.visibility = "hidden";
@@ -362,8 +415,6 @@
                 document.getElementById('main-content').style.pointerEvents = "auto";
             }, 800);
         }
-
-        document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveGameData(); });
     </script>
 </body>
 </html>
