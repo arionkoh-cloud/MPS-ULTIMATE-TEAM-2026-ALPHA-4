@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MPS Ultimate Team 2026</title>
+    <title>MPS Ultimate Team 2026 - Club Pro</title>
     <style>
         :root {
             --primary: #00ffaa;
             --bg: #050508;
             --smooth-curve: cubic-bezier(0.19, 1, 0.22, 1);
-            /* Gradientes de Rareza */
             --oro: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
             --plata: linear-gradient(135deg, #d1d1d1 0%, #959595 100%);
             --bronce: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
@@ -19,72 +18,66 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DIN Condensed', 'Arial Narrow', sans-serif; }
         body { background-color: var(--bg); color: white; overflow: hidden; height: 100vh; }
 
-        /* --- PANTALLA DE CARGA Y ACCESO --- */
+        /* --- PANTALLA DE CARGA --- */
         #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 30% 50%, #1a1a2e 0%, #050508 100%);
-            display: flex;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s;
-            padding: 0 10%;
+            display: flex; align-items: center; z-index: 1000;
+            transition: opacity 0.8s var(--smooth-curve), visibility 0.8s; padding: 0 10%;
         }
-
         .loader-left { position: relative; flex: 1; z-index: 10; }
-        .loader-logo { font-size: 8rem; font-weight: 900; font-style: italic; margin-bottom: -10px; color: white; letter-spacing: -3px; line-height: 1; }
+        .loader-logo { font-size: 8rem; font-weight: 900; font-style: italic; color: white; letter-spacing: -3px; line-height: 1; }
         .edition { color: var(--primary); font-size: 1.8rem; margin-bottom: 30px; letter-spacing: 8px; font-weight: bold; }
 
         #auth-form { display: flex; flex-direction: column; gap: 12px; width: 350px; margin-bottom: 20px; }
-        #auth-form input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 170, 0.3); padding: 12px; color: white; border-radius: 4px; outline: none; font-size: 1.1rem; transition: 0.3s; }
-        #auth-form input:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.1); }
+        #auth-form input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 170, 0.3); padding: 12px; color: white; border-radius: 4px; outline: none; font-size: 1.1rem; }
 
         .auth-buttons { display: flex; gap: 10px; }
-        .btn-action { flex: 1; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; transition: 0.3s; }
-        #login-btn { background: var(--primary); color: black; border: none; }
+        .btn-action { flex: 1; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; border: none; }
+        #login-btn { background: var(--primary); color: black; }
         #register-btn { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
         
-        .progress-container { width: 350px; height: 6px; background: rgba(255,255,255,0.1); margin-bottom: 30px; border-radius: 10px; overflow: hidden; display: none; }
-        .progress-bar { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 20px var(--primary); transition: width 0.4s ease; }
-
-        #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; text-transform: uppercase; font-style: italic; cursor: pointer; opacity: 0; transform: translateY(30px); transition: all 0.5s var(--smooth-curve); pointer-events: none; border-radius: 4px; }
-        #continue-btn.ready { opacity: 1; transform: translateY(0); pointer-events: auto; animation: blink 1.5s infinite; }
-
-        .player-render { position: absolute; left: 15%; bottom: -5%; height: 115vh; z-index: 1; pointer-events: none; }
-        .player-render img { height: 100%; width: auto; filter: drop-shadow(20px 0 50px rgba(0, 255, 170, 0.15)); animation: slideIn 1.8s var(--smooth-curve); }
-
-        @keyframes slideIn { from { transform: translateX(-150px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes blink { 0%, 100% { opacity: 1; box-shadow: 0 0 5px var(--primary); } 50% { opacity: 0.7; box-shadow: 0 0 25px var(--primary); } }
+        #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; text-transform: uppercase; cursor: pointer; opacity: 0; transform: translateY(30px); transition: 0.5s; pointer-events: none; }
+        #continue-btn.ready { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
         /* --- MENÚ PRINCIPAL --- */
-        #main-content { opacity: 0; display: flex; flex-direction: column; height: 100vh; transition: opacity 1s ease; pointer-events: none; }
+        #main-content { opacity: 0; display: flex; flex-direction: column; height: 100vh; transition: 1s ease; pointer-events: none; }
         header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: center; }
-        .user-box { display: flex; align-items: center; gap: 20px; }
-        #logout-btn { background: rgba(255, 50, 50, 0.2); border: 1px solid #ff3232; color: #ff3232; padding: 5px 15px; cursor: pointer; text-transform: uppercase; font-weight: bold; border-radius: 4px; }
-        .stats { display: flex; gap: 20px; background: rgba(255, 255, 255, 0.05); padding: 10px 25px; border-radius: 50px; }
+        .stats { display: flex; gap: 20px; background: rgba(255, 255, 255, 0.05); padding: 10px 25px; border-radius: 50px; font-size: 1.2rem; }
         
         .main-menu { flex: 1; display: flex; padding: 0 40px 60px; gap: 15px; }
-        .menu-btn { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; transition: flex 0.6s var(--smooth-curve), background 0.4s ease; cursor: pointer; position: relative; overflow: hidden; }
-        .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
-        .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
+        .menu-btn { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; transition: 0.6s var(--smooth-curve); cursor: pointer; }
+        .menu-btn:hover { flex: 2; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
+        .menu-btn h2 { font-size: 3rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* --- CLUB --- */
-        #club-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 500; display: none; padding: 60px; overflow-y: auto; }
-        .club-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+        /* --- CLUB ESTILIZADO --- */
+        #club-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 500; display: none; padding: 40px 60px; overflow-y: auto; }
+        .club-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        .club-actions { display: flex; gap: 15px; }
         
-        /* CARTAS DINÁMICAS */
-        .card { aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; }
+        .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 25px; }
+        
+        /* CARTAS */
+        .card { aspect-ratio: 2/3; border-radius: 12px; padding: 12px; position: relative; color: black; text-align: center; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .card:hover { transform: scale(1.05) translateY(-5px); }
         .card.oro { background: var(--oro); }
         .card.plata { background: var(--plata); }
         .card.bronce { background: var(--bronce); }
         .card.especial { background: var(--especial); color: white; }
         
-        .card img { width: 100%; margin-top: 10px; }
-        .card .ovr { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; font-weight: bold; }
-        .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
-        .card .name { bottom: 10px; width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; }
-        .btn-back { background: var(--primary); color: black; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .card img { width: 100%; margin-top: 15px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
+        .card .ovr { position: absolute; top: 12px; left: 12px; font-size: 1.8rem; font-weight: 900; line-height: 1; }
+        .card .pos { position: absolute; top: 35px; left: 12px; font-size: 1rem; font-weight: bold; opacity: 0.8; }
+        .card .name { margin-top: 8px; font-size: 1.2rem; font-weight: 900; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* BOTÓN DESCARTAR */
+        .btn-vender { margin-top: 10px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 5px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.3s; }
+        .btn-vender:hover { background: #ff3232; }
+
+        .btn-ui { padding: 10px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
+        .btn-back { background: var(--primary); color: black; }
+        .btn-duplicates { background: #ff3232; color: white; }
+
     </style>
 </head>
 <body>
@@ -101,21 +94,15 @@
                     <button class="btn-action" id="register-btn">REGISTRAR</button>
                 </div>
             </div>
-            <div class="progress-container" id="p-container">
-                <div id="progress" class="progress-bar"></div>
-            </div>
             <button id="continue-btn" onclick="enterGame()">CLICK PARA EMPEZAR</button>
-        </div>
-        <div class="player-render">
-            <img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true">
         </div>
     </div>
 
     <div id="main-content">
         <header>
             <div class="user-box">
-                <div id="user-display">CONECTANDO...</div>
-                <button id="logout-btn">CERRAR SESIÓN</button>
+                <div id="user-display" style="font-size: 1.5rem;">CONECTANDO...</div>
+                <button id="logout-btn" style="background:none; border:1px solid #ff3232; color:#ff3232; cursor:pointer; padding:2px 10px; border-radius:4px; font-size:0.8rem;">SALIR</button>
             </div>
             <div class="stats">
                 <span id="coins-display">🪙 --</span>
@@ -124,9 +111,7 @@
         </header>
         <main class="main-menu">
             <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
-            <div class="menu-btn"><h2>MI<br>PLANTILLA</h2></div>
             <div class="menu-btn" onclick="abrirClub()"><h2>MI<br>CLUB</h2></div>
-            <div class="menu-btn"><h2>MERCADO DE<br>FICHAJES</h2></div>
             <div class="menu-btn"><h2>TIENDA</h2></div>
         </main>
     </div>
@@ -134,7 +119,10 @@
     <div id="club-section">
         <div class="club-header">
             <h1 style="font-size: 3rem; font-style: italic;">MI CLUB</h1>
-            <button class="btn-back" onclick="cerrarClub()">VOLVER</button>
+            <div class="club-actions">
+                <button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button>
+                <button class="btn-ui btn-back" onclick="cerrarClub()">Volver</button>
+            </div>
         </div>
         <div class="club-grid" id="club-grid"></div>
     </div>
@@ -157,129 +145,120 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj/pub?output=csv";
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj/pub?output=csv";
         let databaseJugadores = [];
-        let gameData = {};
+        let gameData = { coins: 0, points: 0, inventario: [], username: "" };
 
-        onAuthStateChanged(auth, (user) => {
+        // --- PRECIOS DE DESCARTE ---
+        const PRECIOS = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
+
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                startGameLoad(user.uid);
+                document.getElementById('auth-form').style.display = 'none';
+                await cargarDatos(user.uid);
             } else {
                 document.getElementById('auth-form').style.display = 'flex';
-                document.getElementById('p-container').style.display = 'none';
             }
         });
 
-        document.getElementById('register-btn').onclick = async () => {
-            const userNick = document.getElementById('auth-user').value.trim();
-            const pass = document.getElementById('auth-pass').value;
-            if(!userNick || pass.length < 6) return alert("Mín. 6 caracteres.");
-            const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
-                await setDoc(doc(db, "jugadores", cred.user.uid), {
-                    username: userNick.toUpperCase(),
-                    coins: 5000,
-                    points: 0,
-                    inventario: [] // EMPIEZA SIN JUGADORES
-                });
-            } catch (err) { alert("Error al registrar."); }
-        };
-
-        document.getElementById('login-btn').onclick = async () => {
-            const userNick = document.getElementById('auth-user').value.trim();
-            const pass = document.getElementById('auth-pass').value;
-            const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                await signInWithEmailAndPassword(auth, fakeEmail, pass);
-            } catch (err) { alert("Datos incorrectos."); }
-        };
-
-        document.getElementById('logout-btn').onclick = async () => {
-            await saveGameData();
-            await signOut(auth);
-            location.reload();
-        };
-
-        function startGameLoad(uid) {
-            document.getElementById('auth-form').style.display = 'none';
-            document.getElementById('p-container').style.display = 'block';
-            cargarDatosGlobales(uid);
-        }
-
-        async function cargarDatosGlobales(uid) {
-            const bar = document.getElementById('progress');
-            bar.style.width = "20%";
-
+        async function cargarDatos(uid) {
+            // Cargar Excel
             try {
                 const res = await fetch(SHEET_URL);
-                if(res.ok){
-                    const csv = await res.text();
-                    const filas = csv.split('\n').slice(1);
-                    databaseJugadores = filas.map(f => {
-                        const d = f.split(',');
-                        // Columna E (índice 4) es la Rareza
-                        return { id: d[0]?.trim(), name: d[1]?.trim(), grl: d[2]?.trim(), pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
-                    });
-                }
-            } catch (e) { console.warn("Error cargando Sheets"); }
-            
-            bar.style.width = "60%";
+                const csv = await res.text();
+                databaseJugadores = csv.split('\n').slice(1).map(f => {
+                    const d = f.split(',');
+                    return { id: d[0]?.trim(), name: d[1]?.trim(), grl: parseInt(d[2]), pos: d[3]?.trim(), rareza: d[4]?.trim().toLowerCase(), foto: d[5]?.trim() };
+                });
+            } catch (e) { console.error("Error Sheets"); }
 
-            try {
-                const docSnap = await getDoc(doc(db, "jugadores", uid));
-                if (docSnap.exists()) {
-                    gameData = docSnap.data();
-                    if(!gameData.inventario) gameData.inventario = [];
-                    bar.style.width = "100%";
-                    document.getElementById('continue-btn').classList.add('ready');
-                } else {
-                    alert("Usuario no encontrado.");
-                    signOut(auth);
-                }
-            } catch (e) { console.error("Error Firebase:", e); }
-        }
-
-        async function saveGameData() {
-            if (auth.currentUser && gameData.username) {
-                try {
-                    await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
-                        coins: gameData.coins,
-                        points: gameData.points,
-                        inventario: gameData.inventario
-                    });
-                } catch (e) { console.error("Error al guardar."); }
+            // Cargar Firebase
+            const docSnap = await getDoc(doc(db, "jugadores", uid));
+            if (docSnap.exists()) {
+                gameData = docSnap.data();
+                document.getElementById('continue-btn').classList.add('ready');
             }
         }
+
+        // --- LÓGICA DEL CLUB ---
 
         window.abrirClub = function() {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
-            const misJugadores = databaseJugadores.filter(j => gameData.inventario.includes(j.id));
-            
-            misJugadores.forEach(j => {
+
+            // 1. Mapear IDs del inventario a objetos reales y filtrar nulos
+            let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
+
+            // 2. ORDENAR POR GRL (Mayor a Menor)
+            misJugadores.sort((a, b) => b.grl - a.grl);
+
+            // 3. Renderizar
+            misJugadores.forEach((j, index) => {
                 const card = document.createElement('div');
-                // Añade la clase 'card' y también la clase de la rareza (ej: 'oro')
-                card.className = `card ${j.rareza}`; 
+                card.className = `card ${j.rareza}`;
                 card.innerHTML = `
                     <div class="ovr">${j.grl}</div>
                     <div class="pos">${j.pos}</div>
                     <img src="${j.foto}">
                     <div class="name">${j.name}</div>
+                    <button class="btn-vender" onclick="descartarJugador('${j.id}', ${index})">DESCARTAR</button>
                 `;
                 grid.appendChild(card);
             });
             document.getElementById('club-section').style.display = "block";
         }
 
-        window.cerrarClub = function() { document.getElementById('club-section').style.display = "none"; }
+        window.descartarJugador = function(id, indexEnVista) {
+            const jugador = databaseJugadores.find(j => j.id === id);
+            const valor = PRECIOS[jugador.rareza] || 30;
+
+            // Eliminar de la lista por su posición real en el inventario ordenado
+            // Nota: Para ser precisos, buscamos el primer índice que coincida con el ID
+            const realIndex = gameData.inventario.indexOf(id);
+            if (realIndex > -1) {
+                gameData.inventario.splice(realIndex, 1);
+                gameData.coins += valor;
+                actualizarUI();
+                abrirClub(); // Refrescar vista
+                saveGameData();
+            }
+        }
+
+        window.venderRepetidos = function() {
+            let nuevosCoins = 0;
+            let unicos = [];
+            let nuevoInventario = [];
+
+            gameData.inventario.forEach(id => {
+                if (!unicos.includes(id)) {
+                    unicos.push(id);
+                    nuevoInventario.push(id);
+                } else {
+                    const j = databaseJugadores.find(player => player.id === id);
+                    nuevosCoins += (PRECIOS[j.rareza] || 30);
+                }
+            });
+
+            if (nuevosCoins > 0) {
+                gameData.inventario = nuevoInventario;
+                gameData.coins += nuevosCoins;
+                alert(`¡Repetidos vendidos por 🪙 ${nuevosCoins.toLocaleString()}!`);
+                actualizarUI();
+                abrirClub();
+                saveGameData();
+            } else {
+                alert("No tienes jugadores repetidos.");
+            }
+        }
+
+        function actualizarUI() {
+            document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString('es-ES')}`;
+            document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString('es-ES')}`;
+        }
 
         window.enterGame = function() {
             document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
-            document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString('es-ES')}`;
-            document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString('es-ES')}`;
+            actualizarUI();
             document.getElementById('loader').style.opacity = "0";
             setTimeout(() => {
                 document.getElementById('loader').style.visibility = "hidden";
@@ -288,8 +267,39 @@
             }, 800);
         }
 
-        document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveGameData(); });
+        async function saveGameData() {
+            if (auth.currentUser) {
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    coins: gameData.coins,
+                    inventario: gameData.inventario
+                });
+            }
+        }
+
+        // Registro e Inicio de Sesión (simplificados para brevedad)
+        document.getElementById('register-btn').onclick = async () => {
+            const nick = document.getElementById('auth-user').value.trim();
+            const pass = document.getElementById('auth-pass').value;
+            const email = `${nick.toLowerCase()}@mps.com`;
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "jugadores", cred.user.uid), {
+                    username: nick.toUpperCase(), coins: 5000, points: 0, inventario: []
+                });
+                location.reload();
+            } catch (e) { alert("Error"); }
+        };
+
+        document.getElementById('login-btn').onclick = async () => {
+            const nick = document.getElementById('auth-user').value.trim();
+            const pass = document.getElementById('auth-pass').value;
+            try {
+                await signInWithEmailAndPassword(auth, `${nick.toLowerCase()}@mps.com`, pass);
+            } catch (e) { alert("Error"); }
+        };
+
+        window.cerrarClub = () => document.getElementById('club-section').style.display = "none";
+        document.getElementById('logout-btn').onclick = () => signOut(auth).then(() => location.reload());
     </script>
 </body>
 </html>
-
