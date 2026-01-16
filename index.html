@@ -35,7 +35,7 @@
         #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; cursor: pointer; opacity: 0; pointer-events: none; transition: 0.5s; }
         #continue-btn.ready { opacity: 1; pointer-events: auto; }
 
-        /* --- CARTAS (CAPAS PROFESIONALES) --- */
+        /* --- CARTAS (CAPAS) --- */
         .card { 
             aspect-ratio: 2/3; position: relative; color: white; text-align: center; 
             transition: transform 0.3s; cursor: pointer; border-radius: 10px; overflow: hidden;
@@ -48,7 +48,7 @@
         .card .pos { position: absolute; top: 32%; left: 14%; font-size: 1rem; font-weight: bold; z-index: 3; }
         .card .name { position: absolute; bottom: 12%; width: 100%; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; z-index: 3; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
 
-        /* --- MENÚ PRINCIPAL --- */
+        /* --- SECCIONES --- */
         #main-content { opacity: 0; display: flex; flex-direction: column; height: 100vh; transition: opacity 1s ease; pointer-events: none; }
         header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: center; }
         .stats { display: flex; gap: 20px; background: rgba(255, 255, 255, 0.05); padding: 10px 25px; border-radius: 50px; }
@@ -57,13 +57,11 @@
         .menu-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* SECCIONES */
         .full-screen-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #10101a 0%, #050508 100%); z-index: 500; display: none; padding: 60px; overflow-y: auto; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; margin-top: 20px; }
         .btn-ui { padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; background: white; color: black; }
         .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
 
-        /* TIENDA Y MODALES */
         .pack-container { background: rgba(255,255,255,0.05); border: 2px solid var(--primary); padding: 40px; border-radius: 20px; text-align: center; transition: 0.3s; cursor: pointer; }
         .pack-container:hover { transform: scale(1.05); box-shadow: 0 0 30px var(--primary); }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; flex-direction: column; }
@@ -107,7 +105,7 @@
 
     <div id="tienda-section" class="full-screen-overlay">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h1 style="font-style:italic; font-size:3rem;">TIENDA DE <span style="color:var(--primary)">SOBRES</span></h1>
+            <h1 style="font-size:3rem; font-style:italic;">TIENDA DE <span style="color:var(--primary)">SOBRES</span></h1>
             <button class="btn-ui" onclick="cerrarSeccion('tienda-section')">VOLVER</button>
         </div>
         <div class="grid-container">
@@ -124,7 +122,7 @@
 
     <div id="club-section" class="full-screen-overlay">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1 style="font-style:italic; font-size:3rem;">MI <span style="color:var(--primary)">CLUB</span></h1>
+            <h1 style="font-size:3rem; font-style:italic;">MI <span style="color:var(--primary)">CLUB</span></h1>
             <div>
                 <button class="btn-ui" style="background:#ff3232; color:white; margin-right:10px;" onclick="venderRepetidos()">VENDER REPETIDOS</button>
                 <button class="btn-ui" onclick="cerrarSeccion('club-section')">VOLVER</button>
@@ -135,7 +133,7 @@
 
     <div id="mercado-section" class="full-screen-overlay">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h1 style="font-style:italic; font-size:3rem;">MERCADO DE <span style="color:var(--primary)">FICHAJES</span></h1>
+            <h1 style="font-size:3rem; font-style:italic;">MERCADO DE <span style="color:var(--primary)">FICHAJES</span></h1>
             <button class="btn-ui" onclick="cerrarSeccion('mercado-section')">VOLVER</button>
         </div>
         <div id="mercado-grid" class="grid-container"></div>
@@ -176,7 +174,7 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // CONFIGURACIÓN DE MARCOS
+        // MARCOS (RECURSOS)
         const MARCOS = {
             oro: "https://i.ibb.co/688S88S/gold-card.png",
             plata: "https://i.ibb.co/mS6S4S6/silver-card.png",
@@ -228,6 +226,7 @@
             document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
         }
 
+        // FUNCIÓN MAESTRA DE RENDERIZADO (Reemplaza cientos de líneas de HTML repetido)
         function crearHTMLCarta(j) {
             const marco = MARCOS[j.rareza] || MARCOS.oro;
             return `
@@ -247,6 +246,7 @@
         }
         window.cerrarSeccion = (id) => document.getElementById(id).style.display = "none";
 
+        // CLUB: Muestra cartas, botón Descarte y botón Venta Mercado
         window.renderizarClub = () => {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
@@ -281,6 +281,7 @@
             else alert("No hay repetidos.");
         }
 
+        // MERCADO: Preparar y publicar venta
         window.prepararVenta = (id, index) => {
             jugadorParaVenta = { id, index };
             const j = databaseJugadores.find(p => p.id === id);
@@ -325,6 +326,7 @@
             await deleteDoc(doc(db, "mercado", oId));
         }
 
+        // TIENDA: Apertura de sobres
         window.comprarPack = async (tipo, precio) => {
             if(gameData.coins < precio) return alert("Sin monedas.");
             let pool = databaseJugadores.filter(p => tipo === 'especial' ? p.rareza === 'especial' : p.rareza !== 'especial');
