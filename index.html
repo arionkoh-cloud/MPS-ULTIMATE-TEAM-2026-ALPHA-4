@@ -9,9 +9,12 @@
             --primary: #00ffaa;
             --bg: #050508;
             --smooth-curve: cubic-bezier(0.19, 1, 0.22, 1);
-            --oro: linear-gradient(135deg, #f5d061 0%, #e3a62f 100%);
-            --plata: linear-gradient(135deg, #d1d1d1 0%, #959595 100%);
-            --bronce: linear-gradient(135deg, #cd7f32 0%, #8b4513 100%);
+            
+            /* NUEVAS TEXTURAS DE CARTAS (URLs Proporcionadas) */
+            --bg-oro: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_gold.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=f0389e2700687b8be1ceb7f5294462ae');
+            --bg-plata: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_silver.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=b1079f24f16767420cb6396ed3f5fe9b');
+            --bg-bronce: url('https://cdn3.futbin.com/content/fifa26/img/cards/hd/1_bronze.png?fm=png&ixlib=java-2.1.0&verzion=5&w=644&s=4ad307433d3abe0e4eaf4e06573784e0');
+            /* Mantenemos el especial como gradiente por ahora o fallback */
             --especial: linear-gradient(135deg, #00ffaa 0%, #0066ff 100%);
         }
 
@@ -77,24 +80,106 @@
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid rgba(0, 255, 170, 0.2); padding-bottom: 20px; }
         .italic-title { font-size: 3.5rem; font-style: italic; text-transform: uppercase; }
         .primary-text { color: var(--primary); }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 25px; }
 
-        /* CARTAS */
-        .card { aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .card:hover { transform: translateY(-10px); z-index: 2; }
-        .card.oro { background: var(--oro); }
-        .card.plata { background: var(--plata); }
-        .card.bronce { background: var(--bronce); }
-        .card.especial { background: var(--especial); color: white; }
+        /* --- NUEVO DISEÑO DE CARTAS POR CAPAS --- */
+        .card {
+            aspect-ratio: 2/3;
+            border-radius: 0; /* Las imágenes ya tienen forma */
+            padding: 0; /* Quitamos padding interno para que la imagen ocupe todo */
+            position: relative;
+            color: #3e3e3e; /* Color oscuro para el texto sobre oro/plata/bronce */
+            text-align: center;
+            transition: transform 0.3s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            overflow: hidden; /* Mantiene todo dentro de la carta */
+        }
+
+        .card:hover { transform: translateY(-10px) scale(1.05); z-index: 2; }
+
+        /* Asignación de Imágenes de Fondo según rareza */
+        .card.oro { background-image: var(--bg-oro); color: #3e3e3e; }
+        .card.plata { background-image: var(--bg-plata); color: #3e3e3e; }
+        .card.bronce { background-image: var(--bg-bronce); color: #3e3e3e; }
+        .card.especial { background: var(--especial); color: white; border-radius: 10px; } /* Fallback para especial */
         
-        .card img { width: 100%; margin-top: 10px; }
-        .card .ovr { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; font-weight: bold; }
-        .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
-        .card .name { width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* Ajuste de la foto del jugador para encajar en el template */
+        .card img {
+            width: 80%;
+            position: absolute;
+            top: 22%; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0; /* Detrás del texto pero sobre el fondo */
+        }
+
+        /* Posicionamiento de Stats (OVR, POS) para encajar en el diseño de FUT */
+        .card .ovr { 
+            position: absolute; 
+            top: 18%; 
+            left: 18%; 
+            font-size: 1.6rem; 
+            font-weight: 900; 
+            z-index: 1;
+        }
+        .card .pos { 
+            position: absolute; 
+            top: 32%; 
+            left: 18%; 
+            font-size: 0.9rem; 
+            font-weight: bold;
+            z-index: 1;
+        }
         
-        .btn-card-action { margin-top: 8px; background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; text-transform: uppercase; }
+        /* Nombre del jugador */
+        .card .name { 
+            position: absolute;
+            bottom: 38%; /* Ajustado para estar encima de la zona de stats hipotética */
+            width: 100%; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            text-align: center;
+            font-size: 1rem;
+            z-index: 1;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            padding: 0 10px;
+        }
+        
+        /* Botones de acción dentro de la carta (ajustados al fondo) */
+        .btn-card-action { 
+            position: absolute;
+            bottom: 5px;
+            left: 5%;
+            width: 90%;
+            background: rgba(0,0,0,0.85); 
+            color: white; 
+            border: none; 
+            padding: 5px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.7rem; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            text-transform: uppercase; 
+            z-index: 10;
+        }
         .btn-card-action:hover { background: var(--primary); color: black; }
-        .seller-info { font-size: 0.65rem; margin-top: 4px; opacity: 0.8; text-transform: uppercase; color: inherit; }
+        
+        .seller-info { 
+            position: absolute;
+            bottom: 25px; /* Encima del botón */
+            width: 100%;
+            font-size: 0.65rem; 
+            font-weight: bold;
+            text-transform: uppercase; 
+            color: inherit; 
+            z-index: 1;
+        }
 
         .btn-ui { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
         .btn-back { background: white; color: black; }
@@ -127,7 +212,7 @@
         }
 
         #modal-card-preview {
-            margin: 15px auto; width: 120px;
+            margin: 15px auto; width: 160px; /* Un poco más grande para ver el detalle */
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -158,13 +243,14 @@
         font-weight: bold;
         font-size: 1.2rem;
         border: 2px solid white;
-        z-index: 5;
+        z-index: 15;
         pointer-events: none;
         box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
     }
     </style>
 </head>
-<body>
+
+    <body>
 
     <div id="loader">
         <div class="loader-left">
@@ -379,12 +465,14 @@
                         if(j) {
                             const card = document.createElement('div');
                             card.className = `card ${j.rareza} card-venda`;
+                            // NOTA: La estructura visual ahora depende de las clases CSS definidas en Block 1
                             card.innerHTML = `
                                 <div class="badge-venta">EN VENTA</div>
                                 <div class="ovr">${j.grl}</div>
+                                <div class="pos">${j.pos}</div>
                                 <img src="${j.foto}">
                                 <div class="name">${j.name}</div>
-                                <div style="font-weight:bold; color:black; margin-top:5px;">🪙 ${oferta.precio.toLocaleString()}</div>
+                                <div style="font-weight:bold; color:white; position:absolute; bottom:30px; width:100%; text-shadow:1px 1px 2px black;">🪙 ${oferta.precio.toLocaleString()}</div>
                                 <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
                             `;
                             gridVentas.appendChild(card);
@@ -406,13 +494,14 @@
                     const card = document.createElement('div');
                     card.className = `card ${j.rareza}`; 
                     const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
+                    // Estructura adaptada al nuevo CSS de capas
                     card.innerHTML = `
                         <div class="ovr">${j.grl}</div>
                         <div class="pos">${j.pos}</div>
                         <img src="${j.foto}">
                         <div class="name">${j.name}</div>
                         <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
-                        <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
+                        <button class="btn-card-action" style="background:white; color:black; bottom:35px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
                     `;
                     gridInventario.appendChild(card);
                 });
@@ -467,8 +556,9 @@
             jugadorSeleccionadoParaVenta = idJugador;
             const j = databaseJugadores.find(p => p.id === idJugador);
             document.getElementById('modal-card-preview').innerHTML = `
-                <div class="card ${j.rareza}" style="transform: scale(0.7); margin: -20px auto;">
+                <div class="card ${j.rareza}" style="transform: scale(0.9); margin: 0 auto;">
                     <div class="ovr">${j.grl}</div>
+                    <div class="pos">${j.pos}</div>
                     <img src="${j.foto}">
                     <div class="name">${j.name}</div>
                 </div>
@@ -518,6 +608,7 @@
                 card.className = `card ${j.rareza}`;
                 card.innerHTML = `
                     <div class="ovr">${j.grl}</div>
+                    <div class="pos">${j.pos}</div>
                     <img src="${j.foto}">
                     <div class="name">${j.name}</div>
                     <div class="seller-info">POR: ${oferta.vendedorNombre}</div>
