@@ -27,220 +27,53 @@
             padding: 0 10%;
         }
 
-        .loader-left {
-            position: relative;
-            flex: 1;
-            z-index: 10;
-        }
+        .loader-left { position: relative; flex: 1; z-index: 10; }
+        .loader-logo { font-size: 8rem; font-weight: 900; font-style: italic; margin-bottom: -10px; color: white; letter-spacing: -3px; line-height: 1; }
+        .edition { color: var(--primary); font-size: 1.8rem; margin-bottom: 30px; letter-spacing: 8px; font-weight: bold; }
 
-        .loader-logo {
-            font-size: 8rem;
-            font-weight: 900;
-            font-style: italic;
-            margin-bottom: -10px;
-            color: white;
-            letter-spacing: -3px;
-            line-height: 1;
-        }
-
-        .edition {
-            color: var(--primary);
-            font-size: 1.8rem;
-            margin-bottom: 30px;
-            letter-spacing: 8px;
-            font-weight: bold;
-        }
-
-        #auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 350px;
-            margin-bottom: 20px;
-        }
-
-        #auth-form input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 170, 0.3);
-            padding: 12px;
-            color: white;
-            border-radius: 4px;
-            outline: none;
-            font-size: 1.1rem;
-            transition: 0.3s;
-        }
-
+        #auth-form { display: flex; flex-direction: column; gap: 12px; width: 350px; margin-bottom: 20px; }
+        #auth-form input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(0, 255, 170, 0.3); padding: 12px; color: white; border-radius: 4px; outline: none; font-size: 1.1rem; transition: 0.3s; }
         #auth-form input:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.1); }
 
         .auth-buttons { display: flex; gap: 10px; }
-
-        .btn-action {
-            flex: 1;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            border-radius: 4px;
-            transition: 0.3s;
-        }
-
+        .btn-action { flex: 1; padding: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; border-radius: 4px; transition: 0.3s; }
         #login-btn { background: var(--primary); color: black; border: none; }
         #register-btn { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-        #login-btn:hover { background: white; }
-        #register-btn:hover { background: var(--primary); color: black; }
+        
+        .progress-container { width: 350px; height: 6px; background: rgba(255,255,255,0.1); margin-bottom: 30px; border-radius: 10px; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background: var(--primary); box-shadow: 0 0 20px var(--primary); transition: width 0.4s ease; }
 
-        .progress-container {
-            width: 350px;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            margin-bottom: 30px;
-            border-radius: 10px;
-            overflow: hidden;
-            display: none;
-        }
+        #continue-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 15px 45px; font-size: 1.8rem; text-transform: uppercase; font-style: italic; cursor: pointer; opacity: 0; transform: translateY(30px); transition: all 0.5s var(--smooth-curve); pointer-events: none; border-radius: 4px; }
+        #continue-btn.ready { opacity: 1; transform: translateY(0); pointer-events: auto; animation: blink 1.5s infinite; }
 
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background: var(--primary);
-            box-shadow: 0 0 20px var(--primary);
-            transition: width 0.4s ease;
-        }
+        .player-render { position: absolute; left: 15%; bottom: -5%; height: 115vh; z-index: 1; pointer-events: none; }
+        .player-render img { height: 100%; width: auto; filter: drop-shadow(20px 0 50px rgba(0, 255, 170, 0.15)); animation: slideIn 1.8s var(--smooth-curve); }
 
-        #continue-btn {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 15px 45px;
-            font-size: 1.8rem;
-            text-transform: uppercase;
-            font-style: italic;
-            cursor: pointer;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.5s var(--smooth-curve);
-            pointer-events: none;
-            border-radius: 4px;
-        }
-
-        #continue-btn.ready {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-            animation: blink 1.5s infinite;
-        }
-
-        /* --- RENDER DEL JUGADOR --- */
-        .player-render {
-            position: absolute;
-            left: 15%; 
-            bottom: -5%;
-            height: 115vh;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .player-render img {
-            height: 100%;
-            width: auto;
-            filter: drop-shadow(20px 0 50px rgba(0, 255, 170, 0.15));
-            animation: slideIn 1.8s var(--smooth-curve);
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-150px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; box-shadow: 0 0 5px var(--primary); }
-            50% { opacity: 0.7; box-shadow: 0 0 25px var(--primary); }
-        }
+        @keyframes slideIn { from { transform: translateX(-150px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes blink { 0%, 100% { opacity: 1; box-shadow: 0 0 5px var(--primary); } 50% { opacity: 0.7; box-shadow: 0 0 25px var(--primary); } }
 
         /* --- MENÚ PRINCIPAL --- */
-        #main-content {
-            opacity: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            transition: opacity 1s ease;
-            pointer-events: none;
-        }
-
+        #main-content { opacity: 0; display: flex; flex-direction: column; height: 100vh; transition: opacity 1s ease; pointer-events: none; }
         header { padding: 40px 60px; display: flex; justify-content: space-between; align-items: center; }
-        
         .user-box { display: flex; align-items: center; gap: 20px; }
-        
-        #logout-btn {
-            background: rgba(255, 50, 50, 0.2);
-            border: 1px solid #ff3232;
-            color: #ff3232;
-            padding: 5px 15px;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            border-radius: 4px;
-            transition: 0.3s;
-        }
-        #logout-btn:hover { background: #ff3232; color: white; }
-
+        #logout-btn { background: rgba(255, 50, 50, 0.2); border: 1px solid #ff3232; color: #ff3232; padding: 5px 15px; cursor: pointer; text-transform: uppercase; font-weight: bold; border-radius: 4px; }
         .stats { display: flex; gap: 20px; background: rgba(255, 255, 255, 0.05); padding: 10px 25px; border-radius: 50px; }
-        .main-menu { flex: 1; display: flex; padding: 0 40px 60px; gap: 15px; }
         
-        .menu-btn {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            transition: flex 0.6s var(--smooth-curve), background 0.4s ease;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
+        .main-menu { flex: 1; display: flex; padding: 0 40px 60px; gap: 15px; }
+        .menu-btn { flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; transition: flex 0.6s var(--smooth-curve), background 0.4s ease; cursor: pointer; position: relative; overflow: hidden; }
         .menu-btn:hover { flex: 3; background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
         .menu-btn h2 { font-size: 3.5rem; text-transform: uppercase; font-style: italic; line-height: 0.9; }
 
-        /* --- SECCIÓN MI CLUB --- */
-        #club-section {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #050508;
-            z-index: 500;
-            display: none;
-            padding: 60px;
-            overflow-y: auto;
-        }
-
+        /* --- CLUB --- */
+        #club-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050508; z-index: 500; display: none; padding: 60px; overflow-y: auto; }
         .club-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .club-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background: var(--gold);
-            aspect-ratio: 2/3;
-            border-radius: 10px;
-            padding: 10px;
-            position: relative;
-            color: black;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        .card:hover { transform: scale(1.05); }
+        .club-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+        .card { background: var(--gold); aspect-ratio: 2/3; border-radius: 10px; padding: 10px; position: relative; color: black; text-align: center; transition: transform 0.3s; }
         .card img { width: 100%; margin-top: 10px; }
         .card .ovr { position: absolute; top: 10px; left: 10px; font-size: 1.5rem; font-weight: bold; }
         .card .pos { position: absolute; top: 30px; left: 10px; font-size: 0.9rem; }
         .card .name { bottom: 10px; width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; }
-
         .btn-back { background: var(--primary); color: black; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-
     </style>
 </head>
 <body>
@@ -249,7 +82,6 @@
         <div class="loader-left">
             <div class="loader-logo">MPS UT</div>
             <div class="edition">SEASON 2026</div>
-
             <div id="auth-form">
                 <input type="text" id="auth-user" placeholder="USUARIO">
                 <input type="password" id="auth-pass" placeholder="CONTRASEÑA">
@@ -258,14 +90,11 @@
                     <button class="btn-action" id="register-btn">REGISTRAR</button>
                 </div>
             </div>
-
             <div class="progress-container" id="p-container">
                 <div id="progress" class="progress-bar"></div>
             </div>
-
             <button id="continue-btn" onclick="enterGame()">CLICK PARA EMPEZAR</button>
         </div>
-        
         <div class="player-render">
             <img src="https://github.com/arionkoh-cloud/MPS-ULTIMATE-TEAM-2026/blob/main/assets/lostscout.png?raw=true">
         </div>
@@ -282,7 +111,6 @@
                 <span id="points-display">💎 --</span>
             </div>
         </header>
-
         <main class="main-menu">
             <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
             <div class="menu-btn"><h2>MI<br>PLANTILLA</h2></div>
@@ -297,8 +125,7 @@
             <h1 style="font-size: 3rem; font-style: italic;">MI CLUB</h1>
             <button class="btn-back" onclick="cerrarClub()">VOLVER</button>
         </div>
-        <div class="club-grid" id="club-grid">
-            </div>
+        <div class="club-grid" id="club-grid"></div>
     </div>
 
     <script type="module">
@@ -319,12 +146,11 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // CONFIGURACION GOOGLE SHEETS (Corrección aplicada aquí)
+        // URL CORREGIDA
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/1TRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnB/export?format=csv";
         let databaseJugadores = [];
         let gameData = {};
 
-        // Escuchar estado de autenticación
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 startGameLoad(user.uid);
@@ -334,13 +160,11 @@
             }
         });
 
-        // Registro de usuario
         document.getElementById('register-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
-            if(!userNick || pass.length < 6) return alert("Usuario requerido y contraseña mín. 6 caracteres.");
+            if(!userNick || pass.length < 6) return alert("Mín. 6 caracteres.");
             const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
-
             try {
                 await setPersistence(auth, browserLocalPersistence);
                 const cred = await createUserWithEmailAndPassword(auth, fakeEmail, pass);
@@ -348,12 +172,11 @@
                     username: userNick.toUpperCase(),
                     coins: 5000,
                     points: 0,
-                    inventario: ["1", "2"] // Jugadores iniciales de prueba
+                    inventario: ["1", "2"]
                 });
-            } catch (err) { alert("Error: El usuario ya existe o datos inválidos."); }
+            } catch (err) { alert("Error al registrar."); }
         };
 
-        // Login de usuario
         document.getElementById('login-btn').onclick = async () => {
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
@@ -361,10 +184,9 @@
             try {
                 await setPersistence(auth, browserLocalPersistence);
                 await signInWithEmailAndPassword(auth, fakeEmail, pass);
-            } catch (err) { alert("Usuario o contraseña incorrectos."); }
+            } catch (err) { alert("Datos incorrectos."); }
         };
 
-        // Cerrar sesión
         document.getElementById('logout-btn').onclick = async () => {
             await saveGameData();
             await signOut(auth);
@@ -381,100 +203,67 @@
             const bar = document.getElementById('progress');
             bar.style.width = "20%";
 
+            // 1. CARGA DE EXCEL (Si falla, el juego continúa)
             try {
-                // 1. Cargar Excel de Google Sheets
                 const res = await fetch(SHEET_URL);
-                if (res.ok) {
+                if(res.ok){
                     const csv = await res.text();
                     const filas = csv.split('\n').slice(1);
                     databaseJugadores = filas.map(f => {
                         const d = f.split(',');
-                        return { 
-                            id: d[0]?.trim(), 
-                            name: d[1]?.trim(), 
-                            grl: d[2]?.trim(), 
-                            pos: d[3]?.trim(), 
-                            rareza: d[4]?.trim(), 
-                            foto: d[5]?.trim() 
-                        };
+                        return { id: d[0]?.trim(), name: d[1]?.trim(), grl: d[2]?.trim(), pos: d[3]?.trim(), rareza: d[4]?.trim(), foto: d[5]?.trim() };
                     });
                 }
-                bar.style.width = "60%";
+            } catch (e) { console.warn("Error cargando Sheets, continuando..."); }
+            
+            bar.style.width = "60%";
 
-                // 2. Cargar datos de Firebase
-                const docRef = doc(db, "jugadores", uid);
-                const docSnap = await getDoc(docRef);
-                
+            // 2. CARGA DE FIREBASE
+            try {
+                const docSnap = await getDoc(doc(db, "jugadores", uid));
                 if (docSnap.exists()) {
                     gameData = docSnap.data();
-                    if(!gameData.inventario) gameData.inventario = []; 
-
+                    if(!gameData.inventario) gameData.inventario = [];
                     bar.style.width = "100%";
                     document.getElementById('continue-btn').classList.add('ready');
                 } else {
-                    alert("EL USUARIO NO EXISTE EN LA BASE DE DATOS.");
-                    await signOut(auth);
-                    location.reload();
+                    alert("Usuario no encontrado.");
+                    signOut(auth);
                 }
-            } catch (e) { 
-                console.error("Error en la carga:", e);
-                // Si falla Sheets pero Firebase funciona, permitir entrar igual
-                if (gameData.username) {
-                    bar.style.width = "100%";
-                    document.getElementById('continue-btn').classList.add('ready');
-                }
-            }
+            } catch (e) { console.error("Error Firebase:", e); }
         }
 
         async function saveGameData() {
             if (auth.currentUser && gameData.username) {
                 try {
-                    const docRef = doc(db, "jugadores", auth.currentUser.uid);
-                    await updateDoc(docRef, {
+                    await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
                         coins: gameData.coins,
                         points: gameData.points,
-                        inventario: gameData.inventario
+                        inventario: gameData.inventario // Corregido para guardar inventario
                     });
-                } catch (e) { console.error("No se pudo guardar."); }
+                } catch (e) { console.error("Error al guardar."); }
             }
         }
 
-        // FUNCIONES DE INTERFAZ DEL CLUB
         window.abrirClub = function() {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
-            
-            // Filtrar los jugadores que el usuario tiene en su inventario
             const misJugadores = databaseJugadores.filter(j => gameData.inventario.includes(j.id));
-
             misJugadores.forEach(j => {
                 const card = document.createElement('div');
                 card.className = "card";
-                card.innerHTML = `
-                    <div class="ovr">${j.grl}</div>
-                    <div class="pos">${j.pos}</div>
-                    <img src="${j.foto}">
-                    <div class="name">${j.name}</div>
-                `;
+                card.innerHTML = `<div class="ovr">${j.grl}</div><div class="pos">${j.pos}</div><img src="${j.foto}"><div class="name">${j.name}</div>`;
                 grid.appendChild(card);
             });
-
             document.getElementById('club-section').style.display = "block";
         }
 
-        window.cerrarClub = function() {
-            document.getElementById('club-section').style.display = "none";
-        }
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "hidden") saveGameData();
-        });
+        window.cerrarClub = function() { document.getElementById('club-section').style.display = "none"; }
 
         window.enterGame = function() {
             document.getElementById('user-display').innerHTML = `MPS 26 | <strong>${gameData.username}</strong>`;
             document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString('es-ES')}`;
             document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString('es-ES')}`;
-
             document.getElementById('loader').style.opacity = "0";
             setTimeout(() => {
                 document.getElementById('loader').style.visibility = "hidden";
@@ -482,6 +271,8 @@
                 document.getElementById('main-content').style.pointerEvents = "auto";
             }, 800);
         }
+
+        document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") saveGameData(); });
     </script>
 </body>
 </html>
