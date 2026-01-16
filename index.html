@@ -132,6 +132,36 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .sub-titulo {
+    font-size: 1.8rem;
+    font-style: italic;
+    color: var(--primary);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    border-left: 4px solid var(--primary);
+    padding-left: 15px;
+}
+
+/* Estilo para cartas que están en venta */
+.card-venda {
+    filter: saturate(0.5);
+}
+.badge-venta {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: #ff3232;
+    color: white;
+    padding: 5px 15px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border: 2px solid white;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
+}
     </style>
 </head>
 <body>
@@ -177,16 +207,24 @@
         </main>
     </div>
 
-    <div id="club-section" class="full-screen-overlay">
-        <div class="section-header">
-            <h1 class="italic-title">MI <span class="primary-text">CLUB</span></h1>
-            <div>
-                <button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button>
-                <button class="btn-ui btn-back" onclick="cerrarSeccion('club-section')">VOLVER</button>
-            </div>
+   <div id="club-section" class="full-screen-overlay">
+    <div class="section-header">
+        <h1 class="italic-title">MI <span class="primary-text">CLUB</span></h1>
+        <div>
+            <button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button>
+            <button class="btn-ui btn-back" onclick="cerrarSeccion('club-section')">VOLVER</button>
         </div>
-        <div class="grid-container" id="club-grid"></div>
     </div>
+
+    <div id="seccion-mis-ventas" style="display: none; margin-bottom: 40px;">
+        <h2 class="sub-titulo">MIS SUBASTAS ACTIVAS</h2>
+        <div class="grid-container" id="club-ventas-grid"></div>
+        <hr style="border: 0; border-top: 1px solid rgba(0, 255, 170, 0.2); margin-top: 30px;">
+    </div>
+
+    <h2 class="sub-titulo">MI PLANTILLA</h2>
+    <div class="grid-container" id="club-grid"></div>
+</div>
 
     <div id="mercado-section" class="full-screen-overlay">
         <div class="section-header">
@@ -210,7 +248,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, addDoc, deleteDoc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, updateDoc, collection, addDoc, deleteDoc, query, orderBy, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -318,28 +356,79 @@
         }
 
         // --- CLUB ---
-        window.renderizarClub = function() {
-            const grid = document.getElementById('club-grid');
-            grid.innerHTML = "";
-            let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
-            misJugadores.sort((a, b) => b.grl - a.grl);
-            
-            misJugadores.forEach((j) => {
-                const card = document.createElement('div');
-                card.className = `card ${j.rareza}`; 
-                const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
+        window.renderizarClub = async function() {
+    const gridInventario = document.getElementById('club-grid');
+    const gridVentas = document.getElementById('club-ventas-grid');
+    const seccionVentas = document.getElementById('seccion-mis-ventas');
+    
+    gridInventario.innerHTML = "";
+    gridVentas.innerHTML = "";
 
-                card.innerHTML = `
-                    <div class="ovr">${j.grl}</div>
-                    <div class="pos">${j.pos}</div>
-                    <img src="${j.foto}">
-                    <div class="name">${j.name}</div>
-                    <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
-                    <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
-                `;
-                grid.appendChild(card);
-            });
-        }
+    // 1. OBTENER MIS VENTAS DESDE FIREBASE (LO QUE ESTÁ EN EL MERCADO)
+    // Buscamos en el mercado global qué cartas tienen tu vendedorId
+    let misVentasEnMercado = [];
+    try {
+        const q = query(collection(db, "mercado"), where("vendedorId", "==", auth.currentUser.uid));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+            misVentasEnMercado.push({ docId: doc.id, ...doc.data() });
+        });
+    } catch (e) { console.error("Error cargando mis ventas"); }
+
+    // RENDERIZAR VENTAS ACTIVAS
+    if (misVentasEnMercado.length > 0) {
+        seccionVentas.style.display = "block";
+        misVentasEnMercado.forEach(oferta => {
+            const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
+            if(!j) return;
+            const card = document.createElement('div');
+            card.className = `card ${j.rareza} card-venda`;
+            card.innerHTML = `
+                <div class="badge-venta">EN VENTA</div>
+                <div class="ovr">${j.grl}</div>
+                <img src="${j.foto}">
+                <div class="name">${j.name}</div>
+                <div style="font-weight:bold; color:black; margin-top:5px;">🪙 ${oferta.precio.toLocaleString()}</div>
+                <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${oferta.docId}', '${j.id}')">RETIRAR</button>
+            `;
+            gridVentas.appendChild(card);
+        });
+    } else {
+        seccionVentas.style.display = "none";
+    }
+
+    // 2. RENDERIZAR INVENTARIO NORMAL (LO QUE TIENES DISPONIBLE)
+    let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
+    misJugadores.sort((a, b) => b.grl - a.grl);
+    
+    misJugadores.forEach((j) => {
+        const card = document.createElement('div');
+        card.className = `card ${j.rareza}`; 
+        const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
+        card.innerHTML = `
+            <div class="ovr">${j.grl}</div>
+            <div class="pos">${j.pos}</div>
+            <img src="${j.foto}">
+            <div class="name">${j.name}</div>
+            <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
+            <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
+        `;
+        gridInventario.appendChild(card);
+    });
+}
+
+// Nueva función para recuperar un jugador del mercado
+window.cancelarVenta = async (docId, jugadorId) => {
+    try {
+        // 1. Borrar del mercado
+        await deleteDoc(doc(db, "mercado", docId));
+        // 2. Devolver al inventario
+        await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+            inventario: [...gameData.inventario, jugadorId]
+        });
+        alert("Jugador retirado del mercado y devuelto a tu club.");
+    } catch (e) { alert("Error al retirar el jugador."); }
+};
 
         window.descartarJugador = async (id) => {
             const j = databaseJugadores.find(p => p.id === id);
@@ -476,3 +565,4 @@
     </script>
 </body>
 </html>
+
