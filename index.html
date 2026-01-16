@@ -134,34 +134,34 @@
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     
     .sub-titulo {
-    font-size: 1.8rem;
-    font-style: italic;
-    color: var(--primary);
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    border-left: 4px solid var(--primary);
-    padding-left: 15px;
-}
+        font-size: 1.8rem;
+        font-style: italic;
+        color: var(--primary);
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        border-left: 4px solid var(--primary);
+        padding-left: 15px;
+    }
 
-/* Estilo para cartas que están en venta */
-.card-venda {
-    filter: saturate(0.5);
-}
-.badge-venta {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-15deg);
-    background: #ff3232;
-    color: white;
-    padding: 5px 15px;
-    font-weight: bold;
-    font-size: 1.2rem;
-    border: 2px solid white;
-    z-index: 5;
-    pointer-events: none;
-    box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
-}
+    /* Estilo para cartas que están en venta */
+    .card-venda {
+        filter: saturate(0.5);
+    }
+    .badge-venta {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-15deg);
+        background: #ff3232;
+        color: white;
+        padding: 5px 15px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        border: 2px solid white;
+        z-index: 5;
+        pointer-events: none;
+        box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
+    }
     </style>
 </head>
 <body>
@@ -357,78 +357,77 @@
 
         // --- CLUB ---
         window.renderizarClub = async function() {
-    const gridInventario = document.getElementById('club-grid');
-    const gridVentas = document.getElementById('club-ventas-grid');
-    const seccionVentas = document.getElementById('seccion-mis-ventas');
-    
-    gridInventario.innerHTML = "";
-    gridVentas.innerHTML = "";
+            const gridInventario = document.getElementById('club-grid');
+            const gridVentas = document.getElementById('club-ventas-grid');
+            const seccionVentas = document.getElementById('seccion-mis-ventas');
+            
+            if (!gridInventario || !gridVentas) return;
 
-    // 1. OBTENER MIS VENTAS DESDE FIREBASE (LO QUE ESTÁ EN EL MERCADO)
-    // Buscamos en el mercado global qué cartas tienen tu vendedorId
-    let misVentasEnMercado = [];
-    try {
-        const q = query(collection(db, "mercado"), where("vendedorId", "==", auth.currentUser.uid));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            misVentasEnMercado.push({ docId: doc.id, ...doc.data() });
-        });
-    } catch (e) { console.error("Error cargando mis ventas"); }
+            gridInventario.innerHTML = "";
+            gridVentas.innerHTML = "";
 
-    // RENDERIZAR VENTAS ACTIVAS
-    if (misVentasEnMercado.length > 0) {
-        seccionVentas.style.display = "block";
-        misVentasEnMercado.forEach(oferta => {
-            const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
-            if(!j) return;
-            const card = document.createElement('div');
-            card.className = `card ${j.rareza} card-venda`;
-            card.innerHTML = `
-                <div class="badge-venta">EN VENTA</div>
-                <div class="ovr">${j.grl}</div>
-                <img src="${j.foto}">
-                <div class="name">${j.name}</div>
-                <div style="font-weight:bold; color:black; margin-top:5px;">🪙 ${oferta.precio.toLocaleString()}</div>
-                <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${oferta.docId}', '${j.id}')">RETIRAR</button>
-            `;
-            gridVentas.appendChild(card);
-        });
-    } else {
-        seccionVentas.style.display = "none";
-    }
+            // 1. OBTENER MIS VENTAS DESDE FIREBASE
+            try {
+                const q = query(collection(db, "mercado"), where("vendedorId", "==", auth.currentUser.uid));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    seccionVentas.style.display = "block";
+                    querySnapshot.forEach((docSnap) => {
+                        const oferta = docSnap.data();
+                        const j = databaseJugadores.find(p => p.id === oferta.jugadorId);
+                        if(j) {
+                            const card = document.createElement('div');
+                            card.className = `card ${j.rareza} card-venda`;
+                            card.innerHTML = `
+                                <div class="badge-venta">EN VENTA</div>
+                                <div class="ovr">${j.grl}</div>
+                                <img src="${j.foto}">
+                                <div class="name">${j.name}</div>
+                                <div style="font-weight:bold; color:black; margin-top:5px;">🪙 ${oferta.precio.toLocaleString()}</div>
+                                <button class="btn-card-action" style="background:#ff3232" onclick="cancelarVenta('${docSnap.id}', '${j.id}')">RETIRAR</button>
+                            `;
+                            gridVentas.appendChild(card);
+                        }
+                    });
+                } else {
+                    seccionVentas.style.display = "none";
+                }
+            } catch (e) { 
+                console.error("Error cargando mis ventas", e); 
+            }
 
-    // 2. RENDERIZAR INVENTARIO NORMAL (LO QUE TIENES DISPONIBLE)
-    let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
-    misJugadores.sort((a, b) => b.grl - a.grl);
-    
-    misJugadores.forEach((j) => {
-        const card = document.createElement('div');
-        card.className = `card ${j.rareza}`; 
-        const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
-        card.innerHTML = `
-            <div class="ovr">${j.grl}</div>
-            <div class="pos">${j.pos}</div>
-            <img src="${j.foto}">
-            <div class="name">${j.name}</div>
-            <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
-            <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
-        `;
-        gridInventario.appendChild(card);
-    });
-}
+            // 2. RENDERIZAR INVENTARIO NORMAL
+            if (gameData.inventario && gameData.inventario.length > 0) {
+                let misJugadores = gameData.inventario.map(id => databaseJugadores.find(j => j.id === id)).filter(j => j);
+                misJugadores.sort((a, b) => b.grl - a.grl);
+                
+                misJugadores.forEach((j) => {
+                    const card = document.createElement('div');
+                    card.className = `card ${j.rareza}`; 
+                    const valorDescarte = PRECIOS_VENTA[j.rareza] || 30;
+                    card.innerHTML = `
+                        <div class="ovr">${j.grl}</div>
+                        <div class="pos">${j.pos}</div>
+                        <img src="${j.foto}">
+                        <div class="name">${j.name}</div>
+                        <button class="btn-card-action" onclick="descartarJugador('${j.id}')">DESCARTAR (🪙${valorDescarte})</button>
+                        <button class="btn-card-action" style="background:white; color:black; margin-top:4px;" onclick="venderEnMercado('${j.id}')">VENDER MERCADO</button>
+                    `;
+                    gridInventario.appendChild(card);
+                });
+            }
+        };
 
-// Nueva función para recuperar un jugador del mercado
-window.cancelarVenta = async (docId, jugadorId) => {
-    try {
-        // 1. Borrar del mercado
-        await deleteDoc(doc(db, "mercado", docId));
-        // 2. Devolver al inventario
-        await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
-            inventario: [...gameData.inventario, jugadorId]
-        });
-        alert("Jugador retirado del mercado y devuelto a tu club.");
-    } catch (e) { alert("Error al retirar el jugador."); }
-};
+        window.cancelarVenta = async (docId, jugadorId) => {
+            try {
+                await deleteDoc(doc(db, "mercado", docId));
+                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                    inventario: [...gameData.inventario, jugadorId]
+                });
+                alert("Jugador retirado del mercado.");
+            } catch (e) { alert("Error al retirar."); }
+        };
 
         window.descartarJugador = async (id) => {
             const j = databaseJugadores.find(p => p.id === id);
@@ -565,4 +564,3 @@ window.cancelarVenta = async (docId, jugadorId) => {
     </script>
 </body>
 </html>
-
