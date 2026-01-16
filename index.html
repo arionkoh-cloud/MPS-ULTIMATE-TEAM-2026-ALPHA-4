@@ -87,7 +87,7 @@
         .card .name { width: 100%; font-weight: bold; text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         /* Botón Descartar */
-        .btn-discard { margin-top: 8px; background: rgba(0,0,0,0.7); color: white; border: none; padding: 4px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: bold; transition: 0.2s; }
+        .btn-discard { margin-top: 8px; background: rgba(0,0,0,0.7); color: white; border: none; padding: 6px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; }
         .btn-discard:hover { background: #ff3232; }
 
         .btn-ui { padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; border: none; text-transform: uppercase; }
@@ -170,7 +170,6 @@
         let databaseJugadores = [];
         let gameData = { coins: 0, points: 0, inventario: [], username: "" };
 
-        // Precios de descarte
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
         onAuthStateChanged(auth, (user) => {
@@ -273,55 +272,53 @@
         }
 
         function actualizarUI() {
-            document.getElementById('coins-display').innerText = `🪙 ${gameData.coins.toLocaleString('es-ES')}`;
-            document.getElementById('points-display').innerText = `💎 ${gameData.points.toLocaleString('es-ES')}`;
+            const coinsStr = gameData.coins.toLocaleString('es-ES');
+            const pointsStr = gameData.points.toLocaleString('es-ES');
+            document.getElementById('coins-display').innerText = `🪙 ${coinsStr}`;
+            document.getElementById('points-display').innerText = `💎 ${pointsStr}`;
+            // Actualizar también el saldo dentro del club si está abierto
+            const clubCoinsLabel = document.getElementById('club-coins');
+            if(clubCoinsLabel) clubCoinsLabel.innerText = `🪙 ${coinsStr}`;
         }
 
-        // Lógica de Club con Soporte para Duplicados y Ordenamiento
         window.abrirClub = function() {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
-            document.getElementById('club-coins').innerText = "🪙 " + gameData.coins.toLocaleString('es-ES');
+            actualizarUI(); // Sincroniza monedas
             
-            // 1. Convertir IDs en objetos reales (permite duplicados al mapear cada ID)
             let misJugadores = gameData.inventario.map(id => {
                 return databaseJugadores.find(j => j.id === id);
-            }).filter(j => j); // Eliminar posibles nulos
+            }).filter(j => j);
 
-            // 2. Ordenar por GRL de mayor a menor
             misJugadores.sort((a, b) => b.grl - a.grl);
             
-            // 3. Dibujar cartas
             misJugadores.forEach((j, index) => {
                 const card = document.createElement('div');
                 card.className = `card ${j.rareza}`; 
-                const valor = j.rareza === 'oro' ? 500 : j.rareza === 'plata' ? 100 : j.rareza === 'bronce' ? 30 : 1000;
-card.innerHTML = `
-    <div class="ovr">${j.grl}</div>
-    <div class="pos">${j.pos}</div>
-    <img src="${j.foto}">
-    <div class="name">${j.name}</div>
-    <button class="btn-discard" style="width:100%; margin-top:5px; cursor:pointer;" onclick="descartarIndividual('${j.id}')">DESCARTAR (🪙${valor})</button>
-`;
+                const valor = PRECIOS_VENTA[j.rareza] || 30;
+
+                card.innerHTML = `
+                    <div class="ovr">${j.grl}</div>
+                    <div class="pos">${j.pos}</div>
+                    <img src="${j.foto}">
+                    <div class="name">${j.name}</div>
+                    <button class="btn-discard" onclick="descartarIndividual('${j.id}', ${index})">DESCARTAR (🪙${valor})</button>
+                `;
                 grid.appendChild(card);
             });
             document.getElementById('club-section').style.display = "block";
         }
 
         window.descartarIndividual = function(id, indexEnVista) {
-            // Buscamos el jugador para saber su valor
             const jugador = databaseJugadores.find(j => j.id === id);
             const valor = PRECIOS_VENTA[jugador.rareza] || 30;
 
-            // Para eliminar el correcto en una lista con duplicados, necesitamos 
-            // manejar el array original gameData.inventario. 
-            // Como la vista está ordenada, lo más seguro es buscar el ID y quitarlo.
             const realIndex = gameData.inventario.indexOf(id);
             if(realIndex > -1) {
                 gameData.inventario.splice(realIndex, 1);
                 gameData.coins += valor;
                 actualizarUI();
-                abrirClub(); // Refrescar vista
+                abrirClub(); 
                 saveGameData();
             }
         }
@@ -336,7 +333,6 @@ card.innerHTML = `
                     unicos.push(id);
                     nuevoInventario.push(id);
                 } else {
-                    // Es un repetido
                     const j = databaseJugadores.find(p => p.id === id);
                     monedasGanadas += (PRECIOS_VENTA[j.rareza] || 30);
                 }
@@ -371,4 +367,3 @@ card.innerHTML = `
     </script>
 </body>
 </html>
-
