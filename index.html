@@ -139,7 +139,7 @@
 
     <div id="club-section">
         <div class="club-header">
-            <h1 style="font-size: 3rem; font-style: italic;">MI CLUB</h1>
+            <h1 style="font-size: 3rem; font-style: italic;">MI CLUB <span id="club-coins" style="font-size: 1.5rem; color: var(--primary); margin-left: 20px;"></span></h1>
             <div>
                 <button class="btn-ui btn-duplicates" onclick="venderRepetidos()">Vender Repetidos</button>
                 <button class="btn-ui btn-back" onclick="cerrarClub()">VOLVER</button>
@@ -281,6 +281,7 @@
         window.abrirClub = function() {
             const grid = document.getElementById('club-grid');
             grid.innerHTML = "";
+            document.getElementById('club-coins').innerText = "🪙 " + gameData.coins.toLocaleString('es-ES');
             
             // 1. Convertir IDs en objetos reales (permite duplicados al mapear cada ID)
             let misJugadores = gameData.inventario.map(id => {
@@ -294,13 +295,14 @@
             misJugadores.forEach((j, index) => {
                 const card = document.createElement('div');
                 card.className = `card ${j.rareza}`; 
-                card.innerHTML = `
-                    <div class="ovr">${j.grl}</div>
-                    <div class="pos">${j.pos}</div>
-                    <img src="${j.foto}">
-                    <div class="name">${j.name}</div>
-                    <button class="btn-discard" onclick="descartarIndividual('${j.id}', ${index})">DESCARTAR</button>
-                `;
+                const valor = j.rareza === 'oro' ? 500 : j.rareza === 'plata' ? 100 : j.rareza === 'bronce' ? 30 : 1000;
+card.innerHTML = `
+    <div class="ovr">${j.grl}</div>
+    <div class="pos">${j.pos}</div>
+    <img src="${j.foto}">
+    <div class="name">${j.name}</div>
+    <button class="btn-discard" style="width:100%; margin-top:5px; cursor:pointer;" onclick="descartarIndividual('${j.id}')">DESCARTAR (🪙${valor})</button>
+`;
                 grid.appendChild(card);
             });
             document.getElementById('club-section').style.display = "block";
@@ -369,3 +371,4 @@
     </script>
 </body>
 </html>
+
