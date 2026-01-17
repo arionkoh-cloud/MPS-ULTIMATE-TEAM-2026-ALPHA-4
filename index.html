@@ -393,11 +393,10 @@
         let jugadorSeleccionadoParaVenta = null;
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
-        // --- NUEVA CONFIGURACIÓN DE MÚSICA Y MODAL ---
         const playlist = [
-            'https://www.youtube.com/watch?v=HhoATZ1Imtw',
-            'https://www.youtube.com/watch?v=xLFCcnYSCyE',
-            'https://www.youtube.com/watch?v=CfihYWRWRTQ'
+            'https://www.bensound.com/bensound-music/bensound-slowmotion.mp3',
+            'https://www.bensound.com/bensound-music/bensound-energetic.mp3',
+            'https://www.bensound.com/bensound-music/bensound-hipjazz.mp3'
         ];
         let musicaFondo = new Audio();
         musicaFondo.volume = 0.2;
@@ -405,9 +404,9 @@
 
         const iniciarMusica = () => {
             if (musicaFondo.paused) {
-                const proxima = playlist[Math.floor(Math.random() * playlist.length)];
-                musicaFondo.src = proxima;
-                musicaFondo.play().catch(e => console.log("Esperando interacción..."));
+                const track = playlist[Math.floor(Math.random() * playlist.length)];
+                musicaFondo.src = track;
+                musicaFondo.play().catch(e => console.log("Audio esperando clic..."));
             }
         };
         musicaFondo.onended = iniciarMusica;
@@ -891,6 +890,7 @@ window.finalizarApertura = () => {
 
 
 </html>
+
 
 
 
