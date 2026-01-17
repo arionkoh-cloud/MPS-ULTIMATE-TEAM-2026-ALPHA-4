@@ -289,12 +289,11 @@
             </div>
         </header>
         <main class="main-menu">
-            <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
-            <div class="menu-btn" onclick="abrirSeccion('club-section')"><h2>MI<br>CLUB</h2></div>
-            <div class="menu-btn" onclick="abrirSeccion('mercado-section')"><h2>MERCADO DE<br>FICHAJES</h2></div>
-            <div class="menu-btn"><h2>TIENDA</h2></div>
-            <div class="menu-btn" onclick="abrirSeccion('tienda-section')"><h2>TIENDA</h2></div>
-        </main>
+    <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
+    <div class="menu-btn" onclick="abrirSeccion('club-section')"><h2>MI<br>CLUB</h2></div>
+    <div class="menu-btn" onclick="abrirSeccion('mercado-section')"><h2>MERCADO DE<br>FICHAJES</h2></div>
+    <div class="menu-btn" onclick="abrirSeccion('tienda-section')"><h2>TIENDA</h2></div>
+</main>
     </div>
 
    <div id="club-section" class="full-screen-overlay">
@@ -696,32 +695,56 @@ window.abrirSobreTest = async (metodoPago) => {
     const costoCoins = 1000;
     const costoPoints = 50;
 
+    // Validación de fondos
     if (metodoPago === 'coins' && gameData.coins < costoCoins) return alert("Monedas insuficientes.");
     if (metodoPago === 'points' && gameData.points < costoPoints) return alert("MPS Points insuficientes.");
 
-    // Cálculo de Probabilidades
+    // Generar probabilidad
     const azar = Math.random() * 100;
     let minGrl, maxGrl;
 
-    if (azar <= 90) { minGrl = 55; maxGrl = 65; }
-    else if (azar <= 99) { minGrl = 65; maxGrl = 75; }
-    else if (azar <= 99.8) { minGrl = 75; maxGrl = 85; }
-    else { minGrl = 85; maxGrl = 95; }
+    // Rangos basados en tu solicitud
+    if (azar <= 90) { 
+        minGrl = 55; maxGrl = 65; // 90% de probabilidad
+    } else if (azar <= 99) { 
+        minGrl = 66; maxGrl = 75; // 9% de probabilidad
+    } else if (azar <= 99.8) { 
+        minGrl = 76; maxGrl = 85; // 0.8% de probabilidad
+    } else { 
+        minGrl = 86; maxGrl = 95; // 0.2% de probabilidad
+    }
 
-    const posibles = databaseJugadores.filter(j => j.grl >= minGrl && j.grl <= maxGrl);
-    const elegido = posibles.length > 0 
-        ? posibles[Math.floor(Math.random() * posibles.length)]
-        : databaseJugadores[Math.floor(Math.random() * databaseJugadores.length)];
+    // FILTRO DINÁMICO: Buscamos cualquier jugador cuyo GRL esté entre los límites
+    const posibles = databaseJugadores.filter(j => {
+        const rating = parseInt(j.grl);
+        return rating >= minGrl && rating <= maxGrl;
+    });
+
+    // Si por alguna razón tu base de datos no tiene a nadie en ese rango, 
+    // buscamos en el rango inmediatamente inferior para no romper el juego.
+    let elegido;
+    if (posibles.length > 0) {
+        elegido = posibles[Math.floor(Math.random() * posibles.length)];
+    } else {
+        // Backup: si el rango está vacío, elige cualquier jugador al azar
+        console.warn("Rango vacío, eligiendo jugador aleatorio de toda la base.");
+        elegido = databaseJugadores[Math.floor(Math.random() * databaseJugadores.length)];
+    }
 
     try {
         const actualizacion = { inventario: [...gameData.inventario, elegido.id] };
-        if (metodoPago === 'coins') actualizacion.coins = gameData.coins - costoCoins;
-        else actualizacion.points = gameData.points - costoPoints;
+        
+        if (metodoPago === 'coins') {
+            actualizacion.coins = gameData.coins - costoCoins;
+        } else {
+            actualizacion.points = gameData.points - costoPoints;
+        }
 
         await updateDoc(doc(db, "jugadores", auth.currentUser.uid), actualizacion);
         mostrarAnimacionPack(elegido);
     } catch (e) {
-        alert("Error al procesar la compra.");
+        console.error("Error en Firebase:", e);
+        alert("Hubo un error al procesar tu sobre.");
     }
 };
 
@@ -758,3 +781,4 @@ window.finalizarApertura = () => {
 </body>
 
 </html>
+
