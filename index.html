@@ -269,18 +269,6 @@
             </div>
             <div class="progress-container" id="p-container">
                 <div id="progress" class="progress-bar"></div>
-                <div id="auth-form">
-    </div>
-
-<div class="progress-container" id="p-container">
-    <div id="progress" class="progress-bar"></div>
-</div>
-
-<button id="loader-logout-btn" style="display: none; background: none; border: 1px solid #ff3232; color: #ff3232; padding: 5px 15px; cursor: pointer; border-radius: 4px; margin-top: 10px; font-weight: bold; text-transform: uppercase;">
-    CANCELAR / CERRAR SESIÓN
-</button>
-
-<button id="continue-btn" onclick="enterGame()">CLICK PARA EMPEZAR</button>
             </div>
             <button id="continue-btn" onclick="enterGame()">CLICK PARA EMPEZAR</button>
         </div>
@@ -406,22 +394,13 @@
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
         onAuthStateChanged(auth, (user) => {
-    const loaderLogout = document.getElementById('loader-logout-btn'); // Referencia al nuevo botón
-
-    if (user) {
-        loaderLogout.style.display = 'block'; // Mostrar botón si hay sesión activa
-        startGameLoad(user.uid);
-    } else {
-        loaderLogout.style.display = 'none'; // Ocultar si no hay nadie
-        document.getElementById('auth-form').style.display = 'flex';
-        document.getElementById('p-container').style.display = 'none';
-        
-        // Reset visual por si veníamos de un error
-        document.getElementById('loader').style.opacity = "1";
-        document.getElementById('loader').style.visibility = "visible";
-        document.getElementById('main-content').style.opacity = "0";
-    }
-});
+            if (user) {
+                startGameLoad(user.uid);
+            } else {
+                document.getElementById('auth-form').style.display = 'flex';
+                document.getElementById('p-container').style.display = 'none';
+            }
+        });
 
         // --- AUTH LÓGICA ---
         document.getElementById('register-btn').onclick = async () => {
@@ -455,16 +434,6 @@
             await signOut(auth);
             location.reload();
         };
-        // Botón de cerrar sesión en la pantalla de carga
-document.getElementById('loader-logout-btn').onclick = async () => {
-    try {
-        await signOut(auth);
-        // Al cerrar sesión, onAuthStateChanged se activará y reseteará la pantalla solo
-        alert("Sesión cerrada correctamente.");
-    } catch (err) {
-        console.error("Error al cerrar sesión:", err);
-    }
-};
 
         // --- CARGA Y TIEMPO REAL ---
         async function startGameLoad(uid) {
@@ -487,22 +456,16 @@ document.getElementById('loader-logout-btn').onclick = async () => {
             bar.style.width = "50%";
 
             onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
-    if (docSnap.exists()) {
-        gameData = docSnap.data();
-        if(!gameData.inventario) gameData.inventario = [];
-        actualizarUI();
-        if(document.getElementById('club-section').style.display === "block") renderizarClub();
-        
-        bar.style.width = "100%";
-        document.getElementById('continue-btn').classList.add('ready');
-    } else {
-        // Si el documento no existe (cuenta borrada), cerramos sesión automáticamente
-        signOut(auth);
-    }
-}, (error) => {
-    // Si hay error de permisos (cuenta borrada), cerramos sesión
-    signOut(auth);
-});
+                if (docSnap.exists()) {
+                    gameData = docSnap.data();
+                    if(!gameData.inventario) gameData.inventario = [];
+                    actualizarUI();
+                    if(document.getElementById('club-section').style.display === "block") renderizarClub();
+                    
+                    bar.style.width = "100%";
+                    document.getElementById('continue-btn').classList.add('ready');
+                }
+            });
 
             const qMercado = query(collection(db, "mercado"), orderBy("fecha", "desc"));
             onSnapshot(qMercado, (snapshot) => {
@@ -838,6 +801,4 @@ window.finalizarApertura = () => {
     </script>
 </body>
 
-
 </html>
-
