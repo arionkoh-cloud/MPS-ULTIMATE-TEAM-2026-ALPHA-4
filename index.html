@@ -393,6 +393,30 @@
         let jugadorSeleccionadoParaVenta = null;
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
+        // --- NUEVA CONFIGURACIÓN DE MÚSICA Y MODAL ---
+        const playlist = [
+            'https://www.youtube.com/watch?v=HhoATZ1Imtw',
+            'https://www.youtube.com/watch?v=xLFCcnYSCyE',
+            'https://www.youtube.com/watch?v=CfihYWRWRTQ'
+        ];
+        let musicaFondo = new Audio();
+        musicaFondo.volume = 0.2;
+        let accionPendiente = null;
+
+        const iniciarMusica = () => {
+            if (musicaFondo.paused) {
+                const proxima = playlist[Math.floor(Math.random() * playlist.length)];
+                musicaFondo.src = proxima;
+                musicaFondo.play().catch(e => console.log("Esperando interacción..."));
+            }
+        };
+        musicaFondo.onended = iniciarMusica;
+
+        window.cerrarConfirmacion = () => {
+            document.getElementById('confirm-modal').style.display = "none";
+            accionPendiente = null;
+        };
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 startGameLoad(user.uid);
@@ -741,6 +765,7 @@ document.getElementById('btn-confirm-yes').onclick = () => {
 
         // --- NAVEGACIÓN ---
         window.abrirSeccion = (id) => { 
+            iniciarMusica(); // <-- LA MÚSICA EMPIEZA AQUÍ, AL TOCAR EL MENÚ
             document.getElementById(id).style.display = "block"; 
             if(id === 'club-section') renderizarClub();
         };
@@ -866,5 +891,6 @@ window.finalizarApertura = () => {
 
 
 </html>
+
 
 
