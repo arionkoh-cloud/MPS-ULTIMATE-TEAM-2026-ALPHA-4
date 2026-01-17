@@ -487,16 +487,22 @@ document.getElementById('loader-logout-btn').onclick = async () => {
             bar.style.width = "50%";
 
             onSnapshot(doc(db, "jugadores", uid), (docSnap) => {
-                if (docSnap.exists()) {
-                    gameData = docSnap.data();
-                    if(!gameData.inventario) gameData.inventario = [];
-                    actualizarUI();
-                    if(document.getElementById('club-section').style.display === "block") renderizarClub();
-                    
-                    bar.style.width = "100%";
-                    document.getElementById('continue-btn').classList.add('ready');
-                }
-            });
+    if (docSnap.exists()) {
+        gameData = docSnap.data();
+        if(!gameData.inventario) gameData.inventario = [];
+        actualizarUI();
+        if(document.getElementById('club-section').style.display === "block") renderizarClub();
+        
+        bar.style.width = "100%";
+        document.getElementById('continue-btn').classList.add('ready');
+    } else {
+        // Si el documento no existe (cuenta borrada), cerramos sesión automáticamente
+        signOut(auth);
+    }
+}, (error) => {
+    // Si hay error de permisos (cuenta borrada), cerramos sesión
+    signOut(auth);
+});
 
             const qMercado = query(collection(db, "mercado"), orderBy("fecha", "desc"));
             onSnapshot(qMercado, (snapshot) => {
@@ -834,3 +840,4 @@ window.finalizarApertura = () => {
 
 
 </html>
+
