@@ -582,24 +582,71 @@
     }
 };
 
-        window.venderRepetidos = async () => {
-            let monedasGanadas = 0;
-            let unicos = [];
-            let nuevoInv = [];
-            gameData.inventario.forEach(id => {
-                if (!unicos.includes(id)) {
-                    unicos.push(id);
-                    nuevoInv.push(id);
-                } else {
-                    const j = databaseJugadores.find(p => p.id === id);
-                    monedasGanadas += (PRECIOS_VENTA[j.rareza] || 30);
-                }
+        // Variable para guardar la acción pendiente
+let accionPendiente = null;
+
+window.cerrarConfirmacion = () => {
+    document.getElementById('confirm-modal').style.display = "none";
+    accionPendiente = null;
+};
+
+// --- MODIFICACIÓN: DESCARTAR JUGADOR ---
+window.descartarJugador = (id) => {
+    const j = databaseJugadores.find(p => p.id === id);
+    const valor = PRECIOS_VENTA[j.rareza] || 30;
+    
+    document.getElementById('confirm-text').innerText = `Vas a descartar a ${j.name} por 🪙 ${valor}. Esta acción no se puede deshacer.`;
+    document.getElementById('confirm-modal').style.display = "flex";
+    
+    accionPendiente = async () => {
+        const index = gameData.inventario.indexOf(id);
+        if(index > -1) {
+            const nuevoInv = [...gameData.inventario];
+            nuevoInv.splice(index, 1);
+            await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+                inventario: nuevoInv,
+                coins: gameData.coins + valor
             });
-            if (monedasGanadas > 0) {
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { inventario: nuevoInv, coins: gameData.coins + monedasGanadas });
-                alert(`Repetidos vendidos por 🪙 ${monedasGanadas}`);
-            } else alert("No hay repetidos.");
-        };
+        }
+        cerrarConfirmacion();
+    };
+};
+
+// --- MODIFICACIÓN: VENDER REPETIDOS ---
+window.venderRepetidos = () => {
+    let monedasGanadas = 0;
+    let unicos = [];
+    let repetidosContador = 0;
+
+    gameData.inventario.forEach(id => {
+        if (!unicos.includes(id)) {
+            unicos.push(id);
+        } else {
+            const j = databaseJugadores.find(p => p.id === id);
+            monedasGanadas += (PRECIOS_VENTA[j.rareza] || 30);
+            repetidosContador++;
+        }
+    });
+
+    if (repetidosContador === 0) return alert("No tienes jugadores repetidos.");
+
+    document.getElementById('confirm-text').innerText = `Vas a vender ${repetidosContador} jugadores repetidos por un total de 🪙 ${monedasGanadas.toLocaleString()}.`;
+    document.getElementById('confirm-modal').style.display = "flex";
+
+    accionPendiente = async () => {
+        await updateDoc(doc(db, "jugadores", auth.currentUser.uid), { 
+            inventario: unicos, 
+            coins: gameData.coins + monedasGanadas 
+        });
+        cerrarConfirmacion();
+        alert(`Has recibido 🪙 ${monedasGanadas} por tus repetidos.`);
+    };
+};
+
+// Escuchador para el botón de confirmar del modal
+document.getElementById('btn-confirm-yes').onclick = () => {
+    if (accionPendiente) accionPendiente();
+};
 
         // --- LÓGICA DE VENTA (MODAL) ---
         window.venderEnMercado = (idJugador) => {
@@ -804,7 +851,19 @@ window.finalizarApertura = () => {
     if(document.getElementById('club-section').style.display === "block") renderizarClub();
 };
     </script>
-</body>
+
+    <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content" style="border-color: #ff3232;">
+        <h2 class="italic-title" style="font-size: 2rem; color: #ff3232;">¿ESTÁS SEGURO?</h2>
+        <p id="confirm-text" style="margin: 20px 0; font-size: 1.2rem; color: white;"></p>
+        <div class="auth-buttons">
+            <button class="btn-action" id="btn-confirm-yes" style="background: #ff3232; color: white;">SÍ, ELIMINAR</button>
+            <button class="btn-action" onclick="cerrarConfirmacion()" style="background: rgba(255,255,255,0.1); color: white;">CANCELAR</button>
+        </div>
+    </div>
+</div>
+    </body>
 
 
 </html>
+
