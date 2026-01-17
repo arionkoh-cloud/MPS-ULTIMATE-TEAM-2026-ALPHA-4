@@ -393,27 +393,14 @@
         let jugadorSeleccionadoParaVenta = null;
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
-        
-        
         onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // Antes de cargar, verificamos si el documento existe para evitar bloqueos
-        startGameLoad(user.uid);
-    } else {
-        // SOLUCIÓN: Si no hay usuario, forzamos la vuelta al loader y reseteamos la UI
-        document.getElementById('main-content').style.opacity = '0';
-        document.getElementById('main-content').style.pointerEvents = 'none';
-        document.getElementById('loader').style.visibility = 'visible';
-        document.getElementById('loader').style.opacity = '1';
-        
-        document.getElementById('auth-form').style.display = 'flex';
-        document.getElementById('p-container').style.display = 'none';
-        document.getElementById('continue-btn').classList.remove('ready');
-        
-        // Limpiamos los datos locales para que no quede rastro de la cuenta anterior
-        gameData = { coins: 0, points: 0, inventario: [], username: "" };
-    }
-});
+            if (user) {
+                startGameLoad(user.uid);
+            } else {
+                document.getElementById('auth-form').style.display = 'flex';
+                document.getElementById('p-container').style.display = 'none';
+            }
+        });
 
         // --- AUTH LÓGICA ---
         document.getElementById('register-btn').onclick = async () => {
