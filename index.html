@@ -335,17 +335,31 @@
         </div>
     </div>
 
-        <div id="tienda-section" class="full-screen-overlay">
+       <div id="tienda-section" class="full-screen-overlay">
     <div class="section-header">
         <h1 class="italic-title">TIENDA DE <span class="primary-text">SOBRES</span></h1>
         <button class="btn-ui btn-back" onclick="cerrarSeccion('tienda-section')">VOLVER</button>
     </div>
+    
     <div class="pack-container">
-        <div class="pack">
-            <h2 style="font-style: italic; font-size: 2rem;">SOBRE TEST</h2>
-            <p style="color: white; margin-bottom: 15px; font-weight: bold;">55-95 GRL</p>
-            <button class="btn-card-action" onclick="abrirSobreTest('coins')">🪙 1,000</button>
-            <button class="btn-card-action" style="background: #0066ff; margin-top: 5px;" onclick="abrirSobreTest('points')">💎 50</button>
+        <div class="pack" style="background: linear-gradient(135deg, #1a1a2e 0%, #cd7f32 100%); border-color: #cd7f32;">
+            <h2 style="font-style: italic; font-size: 2rem;">BRONCE</h2>
+            <p style="color: white; margin-bottom: 15px; font-weight: bold;">GRATIS</p>
+            <button class="btn-card-action" onclick="abrirPack('bronce', 'gratis')">ABRIR GRATIS</button>
+        </div>
+
+        <div class="pack" style="background: linear-gradient(135deg, #1a1a2e 0%, #95a5a6 100%); border-color: #95a5a6;">
+            <h2 style="font-style: italic; font-size: 2rem;">PLATA</h2>
+            <p style="color: white; margin-bottom: 15px; font-weight: bold;">66-85 GRL</p>
+            <button class="btn-card-action" onclick="abrirPack('plata', 'coins')">🪙 1,000</button>
+            <button class="btn-card-action" style="background: #0066ff; margin-top: 5px;" onclick="abrirPack('plata', 'points')">💎 20</button>
+        </div>
+
+        <div class="pack" style="background: linear-gradient(135deg, #1a1a2e 0%, #f1c40f 100%); border-color: #f1c40f;">
+            <h2 style="font-style: italic; font-size: 2rem;">ORO</h2>
+            <p style="color: white; margin-bottom: 15px; font-weight: bold;">75-95 GRL</p>
+            <button class="btn-card-action" onclick="abrirPack('oro', 'coins')">🪙 5,000</button>
+            <button class="btn-card-action" style="background: #0066ff; margin-top: 5px;" onclick="abrirPack('oro', 'points')">💎 100</button>
         </div>
     </div>
 </div>
@@ -691,60 +705,62 @@
         }
     // --- SISTEMA DE SOBRES ---
 
-window.abrirSobreTest = async (metodoPago) => {
-    const costoCoins = 1000;
-    const costoPoints = 50;
+window.abrirPack = async (tipoPack, metodoPago) => {
+    let costoCoins = 0;
+    let costoPoints = 0;
+    let rangos = [];
+
+    // Definición de Configuración por Pack
+    if (tipoPack === 'bronce') {
+        rangos = [[55, 60, 90], [61, 65, 99], [66, 70, 99.8], [71, 75, 100]];
+    } else if (tipoPack === 'plata') {
+        costoCoins = 1000; costoPoints = 20;
+        rangos = [[66, 70, 90], [71, 75, 99], [76, 80, 99.8], [81, 85, 100]];
+    } else if (tipoPack === 'oro') {
+        costoCoins = 5000; costoPoints = 100;
+        rangos = [[75, 80, 90], [81, 85, 99], [86, 90, 99.8], [91, 95, 100]];
+    }
 
     // Validación de fondos
     if (metodoPago === 'coins' && gameData.coins < costoCoins) return alert("Monedas insuficientes.");
     if (metodoPago === 'points' && gameData.points < costoPoints) return alert("MPS Points insuficientes.");
 
-    // Generar probabilidad
+    // Cálculo de Probabilidad
     const azar = Math.random() * 100;
     let minGrl, maxGrl;
-
-    // Rangos basados en tu solicitud
-    if (azar <= 90) { 
-        minGrl = 55; maxGrl = 65; // 90% de probabilidad
-    } else if (azar <= 99) { 
-        minGrl = 66; maxGrl = 75; // 9% de probabilidad
-    } else if (azar <= 99.8) { 
-        minGrl = 76; maxGrl = 85; // 0.8% de probabilidad
-    } else { 
-        minGrl = 86; maxGrl = 95; // 0.2% de probabilidad
+    
+    for (const [min, max, prob] of rangos) {
+        if (azar <= prob) {
+            minGrl = min; maxGrl = max;
+            break;
+        }
     }
 
-    // FILTRO DINÁMICO: Buscamos cualquier jugador cuyo GRL esté entre los límites
+    // Filtrado de Jugadores
     const posibles = databaseJugadores.filter(j => {
         const rating = parseInt(j.grl);
         return rating >= minGrl && rating <= maxGrl;
     });
 
-    // Si por alguna razón tu base de datos no tiene a nadie en ese rango, 
-    // buscamos en el rango inmediatamente inferior para no romper el juego.
-    let elegido;
-    if (posibles.length > 0) {
-        elegido = posibles[Math.floor(Math.random() * posibles.length)];
+    if (posibles.length === 0) {
+        // Si no hay jugadores en el rango específico, buscar en toda la base como fallback
+        alert("Buscando jugadores disponibles...");
+        var elegido = databaseJugadores[Math.floor(Math.random() * databaseJugadores.length)];
     } else {
-        // Backup: si el rango está vacío, elige cualquier jugador al azar
-        console.warn("Rango vacío, eligiendo jugador aleatorio de toda la base.");
-        elegido = databaseJugadores[Math.floor(Math.random() * databaseJugadores.length)];
+        var elegido = posibles[Math.floor(Math.random() * posibles.length)];
     }
 
+    // Actualización en Firebase
     try {
         const actualizacion = { inventario: [...gameData.inventario, elegido.id] };
-        
-        if (metodoPago === 'coins') {
-            actualizacion.coins = gameData.coins - costoCoins;
-        } else {
-            actualizacion.points = gameData.points - costoPoints;
-        }
+        if (metodoPago === 'coins') actualizacion.coins = gameData.coins - costoCoins;
+        if (metodoPago === 'points') actualizacion.points = gameData.points - costoPoints;
 
         await updateDoc(doc(db, "jugadores", auth.currentUser.uid), actualizacion);
         mostrarAnimacionPack(elegido);
     } catch (e) {
-        console.error("Error en Firebase:", e);
-        alert("Hubo un error al procesar tu sobre.");
+        console.error(e);
+        alert("Error al procesar la apertura.");
     }
 };
 
@@ -756,23 +772,28 @@ function mostrarAnimacionPack(jugador) {
     overlay.style.display = 'flex';
     btnCerrar.style.display = 'none';
     
-    // Si es una carta top, cambiar el fondo
-    overlay.style.background = jugador.grl >= 85 
-        ? "radial-gradient(circle, #554400 0%, #050508 100%)" 
-        : "radial-gradient(circle, #1a1a2e 0%, #050508 100%)";
+    // Color de fondo dinámico
+    if (jugador.grl >= 86) {
+        overlay.style.background = "radial-gradient(circle, #f1c40f 0%, #000 100%)"; // Brillo Oro Top
+    } else if (jugador.grl >= 75) {
+        overlay.style.background = "radial-gradient(circle, #34495e 0%, #000 100%)"; // Brillo Plata/Oro bajo
+    } else {
+        overlay.style.background = "black";
+    }
 
     container.innerHTML = `
-        <div class="card ${jugador.rareza} walkout-animation" style="width: 280px; transform: scale(1.2);">
+        <div class="card ${jugador.rareza} walkout-animation" style="width: 280px; transform: scale(1.1);">
             <div class="ovr" style="font-size: 2.2rem;">${jugador.grl}</div>
-            <div class="pos" style="font-size: 1.2rem;">${jugador.pos}</div>
+            <div class="pos">${jugador.pos}</div>
             <img src="${jugador.foto}">
-            <div class="name" style="font-size: 1.5rem; bottom: 18%;">${jugador.name}</div>
+            <div class="name" style="font-size: 1.4rem; bottom: 18%;">${jugador.name}</div>
         </div>
     `;
 
-    setTimeout(() => { btnCerrar.style.display = 'block'; }, 2000);
+    setTimeout(() => {
+        btnCerrar.style.display = 'block';
+    }, 2000);
 }
-
 window.finalizarApertura = () => {
     document.getElementById('reveal-overlay').style.display = 'none';
     if(document.getElementById('club-section').style.display === "block") renderizarClub();
@@ -781,4 +802,5 @@ window.finalizarApertura = () => {
 </body>
 
 </html>
+
 
