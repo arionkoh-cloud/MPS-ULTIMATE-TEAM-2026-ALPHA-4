@@ -335,6 +335,17 @@
         </div>
     </div>
 
+        <div id="confirm-modal" class="modal-overlay">
+    <div class="modal-content" style="border-color: #ff3232;">
+        <h2 class="italic-title" style="font-size: 2rem; color: #ff3232;">¿ESTÁS SEGURO?</h2>
+        <p id="confirm-text" style="margin: 20px 0; font-size: 1.2rem; color: white;"></p>
+        <div class="auth-buttons">
+            <button class="btn-action" id="btn-confirm-yes" style="background: #ff3232; color: white;">SÍ, ELIMINAR</button>
+            <button class="btn-action" onclick="cerrarConfirmacion()" style="background: rgba(255,255,255,0.1); color: white;">CANCELAR</button>
+        </div>
+    </div>
+</div>
+
        <div id="tienda-section" class="full-screen-overlay">
     <div class="section-header">
         <h1 class="italic-title">TIENDA DE <span class="primary-text">SOBRES</span></h1>
@@ -387,6 +398,12 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+// --- PEGA ESTO AQUÍ ---
+const musicaFondo = new Audio('https://www.youtube.com/watch?v=CfihYWRWRTQ'); 
+musicaFondo.loop = true;
+musicaFondo.volume = 0.3;
+let accionPendiente = null;
+
         const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTRZ3aXiCltsIuIyA9lWBNSF6svc6QAxIHuQ8nkqS7NnBNUK0NWAsc5tNn8hDbcUff-IHJzI2hsg4Lj/pub?output=csv";
         let databaseJugadores = [];
         let gameData = { coins: 0, points: 0, inventario: [], username: "" };
@@ -421,6 +438,11 @@
         };
 
         document.getElementById('login-btn').onclick = async () => {
+    // AÑADE ESTA LÍNEA AQUÍ:
+    musicaFondo.play().catch(e => console.log("Audio esperando interacción"));
+
+    const userNick = document.getElementById('auth-user').value.trim();
+    // ... sigue el código normal ...
             const userNick = document.getElementById('auth-user').value.trim();
             const pass = document.getElementById('auth-pass').value;
             const fakeEmail = `${userNick.toLowerCase()}@mps.com`;
@@ -866,4 +888,5 @@ window.finalizarApertura = () => {
 
 
 </html>
+
 
