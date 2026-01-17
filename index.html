@@ -564,18 +564,23 @@
         };
 
         window.descartarJugador = async (id) => {
-            const j = databaseJugadores.find(p => p.id === id);
-            const valor = PRECIOS_VENTA[j.rareza] || 30;
-            const index = gameData.inventario.indexOf(id);
-            if(index > -1) {
-                const nuevoInv = [...gameData.inventario];
-                nuevoInv.splice(index, 1);
-                await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
-                    inventario: nuevoInv,
-                    coins: gameData.coins + valor
-                });
-            }
-        };
+    const j = databaseJugadores.find(p => p.id === id);
+    const valor = PRECIOS_VENTA[j.rareza] || 30;
+    
+    // Nueva ventana de confirmación
+    const mensaje = `¿Estás seguro de que quieres descartar a ${j.name} (${j.grl}) por 🪙 ${valor}?`;
+    if (!confirm(mensaje)) return;
+
+    const index = gameData.inventario.indexOf(id);
+    if(index > -1) {
+        const nuevoInv = [...gameData.inventario];
+        nuevoInv.splice(index, 1);
+        await updateDoc(doc(db, "jugadores", auth.currentUser.uid), {
+            inventario: nuevoInv,
+            coins: gameData.coins + valor
+        });
+    }
+};
 
         window.venderRepetidos = async () => {
             let monedasGanadas = 0;
@@ -800,5 +805,6 @@ window.finalizarApertura = () => {
 };
     </script>
 </body>
+
 
 </html>
