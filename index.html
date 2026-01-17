@@ -393,29 +393,6 @@
         let jugadorSeleccionadoParaVenta = null;
         const PRECIOS_VENTA = { bronce: 30, plata: 100, oro: 500, especial: 1000 };
 
-        const playlist = [
-            'https://www.bensound.com/bensound-music/bensound-slowmotion.mp3',
-            'https://www.bensound.com/bensound-music/bensound-energetic.mp3',
-            'https://www.bensound.com/bensound-music/bensound-hipjazz.mp3'
-        ];
-        let musicaFondo = new Audio();
-        musicaFondo.volume = 0.2;
-        let accionPendiente = null;
-
-        const iniciarMusica = () => {
-            if (musicaFondo.paused) {
-                const track = playlist[Math.floor(Math.random() * playlist.length)];
-                musicaFondo.src = track;
-                musicaFondo.play().catch(e => console.log("Audio esperando clic..."));
-            }
-        };
-        musicaFondo.onended = iniciarMusica;
-
-        window.cerrarConfirmacion = () => {
-            document.getElementById('confirm-modal').style.display = "none";
-            accionPendiente = null;
-        };
-
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 startGameLoad(user.uid);
@@ -764,7 +741,6 @@ document.getElementById('btn-confirm-yes').onclick = () => {
 
         // --- NAVEGACIÓN ---
         window.abrirSeccion = (id) => { 
-            iniciarMusica(); // <-- LA MÚSICA EMPIEZA AQUÍ, AL TOCAR EL MENÚ
             document.getElementById(id).style.display = "block"; 
             if(id === 'club-section') renderizarClub();
         };
@@ -890,7 +866,5 @@ window.finalizarApertura = () => {
 
 
 </html>
-
-
 
 
