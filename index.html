@@ -200,6 +200,57 @@
             background: #ff3232; color: white; padding: 5px 15px; font-weight: bold; font-size: 1.2rem;
             border: 2px solid white; z-index: 15; pointer-events: none; box-shadow: 0 0 15px rgba(255, 50, 50, 0.5);
         }
+    
+    /* --- ESTILOS DE LA TIENDA Y ANIMACIÓN --- */
+.pack-container {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 50px;
+    flex-wrap: wrap;
+}
+
+.pack {
+    width: 220px;
+    height: 320px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #00ffaa 100%);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--primary);
+    padding: 20px;
+    text-align: center;
+}
+
+.pack:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px var(--primary);
+}
+
+#reveal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, #1a1a2e 0%, #050508 100%);
+    z-index: 3000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.walkout-animation {
+    animation: packFlash 1.5s forwards, slideUp 0.8s var(--smooth-curve);
+}
+
+@keyframes packFlash {
+    0% { filter: brightness(1) blur(0px); }
+    50% { filter: brightness(5) blur(15px); }
+    100% { filter: brightness(1) blur(0px); }
+}
     </style>
 </head>
 
@@ -242,6 +293,7 @@
             <div class="menu-btn" onclick="abrirSeccion('club-section')"><h2>MI<br>CLUB</h2></div>
             <div class="menu-btn" onclick="abrirSeccion('mercado-section')"><h2>MERCADO DE<br>FICHAJES</h2></div>
             <div class="menu-btn"><h2>TIENDA</h2></div>
+            <div class="menu-btn" onclick="abrirSeccion('tienda-section')"><h2>TIENDA</h2></div>
         </main>
     </div>
 
@@ -283,6 +335,26 @@
             </div>
         </div>
     </div>
+
+        <div id="tienda-section" class="full-screen-overlay">
+    <div class="section-header">
+        <h1 class="italic-title">TIENDA DE <span class="primary-text">SOBRES</span></h1>
+        <button class="btn-ui btn-back" onclick="cerrarSeccion('tienda-section')">VOLVER</button>
+    </div>
+    <div class="pack-container">
+        <div class="pack">
+            <h2 style="font-style: italic; font-size: 2rem;">SOBRE TEST</h2>
+            <p style="color: white; margin-bottom: 15px; font-weight: bold;">55-95 GRL</p>
+            <button class="btn-card-action" onclick="abrirSobreTest('coins')">🪙 1,000</button>
+            <button class="btn-card-action" style="background: #0066ff; margin-top: 5px;" onclick="abrirSobreTest('points')">💎 50</button>
+        </div>
+    </div>
+</div>
+
+<div id="reveal-overlay">
+    <div id="pack-animation-container"></div>
+    <button class="btn-ui btn-back" id="btn-cerrar-sobre" style="margin-top: 40px; display:none;" onclick="finalizarApertura()">CONTINUAR</button>
+</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -618,6 +690,71 @@
                 document.getElementById('main-content').style.pointerEvents = "auto";
             }, 800);
         }
+    // --- SISTEMA DE SOBRES ---
+
+window.abrirSobreTest = async (metodoPago) => {
+    const costoCoins = 1000;
+    const costoPoints = 50;
+
+    if (metodoPago === 'coins' && gameData.coins < costoCoins) return alert("Monedas insuficientes.");
+    if (metodoPago === 'points' && gameData.points < costoPoints) return alert("MPS Points insuficientes.");
+
+    // Cálculo de Probabilidades
+    const azar = Math.random() * 100;
+    let minGrl, maxGrl;
+
+    if (azar <= 90) { minGrl = 55; maxGrl = 65; }
+    else if (azar <= 99) { minGrl = 65; maxGrl = 75; }
+    else if (azar <= 99.8) { minGrl = 75; maxGrl = 85; }
+    else { minGrl = 85; maxGrl = 95; }
+
+    const posibles = databaseJugadores.filter(j => j.grl >= minGrl && j.grl <= maxGrl);
+    const elegido = posibles.length > 0 
+        ? posibles[Math.floor(Math.random() * posibles.length)]
+        : databaseJugadores[Math.floor(Math.random() * databaseJugadores.length)];
+
+    try {
+        const actualizacion = { inventario: [...gameData.inventario, elegido.id] };
+        if (metodoPago === 'coins') actualizacion.coins = gameData.coins - costoCoins;
+        else actualizacion.points = gameData.points - costoPoints;
+
+        await updateDoc(doc(db, "jugadores", auth.currentUser.uid), actualizacion);
+        mostrarAnimacionPack(elegido);
+    } catch (e) {
+        alert("Error al procesar la compra.");
+    }
+};
+
+function mostrarAnimacionPack(jugador) {
+    const overlay = document.getElementById('reveal-overlay');
+    const container = document.getElementById('pack-animation-container');
+    const btnCerrar = document.getElementById('btn-cerrar-sobre');
+
+    overlay.style.display = 'flex';
+    btnCerrar.style.display = 'none';
+    
+    // Si es una carta top, cambiar el fondo
+    overlay.style.background = jugador.grl >= 85 
+        ? "radial-gradient(circle, #554400 0%, #050508 100%)" 
+        : "radial-gradient(circle, #1a1a2e 0%, #050508 100%)";
+
+    container.innerHTML = `
+        <div class="card ${jugador.rareza} walkout-animation" style="width: 280px; transform: scale(1.2);">
+            <div class="ovr" style="font-size: 2.2rem;">${jugador.grl}</div>
+            <div class="pos" style="font-size: 1.2rem;">${jugador.pos}</div>
+            <img src="${jugador.foto}">
+            <div class="name" style="font-size: 1.5rem; bottom: 18%;">${jugador.name}</div>
+        </div>
+    `;
+
+    setTimeout(() => { btnCerrar.style.display = 'block'; }, 2000);
+}
+
+window.finalizarApertura = () => {
+    document.getElementById('reveal-overlay').style.display = 'none';
+    if(document.getElementById('club-section').style.display === "block") renderizarClub();
+};
     </script>
 </body>
+
 </html>
