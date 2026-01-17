@@ -251,45 +251,6 @@
     50% { filter: brightness(5) blur(15px); }
     100% { filter: brightness(1) blur(0px); }
 }
-    
-    .play-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-.play-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid #333;
-    border-radius: 15px;
-    padding: 30px;
-    text-align: center;
-    transition: 0.3s var(--smooth-curve);
-    cursor: pointer;
-}
-
-.play-card:hover {
-    border-color: var(--primary);
-    background: rgba(0, 255, 170, 0.1);
-    transform: translateY(-5px);
-}
-
-.play-card.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: grayscale(1);
-}
-
-.play-icon {
-    font-size: 3.5rem;
-    margin-bottom: 15px;
-}
-
-.play-card h3 {
-    margin: 10px 0;
-    color: var(--primary);
-}
     </style>
 </head>
 
@@ -328,7 +289,7 @@
             </div>
         </header>
         <main class="main-menu">
-    <div class="nav-btn" onclick="showSection('play-menu-section')">JUGAR</button>
+    <div class="menu-btn"><h2>DIVISION<br>RIVALS</h2></div>
     <div class="menu-btn" onclick="abrirSeccion('club-section')"><h2>MI<br>CLUB</h2></div>
     <div class="menu-btn" onclick="abrirSeccion('mercado-section')"><h2>MERCADO DE<br>FICHAJES</h2></div>
     <div class="menu-btn" onclick="abrirSeccion('tienda-section')"><h2>TIENDA</h2></div>
@@ -354,46 +315,7 @@
     <div class="grid-container" id="club-grid"></div>
 </div>
 
-   <section id="play-menu-section" style="display:none;">
-    <div class="menu-header">
-        <h2 class="italic-title">CENTRO DE JUEGO</h2>
-        <button class="btn-action" onclick="showSection('main-app-content')" style="width: auto; padding: 10px 20px;">VOLVER</button>
-    </div>
-    
-    <div class="play-grid">
-        <div class="play-card" onclick="showSection('lineup-section')">
-            <div class="play-icon">📋</div>
-            <h3>MI PLANTILLA</h3>
-            <p>Elige tus 7 titulares</p>
-        </div>
-        <div class="play-card disabled">
-            <div class="play-icon">⚽</div>
-            <h3>PARTIDO RÁPIDO</h3>
-            <p>(Próximamente)</p>
-        </div>
-        <div class="play-card disabled">
-            <div class="play-icon">🏆</div>
-            <h3>DIVISION RIVALS</h3>
-            <p>(Próximamente)</p>
-        </div>
-        <div class="play-card disabled">
-            <div class="play-icon">🌐</div>
-            <h3>PARTIDO ONLINE</h3>
-            <p>(Próximamente)</p>
-        </div>
-    </div>
-</section>
-
-<section id="lineup-section" style="display:none;">
-    <div class="menu-header">
-        <h2 class="italic-title">MI ESCUADRA (7)</h2>
-        <button class="btn-action" onclick="showSection('play-menu-section')" style="width: auto; padding: 10px 20px;">VOLVER</button>
-    </div>
-    <div id="active-lineup" class="lineup-container">
-        </div>
-</section>
-        
-        <div id="mercado-section" class="full-screen-overlay">
+    <div id="mercado-section" class="full-screen-overlay">
         <div class="section-header">
             <h1 class="italic-title">MERCADO DE <span class="primary-text">FICHAJES</span></h1>
             <button class="btn-ui btn-back" onclick="cerrarSeccion('mercado-section')">VOLVER</button>
@@ -971,13 +893,3 @@ window.finalizarApertura = () => {
 
 
 </html>
-
-
-
-
-
-
-
-
-
-
